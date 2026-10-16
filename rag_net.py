@@ -28,12 +28,11 @@ RETRY_STATUS = (429, 500, 502, 503, 504)
 
 
 def make_session() -> requests.Session:
-    """Session с пулом соединений; транспортные повторы ВЫКЛЮЧЕНЫ.
+    """Create a session with connection pooling and transport retries disabled.
 
-    Единый бюджет повторов NET.max_retries применяется только одним слоем —
-    внешним циклом в http_post()/http_get() (соединения, таймауты и 429/5xx).
-    urllib3-Retry отключён (total=0), иначе его статус-повторы складывались бы
-    с повторами внешнего цикла (до max_retries^2 запросов на один вызов).
+    Retry budgets are managed by http_post and http_get. Only http_post
+    retries RETRY_STATUS responses; http_get retries connection failures
+    and timeouts only.
     """
     s = requests.Session()
     if Retry is not None:
@@ -53,6 +52,7 @@ _session: requests.Session | None = None
 
 
 def get_session() -> requests.Session:
+    """Return the shared session, creating and caching it on first use."""
     global _session
     if _session is None:
         _session = make_session()
@@ -65,19 +65,20 @@ class NetworkError(RuntimeError):
 
 def http_post(url: str, json_payload: dict, headers: dict | None = None,
               timeout: float | None = None) -> requests.Response:
-    """POST с повторными попытками (экспоненциальный backoff).
+    """Send JSON and return a response after checking its HTTP status.
 
-    Единый слой повторов: транспортный urllib3-Retry отключён в make_session(),
-    поэтому 429/5xx и сетевые сбои ДО отправки повторяются только этим циклом —
-    один общий бюджет NET.max_retries на запрос.
+    timeout is a connect/read timeout in seconds. None uses NET.cloud_timeout
+    for URLs containing '://' but neither '127.0.0.1' nor 'localhost'; other
+    URLs use NET.local_timeout.
 
-    POST-ограничение (идемпотентность не гарантирована): повтор разрешён ТОЛЬКО
-    для сбоев, известных как произошедшие до передачи запроса провайдеру
-    (ConnectionError — отказ соединения/DNS). ReadTimeout НЕ повторяется: он
-    означает, что запрос уже мог быть получен провайдером (LLM-генерация
-    неточна и может иметь побочные эффекты/стоимость).
+    Retry connection errors (including connect timeouts) and RETRY_STATUS
+    responses with exponential backoff for up to NET.max_retries session calls
+    in total. Retries can resend a POST; no idempotency guarantee is provided.
 
-    Бросает NetworkError, если все попытки исчерпаны.
+    Raise NetworkError immediately for other timeouts, including read timeouts,
+    after connection-error attempts are exhausted, or if no attempts are
+    configured. HTTPError propagates for failing HTTP statuses,
+    including exhausted status retries. Other Requests errors also propagate.
     """
     if timeout is None:
         timeout = NET.cloud_timeout if "://" in url and "127.0.0.1" not in url and "localhost" not in url else NET.local_timeout
@@ -114,7 +115,15 @@ def http_post(url: str, json_payload: dict, headers: dict | None = None,
 
 def http_get(url: str, timeout: float | None = None,
              headers: dict | None = None) -> requests.Response:
-    """GET с ретраями (для health-check'ов и т.п.)."""
+    """Return a GET response after checking its HTTP status.
+
+    timeout is a connect/read timeout in seconds; None uses NET.health_timeout.
+    Retry connection failures and timeouts with exponential backoff for up to
+    NET.max_retries session calls. HTTP error responses are not retried.
+
+    Raise NetworkError when connection/timeout attempts are exhausted or no
+    attempts are configured. HTTPError and other Requests errors propagate.
+    """
     if timeout is None:
         timeout = NET.health_timeout
     sess = get_session()
@@ -134,14 +143,10 @@ def http_get(url: str, timeout: float | None = None,
 
 
 def is_alive(url: str, timeout: float | None = None) -> bool:
-    """Быстрая проверка доступности health-endpoint'а.
+    """Return whether a GET's final response has a status below 400.
 
-    * РОВНО одна сетевая попытка: запрос идёт через временную Session БЕЗ
-      retry-adapter'а (не через get_session()) — health-опросы не должны
-      тратить бюджет повторов http_get().
-    * Здоровым считается только успешный ответ (r.ok = 2xx; редиректы
-      отслеживаются и оценивается финальный статус). 404 на /health или
-      /api/v1/info означает «эндпоинт не найден» — бэкенд нездоров.
+    Requests exceptions return False. timeout is in seconds; None or zero uses
+    NET.health_timeout. This check does not retry.
     """
     try:
         with requests.Session() as sess:  # свежая сессия, adapter без Retry

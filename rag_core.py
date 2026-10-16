@@ -54,7 +54,10 @@ def load_env() -> dict:
 
 
 def has_api_key(env: dict, prov_name: str) -> bool:
-    """Есть ли у провайдера заполненный ключ (с учётом старых алиасов имён)."""
+    """Return whether env has a nonblank provider key or supported legacy alias.
+
+    prov_name must name a CLOUD_PROVIDERS entry; otherwise raise KeyError.
+    """
     key_var = CLOUD_PROVIDERS[prov_name]["key_var"]
     for k in [key_var] + KEY_ALIASES.get(key_var, []):
         if env.get(k, "").strip():
@@ -254,10 +257,11 @@ def get_collection():
 
 
 def list_collections() -> list[str]:
-    """
-    Перечисляет существующие коллекции во ВСЕХ базах Chroma (без загрузки эмбеддинг-модели).
-    Имена с префиксом базы: "zaebalo:name" (основная) и "bookrag:name" (книги).
-    Пустой список = нет коллекций.
+    """List collections in the main and book databases without loading the embedding model.
+
+    Names use the prefixes 'zaebalo:' and 'bookrag:', respectively. Missing
+    databases and database errors are skipped, so results may be incomplete
+    or empty even when collections exist.
     """
     result = []
     for db_label, db_path in (("zaebalo", CHROMA_DIR), ("bookrag", BOOKRAG_DIR)):
@@ -304,12 +308,19 @@ def find_llama_server() -> Path | None:
 
 
 def kobold_alive() -> bool:
-    """Проверяет доступность KoboldCpp (порт берётся из rag_config.NET)."""
+    """Check the configured KoboldCpp info URL with a two-second timeout.
+
+    Return True for a final status below 400, and False for Requests exceptions.
+    """
     return is_alive(NET.kobold_info_url, timeout=2)
 
 
 def llama_alive() -> bool:
-    """Проверяет доступность llama-server: локально, MTP или удалённый ПК."""
+    """Return whether any configured llama health URL passes is_alive.
+
+    Check primary, MTP, then remote endpoints. A final status below 400 counts
+    as available; Requests exceptions fail that endpoint's check.
+    """
     for h in LLAMA_HEALTH_URLS:
         if is_alive(h):
             return True
@@ -317,7 +328,10 @@ def llama_alive() -> bool:
 
 
 def get_llama_url() -> str:
-    """Возвращает URL живого llama-сервера: основной порт → MTP → удалённый."""
+    """Return the first llama chat URL whose health check passes is_alive.
+
+    Check primary, MTP, then remote endpoints; return LLAMA_URL if none pass.
+    """
     for h, url in LLAMA_ENDPOINTS:
         if is_alive(h):
             return url
@@ -492,7 +506,13 @@ def extract_word_limit(text: str) -> int | None:
 
 
 def _try_cloud_provider(prov_name: str, messages: list[dict], max_tokens: int, temperature: float):
-    """Пробует один облачный API. Возвращает (ответ, None) или (None, ошибка)."""
+    """Request one provider using the first nonblank key or legacy alias in .env.
+
+    Return (content, None) on a parsed response, or (None, error_message) for
+    a missing key or a caught request/response error. Content is not validated
+    and may be empty or None. Unknown providers raise KeyError; errors reading
+    or decoding .env propagate before the request handler.
+    """
     cfg = CLOUD_PROVIDERS[prov_name]
     env = load_env()
     key_names = [cfg["key_var"]] + KEY_ALIASES.get(cfg["key_var"], [])
@@ -564,12 +584,22 @@ def _try_cloud_chain(messages: list[dict], max_tokens: int, temperature: float,
 
 def call_llm(messages: list[dict], max_tokens: int = 6000, temperature: float = 0.75,
              provider: str = "auto") -> str:
-    """
-    Отправляет запрос в активный бэкенд.
-    provider: 'auto' | 'kobold' | 'llama' | 'OpenAI' | 'Google' | 'Groq' | 'NVIDIA' | 'DeepSeek'
+    """Request a chat completion from a local backend or cloud provider.
 
-    Порядок в режиме 'auto': локальный сервер (гемма на 8080 / KoboldCpp на 5001),
-    при его недоступности или ошибке — облачные провайдеры из .env.
+    provider accepts 'auto', 'kobold', 'llama', or a CLOUD_PROVIDERS key.
+    Auto prefers KoboldCpp, then a reachable llama endpoint, and falls back to
+    cloud providers with keys in .env. A successful cloud choice is cached for
+    later calls while no local backend is available. If the cached provider
+    fails, auto tries the remaining providers before retrying that provider.
+
+    Return response content or an error string for handled failures. Empty or
+    None local content is retried once with thinking disabled and twice the
+    max_tokens budget; the retry's content may still be empty or None.
+    Explicit providers do not use the automatic cloud fallback.
+
+    Requests use configured local/cloud timeouts in seconds. Errors reading or
+    decoding .env or settings.txt can propagate before request handling or
+    during cloud fallback.
     """
     global _auto_provider
     cached = False

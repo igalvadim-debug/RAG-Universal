@@ -16,6 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent
 
 
 def _env(name: str, default: str) -> str:
+    """Return the stripped environment value, or default if unset or blank."""
     v = os.environ.get(name)
     return v.strip() if v and v.strip() else default
 
@@ -89,14 +90,17 @@ class NetConfig:
 
     @property
     def kobold_url(self) -> str:
+        """Return the chat-completions URL for the configured KoboldCpp host and port."""
         return f"http://{self.kobold_host}:{self.kobold_port}/v1/chat/completions"
 
     @property
     def kobold_info_url(self) -> str:
+        """Return the info URL used to check the configured KoboldCpp server."""
         return f"http://{self.kobold_host}:{self.kobold_port}/api/v1/info"
 
     @property
     def llama_url(self) -> str:
+        """Return the chat-completions URL for the primary llama host and port."""
         return f"{_scheme(self.llama_host)}://{self.llama_host}:{self.llama_port}/v1/chat/completions"
 
     @property
