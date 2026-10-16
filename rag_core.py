@@ -531,7 +531,8 @@ def _try_cloud_provider(prov_name: str, messages: list[dict], max_tokens: int, t
         "max_tokens":  max_tokens,
     }
     try:
-        # Сессия с переиспользованием соединений + retry/backoff (rag_net.http_post).
+        # Сессия с переиспользованием соединений + retry/backoff (rag_net.http_post);
+        # облачный таймаут берётся из NET.cloud_timeout.
         resp = http_post(cfg["url"], payload, headers=headers, timeout=NET.cloud_timeout)
         return resp.json()["choices"][0]["message"]["content"], None
     except requests.exceptions.HTTPError as e:
@@ -560,11 +561,13 @@ def _try_cloud_chain(messages: list[dict], max_tokens: int, temperature: float,
     global _auto_provider
     env = load_env()
     order = []
-    if first and first != skip and env.get(CLOUD_PROVIDERS[first]["key_var"], "").strip():
+    # Единая проверка ключей для всех кандидатов (включая legacy-алиасы,
+    # напр. agnes_API_KEY) — через has_api_key, как в _try_cloud_provider.
+    if first and first != skip and has_api_key(env, first):
         order.append(first)
     order += [p for p in CLOUD_PROVIDERS
-              if p not in (first, skip) and env.get(CLOUD_PROVIDERS[p]["key_var"], "").strip()]
-    if skip and skip not in order and env.get(CLOUD_PROVIDERS[skip]["key_var"], "").strip():
+              if p not in (first, skip) and has_api_key(env, p)]
+    if skip and skip not in order and has_api_key(env, skip):
         order.append(skip)  # в последнюю очередь
     errors = []
     for prov_name in order:
