@@ -20,6 +20,18 @@ def _env(name: str, default: str) -> str:
     return v.strip() if v and v.strip() else default
 
 
+def _scheme(host: str) -> str:
+    """http:// для loopback-хостов (локальные llama-server/KoboldCpp), https:// для остальных."""
+    h = host.strip().lower()
+    if h.startswith("["):  # IPv6-литерал вида [::1]:port
+        h = h[1:h.find("]")] if "]" in h else h
+    else:
+        h = h.split(":")[0]  # host или host:port
+    if h in ("127.0.0.1", "localhost", "::1") or h.startswith("127."):
+        return "http"
+    return "https"
+
+
 # ──────────────────────────────────────────────
 # ПУТИ
 # ──────────────────────────────────────────────
@@ -82,21 +94,27 @@ class NetConfig:
 
     @property
     def llama_url(self) -> str:
-        return f"http://{self.llama_host}:{self.llama_port}/v1/chat/completions"
+        return f"{_scheme(self.llama_host)}://{self.llama_host}:{self.llama_port}/v1/chat/completions"
 
     @property
     def llama_endpoints(self) -> list[tuple[str, str]]:
-        """Пары (health-URL, chat-URL) в порядке приоритета."""
+        """Пары (health-URL, chat-URL) в порядке приоритета.
+
+        Loopback-хосты — http://; не-локальные (удалённый ПК/сервер) — https://,
+        чтобы сообщения чата передавались по шифрованному соединению.
+        """
         l = self.llama_host
+        s = _scheme(l)
         pairs = [
-            (f"http://{l}:{self.llama_port}/health",
-             f"http://{l}:{self.llama_port}/v1/chat/completions"),
-            (f"http://{l}:{self.mtp_port}/health",
-             f"http://{l}:{self.mtp_port}/v1/chat/completions"),
+            (f"{s}://{l}:{self.llama_port}/health",
+             f"{s}://{l}:{self.llama_port}/v1/chat/completions"),
+            (f"{s}://{l}:{self.mtp_port}/health",
+             f"{s}://{l}:{self.mtp_port}/v1/chat/completions"),
         ]
         if self.remote_llama:
-            pairs.append((f"http://{self.remote_llama}/health",
-                          f"http://{self.remote_llama}/v1/chat/completions"))
+            rs = _scheme(self.remote_llama)
+            pairs.append((f"{rs}://{self.remote_llama}/health",
+                          f"{rs}://{self.remote_llama}/v1/chat/completions"))
         return pairs
 
 
