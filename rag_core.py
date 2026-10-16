@@ -677,12 +677,17 @@ def _try_cloud_provider(prov_name: str, messages: list[dict], max_tokens: int, t
 
 def _try_cloud_chain(messages: list[dict], max_tokens: int, temperature: float,
                      reason: str, first: str | None = None, skip: str | None = None) -> str:
-    """
-    Перебирает облачных провайдеров (у кого есть ключ в .env) и возвращает первый ответ.
-    first — провайдер, который пробуем в первую очередь (кэш авто-режима).
-    skip  — провайдер, который ТОЛЬКО ЧТО не ответил: пробуем его в последнюю очередь
-            (чтобы не жечь таймаут на том же сервисе дважды подряд).
-    Возвращает текст ответа или строку с ошибкой, если ни один не ответил.
+    """Try cloud providers with nonblank keys or supported legacy aliases in .env.
+
+    Try first before the configured provider order and defer skip until last,
+    even when first and skip name the same provider. Providers without keys
+    are omitted. Return the first non-None content, including an empty string,
+    and cache that provider for subsequent automatic calls.
+
+    Wait 10 seconds after each reported HTTP 429 or 503 failure, including the
+    last attempt. Return an error string if all providers fail or no keys exist.
+    Errors reading or decoding .env propagate; unknown first or skip names
+    can raise KeyError during key lookup.
     """
     global _auto_provider
     env = load_env()
