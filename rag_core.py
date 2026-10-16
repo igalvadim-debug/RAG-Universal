@@ -8,7 +8,6 @@ import logging
 import os
 import re
 import subprocess
-import threading
 import time
 from pathlib import Path
 
@@ -41,23 +40,16 @@ SETTINGS_PATH   = PATHS.settings_path
 # ──────────────────────────────────────────────
 
 def load_env() -> dict:
-    """Читает .env из папки проекта, возвращает словарь KEY=VALUE.
-    Кэширует по mtime файла: файл меняется редко, а вызывается на каждый запрос к API."""
-    global _env_cache
-    if not ENV_FILE.exists():
-        _env_cache = None
-        return {}
-    mtime = ENV_FILE.stat().st_mtime
-    if _env_cache is not None and _env_cache[0] == mtime:
-        return _env_cache[1]
+    """Читает .env из папки проекта, возвращает словарь KEY=VALUE."""
     env = {}
+    if not ENV_FILE.exists():
+        return env
     for line in ENV_FILE.read_text(encoding="utf-8").splitlines():
         line = line.strip()
         if not line or line.startswith("#") or "=" not in line:
             continue
         k, _, v = line.partition("=")
         env[k.strip()] = v.strip()
-    _env_cache = (mtime, env)
     return env
 
 
@@ -75,7 +67,6 @@ def has_api_key(env: dict, prov_name: str) -> bool:
 
 def save_env(updates: dict):
     """Сохраняет обновлённые значения обратно в .env."""
-    global _env_cache
     current = load_env()
     current.update({k: v for k, v in updates.items() if v})
     lines = []
@@ -96,7 +87,6 @@ def save_env(updates: dict):
     for k, v in current.items():
         lines.append(f"{k}={v}")
     ENV_FILE.write_text("\n".join(lines), encoding="utf-8")
-    _env_cache = None  # сброс кэша после записи
 
 
 # ──────────────────────────────────────────────
@@ -231,15 +221,6 @@ LLAMA_URL   = NET.llama_url
 LLAMA_ENDPOINTS    = NET.llama_endpoints
 LLAMA_HEALTH_URLS  = [h for h, _ in LLAMA_ENDPOINTS]
 
-# Таймаут ПРОВЕРКИ ДОСТУПНОСТИ (/health) — 2 сек. Сама генерация всегда 600 сек:
-# если сервер жив, но долго думает — ждём, не обрываем.
-# (было 5 сек: при недоступных эндпоинтах get_backend() вешал UI на 5+15 сек;
-#  2 сек достаточно для локального/LAN-ответа, результат дополнительно кэшируется)
-LLAMA_HEALTH_TIMEOUT    = 2
-
-# Кэш результата health-проверок (сек). backend_status()/call_llm вызываются
-# при каждом взаимодействии с UI — повторные HTTP-запросы /health не нужны.
-HEALTH_CACHE_TTL        = 3.0
 # Таймаут ПРОВЕРКИ ДОСТУПНОСТИ (/health). Сама генерация всегда LOCAL_TIMEOUT сек.
 LLAMA_HEALTH_TIMEOUT = NET.health_timeout
 
@@ -254,26 +235,15 @@ _client        = None
 _collection    = None
 _llama_proc    = None   # subprocess llama-server если мы его запустили
 _auto_provider = None   # кэш провайдера для auto-режима call_llm
-_env_cache     = None   # кэш load_env(): (mtime, dict) — .env читается на каждом запросе
-
-# Переиспользуемая HTTP-сессия (keep-alive): экономит TCP/TLS-handshake
-# на каждом запросе к локальному серверу и облачным API.
-_http = requests.Session()
-
-# Кэш health-статуса: (monotonic_time, backend, url, port)
-_health_cache = None
-_health_lock  = threading.Lock()
 
 
 def get_model():
-    """Загружает SentenceTransformer один раз и кэширует (потокбезопасно)."""
+    """Загружает SentenceTransformer один раз и кэширует."""
     global _model
     if _model is None:
-        with _health_lock:  # общий lock защищает от двойной загрузки в разных потоках Gradio
-            if _model is None:
-                print(f"[RAG] Загружаю модель из {MODEL_DIR} ...")
-                _model = SentenceTransformer(str(MODEL_DIR))
-                print("[RAG] Модель загружена.")
+        print(f"[RAG] Загружаю модель из {MODEL_DIR} ...")
+        _model = SentenceTransformer(str(MODEL_DIR))
+        print("[RAG] Модель загружена.")
     return _model
 
 
@@ -337,72 +307,6 @@ def find_llama_server() -> Path | None:
     return None
 
 
-def _probe_health(force: bool = False):
-    """
-    Один зонд для всех проверок доступности бэкенда. Возвращает кортеж
-    (backend, chat_url, port) и кэширует результат на HEALTH_CACHE_TTL сек.,
-    чтобы не долбить /health при каждом обновлении UI и каждом call_llm.
-    backend: 'kobold' | 'llama' | 'none'.
-    """
-    global _health_cache
-    now = time.monotonic()
-    if not force and _health_cache is not None and (now - _health_cache[0]) < HEALTH_CACHE_TTL:
-        return _health_cache[1], _health_cache[2], _health_cache[3]
-
-    backend, url, port = "none", LLAMA_URL, None
-    try:
-        r = _http.get("http://127.0.0.1:5001/api/v1/info", timeout=LLAMA_HEALTH_TIMEOUT)
-        if r.status_code < 500:
-            backend, url, port = "kobold", KOBOLD_URL, 5001
-    except Exception:
-        pass
-    if backend == "none":
-        for h, u in LLAMA_ENDPOINTS:
-            try:
-                r = _http.get(h, timeout=LLAMA_HEALTH_TIMEOUT)
-                if r.status_code == 200:
-                    backend = "llama"
-                    url     = u
-                    try:
-                        port = int(h.split(":")[2].split("/")[0])
-                    except Exception:
-                        port = None
-                    break
-            except Exception:
-                continue
-
-    with _health_lock:
-        _health_cache = (time.monotonic(), backend, url, port)
-    return backend, url, port
-
-
-def invalidate_health_cache():
-    """Сбрасывает кэш health-статуса (после запуска/остановки сервера)."""
-    global _health_cache
-    with _health_lock:
-        _health_cache = None
-
-
-def kobold_alive() -> bool:
-    """Проверяет доступность KoboldCpp на порту 5001 (с кэшем)."""
-    return _probe_health()[0] == "kobold"
-
-
-def llama_alive() -> bool:
-    """Проверяет доступность llama-server: локально (8080/8510) или удалённый ПК (с кэшем)."""
-    return _probe_health()[0] == "llama"
-
-
-def get_llama_url() -> str:
-    """Возвращает URL живого llama-сервера: 8080 → MTP 8510 → удалённый (из кэша зонда)."""
-    backend, url, _ = _probe_health()
-    return url if backend == "llama" else LLAMA_URL
-
-
-def get_llama_port() -> int | None:
-    """Порт живого llama-сервера (для статуса в UI) или None (из кэша зонда)."""
-    backend, _, port = _probe_health()
-    return port if backend == "llama" else None
 def kobold_alive() -> bool:
     """Check the configured KoboldCpp info URL with a two-second timeout.
 
@@ -511,7 +415,6 @@ def start_llama_server(gguf_path: str, log_callback=None) -> bool:
                 log_callback(msg)
             _llama_proc = None
             return False
-        invalidate_health_cache()  # принудительный повторный зонд без кэша
         if llama_alive():
             msg = f"[RAG] llama-server bereit (nach {i+1} sec)."
             print(msg)
@@ -541,19 +444,23 @@ def stop_llama_server():
     if _llama_proc and _llama_proc.poll() is None:
         _llama_proc.terminate()
         _llama_proc = None
-        invalidate_health_cache()
         print("[RAG] llama-server остановлен.")
 
 
 def get_backend() -> str:
     """
-    Определяет активный бэкенд (результат кэшируется на HEALTH_CACHE_TTL сек).
+    Определяет активный бэкенд.
     Возвращает: 'kobold', 'llama', или 'none'.
     """
-    return _probe_health()[0]
+    if kobold_alive():
+        return "kobold"
+    if llama_alive():
+        return "llama"
+    return "none"
 
 
 def get_api_url() -> str:
+    """Return the chat-completions URL for the currently active backend."""
     backend = get_backend()
     if backend == "kobold":
         return KOBOLD_URL
@@ -564,57 +471,24 @@ def get_api_url() -> str:
 # RAG: ПОИСК
 # ──────────────────────────────────────────────
 
-# Кэш поиска: одинаковые вопросы при повторной генерации (2-pass, правки)
-# больше не кодируются моделью и не запрашивают ChromaDB заново.
-_search_cache    = {}          # OrderedDict-like: key → list[str]
-_SEARCH_CACHE_MAX = 32
-
-
-def _search_cache_key(question: str, top_k: int, collection_name: str) -> tuple:
-    return (question.strip(), top_k, collection_name.strip().lower())
-
-
 def search_chunks(question: str, top_k: int = TOP_K, collection_name: str = "") -> list[str]:
     """
     Ищет top_k релевантных чанков по вопросу.
     collection_name: "" или "выкл" → RAG отключён, эмбеддинг-модель НЕ грузится, возвращается [].
     Иначе — поиск в указанной коллекции. Поддерживает префикс базы: 'zaebalo:name' / 'bookrag:name'.
-    Результаты кэшируются (LRU, до _SEARCH_CACHE_MAX записей); сброс — clear_search_cache().
     """
     if not collection_name or collection_name.strip().lower().startswith("выкл") \
             or collection_name.strip().lower() in ("off", "none", "без раг"):
         return []
-
-    key = _search_cache_key(question, top_k, collection_name)
-    cached = _search_cache.get(key)
-    if cached is not None:
-        # переносим в конец (LRU)
-        _search_cache.pop(key)
-        _search_cache[key] = cached
-        return list(cached)
-
     model      = get_model()
     collection = get_collection_by_name(collection_name)
 
     q_emb = model.encode(question).tolist()
-    n_avail = collection.count()
-    if n_avail == 0:
-        return []
     results = collection.query(
         query_embeddings=[q_emb],
-        n_results=min(top_k, n_avail),
+        n_results=min(top_k, collection.count()),
     )
-    chunks = results["documents"][0] if results["documents"] else []
-
-    _search_cache[key] = list(chunks)
-    while len(_search_cache) > _SEARCH_CACHE_MAX:
-        _search_cache.pop(next(iter(_search_cache)))
-    return list(chunks)
-
-
-def clear_search_cache():
-    """Очищает кэш RAG-поиска (например, после обновления базы)."""
-    _search_cache.clear()
+    return results["documents"][0] if results["documents"] else []
 
 
 def build_context(chunks: list[str]) -> str:
@@ -2286,10 +2160,8 @@ def generate_topics(seed: str = "", cloud_provider: str = "auto", collection_nam
 
 
 def clear_cache():
-    """Выгружает модель из памяти (освобождает RAM/VRAM) и сбрасывает вспомогательные кэши."""
+    """Выгружает модель из памяти (освобождает RAM/VRAM)."""
     global _model
-    clear_search_cache()
-    invalidate_health_cache()
     if _model is not None:
         del _model
         _model = None

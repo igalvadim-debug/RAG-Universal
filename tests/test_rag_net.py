@@ -11,6 +11,7 @@ PAYLOAD = {"messages": [{"role": "user", "content": "Hello"}]}
 
 
 def response(status=200):
+    """Build a requests.Response stub with the given status code and test URL."""
     result = requests.Response()
     result.status_code = status
     result.url = URL
@@ -19,6 +20,7 @@ def response(status=200):
 
 @pytest.fixture
 def session(net, monkeypatch):
+    """Install a mocked requests.Session as rag_net's shared session and return it."""
     result = Mock(spec=requests.Session)
     result.get.return_value = response()
     result.post.return_value = response()
@@ -27,12 +29,14 @@ def session(net, monkeypatch):
 
 
 def send(net, method, **kwargs):
+    """Dispatch to rag_net.http_post or http_get for the given method name."""
     if method == "post":
         return net.http_post(URL, PAYLOAD, **kwargs)
     return net.http_get(URL, **kwargs)
 
 
 def test_make_session_configures_both_transports(net, monkeypatch):
+    """make_session should mount the same adapter on http:// and https://, configured from NET."""
     monkeypatch.setattr(net, "NET", replace(net.NET, max_retries=4, backoff_base=0.6))
 
     with net.make_session() as session:
@@ -46,6 +50,7 @@ def test_make_session_configures_both_transports(net, monkeypatch):
 
 
 def test_make_session_without_urllib3_retry_still_returns_usable_session(net, monkeypatch):
+    """make_session should return a usable Session with transport retries disabled if Retry is unavailable."""
     monkeypatch.setattr(net, "Retry", None)
 
     with net.make_session() as session:
@@ -55,6 +60,7 @@ def test_make_session_without_urllib3_retry_still_returns_usable_session(net, mo
 
 
 def test_get_session_initializes_lazily_and_reuses_the_same_session(net, monkeypatch):
+    """get_session should only call make_session once and cache its result."""
     factory = Mock(return_value=Mock(spec=requests.Session))
     monkeypatch.setattr(net, "make_session", factory)
 
@@ -66,6 +72,7 @@ def test_get_session_initializes_lazily_and_reuses_the_same_session(net, monkeyp
 
 @pytest.mark.parametrize("method", ["get", "post"])
 def test_request_forwards_payload_headers_and_explicit_timeout(net, session, method):
+    """http_get/http_post should forward the given headers, timeout, and (for post) JSON payload."""
     headers = {"Authorization": "Bearer synthetic-test-key"}
 
     result = send(net, method, timeout=1.25, headers=headers)
@@ -89,6 +96,7 @@ def test_request_forwards_payload_headers_and_explicit_timeout(net, session, met
     ],
 )
 def test_post_selects_default_timeout_for_url(net, session, monkeypatch, url, timeout_field):
+    """http_post without an explicit timeout should pick local or cloud timeout based on the URL."""
     monkeypatch.setattr(net, "NET", replace(net.NET, local_timeout=32.5, cloud_timeout=11.5))
 
     net.http_post(url, PAYLOAD)
@@ -97,6 +105,7 @@ def test_post_selects_default_timeout_for_url(net, session, monkeypatch, url, ti
 
 
 def test_get_uses_configured_health_timeout(net, session, monkeypatch):
+    """http_get without an explicit timeout should use NET.health_timeout."""
     monkeypatch.setattr(net, "NET", replace(net.NET, health_timeout=0.125))
 
     net.http_get(URL)
@@ -106,6 +115,7 @@ def test_get_uses_configured_health_timeout(net, session, monkeypatch):
 
 @pytest.mark.parametrize("method", ["get", "post"])
 def test_explicit_zero_timeout_is_not_replaced_by_a_default(net, session, method):
+    """A timeout of 0 should be passed through as-is instead of being treated as unset."""
     send(net, method, timeout=0)
 
     assert getattr(session, method).call_args.kwargs["timeout"] == 0
@@ -114,6 +124,7 @@ def test_explicit_zero_timeout_is_not_replaced_by_a_default(net, session, method
 @pytest.mark.parametrize("method", ["get", "post"])
 @pytest.mark.parametrize("error_type", [requests.ConnectionError, requests.Timeout])
 def test_transient_failures_retry_with_exponential_backoff(net, session, monkeypatch, method, error_type):
+    """Connection errors and timeouts should be retried with exponential backoff up to max_retries."""
     monkeypatch.setattr(net, "NET", replace(net.NET, max_retries=4, backoff_base=0.25))
     success = response()
     transport = getattr(session, method)
@@ -131,6 +142,7 @@ def test_transient_failures_retry_with_exponential_backoff(net, session, monkeyp
 def test_exhaustion_reports_the_last_failure_and_does_not_sleep_afterwards(
     net, session, method, error_type,
 ):
+    """After retries are exhausted, NetworkError should report the last failure and stop sleeping."""
     transport = getattr(session, method)
     transport.side_effect = [error_type("first"), error_type("second"), error_type("last failure")]
 
@@ -148,6 +160,7 @@ def test_exhaustion_reports_the_last_failure_and_does_not_sleep_afterwards(
 
 @pytest.mark.parametrize("method", ["get", "post"])
 def test_single_attempt_budget_never_sleeps(net, session, monkeypatch, method):
+    """With max_retries=1, a failing request should raise immediately without sleeping."""
     monkeypatch.setattr(net, "NET", replace(net.NET, max_retries=1))
     transport = getattr(session, method)
     transport.side_effect = requests.Timeout("unavailable")
@@ -162,6 +175,7 @@ def test_single_attempt_budget_never_sleeps(net, session, monkeypatch, method):
 @pytest.mark.parametrize("method", ["get", "post"])
 @pytest.mark.parametrize("status", [400, 401, 403, 404])
 def test_client_errors_preserve_the_response_and_fail_without_retry(net, session, method, status):
+    """4xx client error responses should raise HTTPError immediately, without retrying."""
     failure = response(status)
     getattr(session, method).return_value = failure
 
@@ -177,6 +191,7 @@ def test_client_errors_preserve_the_response_and_fail_without_retry(net, session
 def test_post_manually_retries_retryable_status_when_transport_retry_is_unavailable(
     net, session, monkeypatch, status,
 ):
+    """Without urllib3's Retry, http_post should manually retry RETRY_STATUS responses itself."""
     monkeypatch.setattr(net, "Retry", None)
     success = response()
     session.post.side_effect = [response(status), response(status), success]
@@ -189,6 +204,7 @@ def test_post_manually_retries_retryable_status_when_transport_retry_is_unavaila
 
 @pytest.mark.parametrize("status", [429, 500, 502, 503, 504])
 def test_post_preserves_terminal_http_error_after_manual_retries(net, session, monkeypatch, status):
+    """If manual status retries are exhausted, http_post should raise HTTPError for the last response."""
     monkeypatch.setattr(net, "Retry", None)
     failure = response(status)
     session.post.return_value = failure
@@ -202,6 +218,7 @@ def test_post_preserves_terminal_http_error_after_manual_retries(net, session, m
 
 
 def test_post_handles_mixed_connection_and_http_failures_with_one_attempt_budget(net, session, monkeypatch):
+    """A connection error followed by a retryable status should share the same overall retry budget."""
     monkeypatch.setattr(net, "Retry", None)
     success = response()
     session.post.side_effect = [requests.ConnectionError("connection reset"), response(503), success]
@@ -214,6 +231,7 @@ def test_post_handles_mixed_connection_and_http_failures_with_one_attempt_budget
 
 @pytest.mark.parametrize("method", ["get", "post"])
 def test_http_status_retry_is_left_to_the_configured_transport(net, session, method):
+    """When the transport-level Retry is in place, a single retryable status should raise once, unretried here."""
     getattr(session, method).return_value = response(503)
 
     with pytest.raises(requests.HTTPError):
@@ -225,6 +243,7 @@ def test_http_status_retry_is_left_to_the_configured_transport(net, session, met
 
 @pytest.mark.parametrize("method", ["get", "post"])
 def test_unexpected_request_errors_are_not_reclassified_as_network_exhaustion(net, session, method):
+    """Non-retryable Requests exceptions should propagate unchanged, not as NetworkError."""
     failure = requests.exceptions.InvalidURL("bad URL")
     getattr(session, method).side_effect = failure
 
@@ -238,6 +257,7 @@ def test_unexpected_request_errors_are_not_reclassified_as_network_exhaustion(ne
 
 @pytest.mark.parametrize("status", [200, 204, 301, 400, 404, 499, 500, 503])
 def test_is_alive_status_boundary(net, session, status):
+    """Check is_alive's true/false boundary across a range of HTTP status codes."""
     session.get.return_value = response(status)
 
     assert net.is_alive(URL) is (status < 500)
@@ -247,6 +267,7 @@ def test_is_alive_status_boundary(net, session, status):
 
 
 def test_is_alive_forwards_explicit_timeout(net, session):
+    """is_alive should forward an explicit timeout to the underlying GET call."""
     assert net.is_alive(URL, timeout=0.25) is True
 
     session.get.assert_called_once_with(URL, timeout=0.25)
@@ -254,6 +275,7 @@ def test_is_alive_forwards_explicit_timeout(net, session):
 
 @pytest.mark.parametrize("error_type", [requests.ConnectionError, requests.Timeout, requests.RequestException])
 def test_is_alive_converts_request_failure_to_false_without_manual_retries(net, session, error_type):
+    """is_alive should return False on a Requests exception, with a single attempt and no retry."""
     session.get.side_effect = error_type("unavailable")
 
     assert net.is_alive(URL) is False
