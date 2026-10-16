@@ -1,4 +1,4 @@
-"""Tests for PR #1's configuration wiring and shared-network call sites."""
+"""Tests for configuration wiring, shared HTTP transport, and provider routing."""
 
 from dataclasses import replace
 from types import SimpleNamespace
@@ -13,6 +13,7 @@ PROVIDERS = ["OpenAI", "Groq", "DeepSeek", "NVIDIA_NIM", "OpenRouter", "Google",
 
 def chat_response(content="Generated text"):
     response = Mock(spec=requests.Response)
+    response.status_code = 200
     response.json.return_value = {"choices": [{"message": {"content": content}}]}
     return response
 
@@ -101,19 +102,7 @@ def test_agnes_key_alias_and_canonical_precedence(core, post, env_text, expected
     assert post.call_args.kwargs["headers"]["Authorization"] == f"Bearer {expected_key}"
 
 
-@pytest.mark.parametrize(
-    "key_name",
-    [
-        "AGNES_API_KEY",
-        pytest.param(
-            "agnes_API_KEY",
-            marks=pytest.mark.xfail(
-                strict=True,
-                reason="PR #1: _try_cloud_chain filters canonical keys only and skips the legacy Agnes alias",
-            ),
-        ),
-    ],
-)
+@pytest.mark.parametrize("key_name", ["AGNES_API_KEY", "agnes_API_KEY"])
 def test_automatic_cloud_selection_accepts_both_agnes_key_spellings(core, post, monkeypatch, key_name):
     core.ENV_FILE.write_text(f"{key_name}=synthetic-test-key\n", encoding="utf-8")
     monkeypatch.setattr(core, "get_backend", Mock(return_value="none"))
@@ -122,6 +111,94 @@ def test_automatic_cloud_selection_accepts_both_agnes_key_spellings(core, post, 
 
     post.assert_called_once()
     assert post.call_args.args[0] == core.CLOUD_PROVIDERS["Agnes"]["url"]
+
+
+@pytest.mark.parametrize(
+    ("first", "skip", "expected_order"),
+    [
+        (None, None, ["OpenAI", "Groq", "Agnes"]),
+        ("Agnes", None, ["Agnes", "OpenAI", "Groq"]),
+        (None, "Agnes", ["OpenAI", "Groq", "Agnes"]),
+        ("Agnes", "Agnes", ["OpenAI", "Groq", "Agnes"]),
+        ("Agnes", "OpenAI", ["Agnes", "Groq", "OpenAI"]),
+    ],
+)
+def test_cloud_chain_includes_legacy_key_in_each_priority_position(
+    core, monkeypatch, first, skip, expected_order,
+):
+    core.ENV_FILE.write_text(
+        "OPENAI_API_KEY=openai-test-key\nGROQ_API_KEY=groq-test-key\n"
+        "AGNES_API_KEY= \nagnes_API_KEY= legacy-test-key \n",
+        encoding="utf-8",
+    )
+    attempt = Mock(side_effect=lambda name, *_: (None, f"[{name}] unavailable"))
+    monkeypatch.setattr(core, "_try_cloud_provider", attempt)
+
+    result = core._try_cloud_chain(MESSAGES, 91, 0.4, "test fallback", first=first, skip=skip)
+
+    assert attempt.call_args_list == [call(name, MESSAGES, 91, 0.4) for name in expected_order]
+    assert result.startswith("[Ошибка]")
+    assert result.splitlines()[1:] == [f"[{name}] unavailable" for name in expected_order]
+    assert core._auto_provider is None
+    core.time.sleep.assert_not_called()
+
+
+@pytest.mark.parametrize(("first", "skip"), [(None, None), ("Agnes", None), (None, "Agnes"), ("Agnes", "Agnes")])
+@pytest.mark.parametrize("env_text", [None, "AGNES_API_KEY= \t\nagnes_API_KEY= \t\n"])
+def test_cloud_chain_does_not_attempt_missing_or_blank_keys(core, monkeypatch, first, skip, env_text):
+    if env_text is not None:
+        core.ENV_FILE.write_text(env_text, encoding="utf-8")
+    attempt = Mock()
+    monkeypatch.setattr(core, "_try_cloud_provider", attempt)
+
+    result = core._try_cloud_chain(MESSAGES, 91, 0.4, "no credentials", first=first, skip=skip)
+
+    assert result.startswith("[Ошибка]")
+    assert "ни одного ключа" in result
+    attempt.assert_not_called()
+    assert core._auto_provider is None
+    core.time.sleep.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "env_text",
+    [
+        "agnes_API_KEY= legacy-test-key \n",
+        "AGNES_API_KEY= \nagnes_API_KEY=legacy-test-key\n",
+        "AGNES_API_KEY=canonical-test-key\nagnes_API_KEY=legacy-test-key\n",
+    ],
+)
+def test_automatic_cloud_fallback_caches_agnes_and_reuses_it(core, post, monkeypatch, env_text):
+    core.ENV_FILE.write_text(
+        f"OPENAI_API_KEY=openai-test-key\n{env_text}", encoding="utf-8",
+    )
+    monkeypatch.setattr(core, "get_backend", Mock(return_value="none"))
+    post.side_effect = [core.NetworkError("OpenAI unavailable"), chat_response(), chat_response("Cached answer")]
+
+    assert core.call_llm(MESSAGES, max_tokens=80, temperature=0.1) == "Generated text"
+    assert core._auto_provider == "Agnes"
+    assert core.call_llm(MESSAGES, max_tokens=80, temperature=0.1) == "Cached answer"
+
+    assert [request.args[0] for request in post.call_args_list] == [
+        core.CLOUD_PROVIDERS[name]["url"] for name in ["OpenAI", "Agnes", "Agnes"]
+    ]
+    assert core._auto_provider == "Agnes"
+
+
+def test_failed_cached_legacy_provider_is_retried_after_other_candidates(core, post, monkeypatch):
+    core.ENV_FILE.write_text(
+        "OPENAI_API_KEY=openai-test-key\nagnes_API_KEY=legacy-test-key\n", encoding="utf-8",
+    )
+    monkeypatch.setattr(core, "get_backend", Mock(return_value="none"))
+    monkeypatch.setattr(core, "_auto_provider", "Agnes")
+    post.side_effect = [core.NetworkError("Agnes unavailable"), core.NetworkError("OpenAI unavailable"), chat_response()]
+
+    assert core.call_llm(MESSAGES) == "Generated text"
+
+    assert [request.args[0] for request in post.call_args_list] == [
+        core.CLOUD_PROVIDERS[name]["url"] for name in ["Agnes", "OpenAI", "Agnes"]
+    ]
+    assert core._auto_provider == "Agnes"
 
 
 @pytest.mark.parametrize("env_text", [None, "AGNES_API_KEY= \nagnes_API_KEY= \n"])
@@ -343,6 +420,125 @@ def test_explicit_local_http_error_without_response_does_not_crash(local, post):
     assert local.call_llm(MESSAGES, provider="llama").startswith("[Ошибка] HTTP")
 
     local._try_cloud_chain.assert_not_called()
+
+
+@pytest.fixture
+def shared_session(core, net, monkeypatch):
+    """Keep the real HTTP helper so request counts include its retries."""
+    session = Mock(spec=requests.Session)
+    session.post.return_value = chat_response()
+    monkeypatch.setattr(net, "_session", session)
+    settings = replace(core.NET, cloud_timeout=17.5, local_timeout=25.5, max_retries=2, backoff_base=0.125)
+    monkeypatch.setattr(core, "NET", settings)
+    monkeypatch.setattr(net, "NET", settings)
+    monkeypatch.setattr(core, "get_llama_url", Mock(return_value="http://llama.internal:9000/v1/chat/completions"))
+    monkeypatch.setattr(core, "load_settings", Mock(return_value={}))
+    core.ENV_FILE.write_text("OPENAI_API_KEY=synthetic-test-key\n", encoding="utf-8")
+    # A request through the old session would duplicate the shared helper's POST.
+    legacy_post = Mock(side_effect=AssertionError("LLM requests must use the shared HTTP helper"))
+    monkeypatch.setattr(core._http, "post", legacy_post)
+    yield session
+    legacy_post.assert_not_called()
+
+
+@pytest.mark.parametrize("provider", ["OpenAI", "kobold", "llama"])
+@pytest.mark.parametrize(
+    ("outcome", "attempts"),
+    [("success", 1), ("connection", 2), ("connect-timeout", 2), ("rate-limit", 2), ("read-timeout", 1)],
+)
+def test_completion_uses_only_shared_session_and_its_retry_policy(core, net, shared_session, provider, outcome, attempts):
+    if outcome != "success":
+        failure = {
+            "connection": requests.ConnectionError("connection refused"),
+            "connect-timeout": requests.ConnectTimeout("connection timed out"),
+            "rate-limit": http_error(429).response,
+            "read-timeout": requests.ReadTimeout("response timed out"),
+        }[outcome]
+        shared_session.post.side_effect = [failure, chat_response()]
+
+    result = core.call_llm(MESSAGES, max_tokens=73, temperature=0.2, provider=provider)
+
+    if outcome == "read-timeout":
+        assert result.startswith("[Ошибка]" if provider != "OpenAI" else "[OpenAI]")
+        assert ("нет соединения" if provider == "OpenAI" else "таймаут") in result
+    else:
+        assert result == "Generated text"
+    if provider == "OpenAI":
+        cfg = core.CLOUD_PROVIDERS[provider]
+        url, model, timeout = cfg["url"], cfg["model"], 17.5
+        headers = {"Content-Type": "application/json", "Authorization": "Bearer synthetic-test-key"}
+    else:
+        url = core.KOBOLD_URL if provider == "kobold" else core.get_llama_url.return_value
+        model, timeout, headers = "local", 25.5, None
+    expected_request = call(
+        url, json={"model": model, "messages": MESSAGES, "temperature": 0.2, "max_tokens": 73},
+        headers=headers, timeout=timeout,
+    )
+    assert shared_session.post.call_args_list == [expected_request] * attempts
+    assert net.time.sleep.call_args_list == ([call(0.125)] if attempts == 2 else [])
+
+
+@pytest.mark.parametrize("provider", ["OpenAI", "kobold", "llama"])
+@pytest.mark.parametrize(("status", "attempts"), [(401, 1), (429, 2), (503, 2)])
+def test_completion_preserves_http_errors_after_shared_session_attempts(core, net, shared_session, provider, status, attempts):
+    shared_session.post.return_value = http_error(status).response
+
+    result = core.call_llm(MESSAGES, provider=provider)
+
+    assert f"HTTP {status}" in result
+    assert shared_session.post.call_count == attempts
+    assert net.time.sleep.call_args_list == ([call(0.125)] if attempts == 2 else [])
+
+
+@pytest.mark.parametrize("provider", ["OpenAI", "kobold", "llama"])
+def test_completion_does_not_exceed_shared_connection_retry_budget(core, net, shared_session, provider):
+    shared_session.post.side_effect = requests.ConnectionError("connection refused")
+
+    result = core.call_llm(MESSAGES, provider=provider)
+
+    assert ("нет соединения" if provider == "OpenAI" else "таймаут") in result
+    assert shared_session.post.call_count == 2
+    net.time.sleep.assert_called_once_with(0.125)
+
+
+@pytest.mark.parametrize("provider", ["kobold", "llama"])
+@pytest.mark.parametrize("retry_content", ["Recovered text", "", None])
+def test_empty_local_response_uses_shared_session_for_one_thinking_retry(core, shared_session, provider, retry_content):
+    core.load_settings.return_value = {"top_p": 0.8, "seed": 0}
+    shared_session.post.side_effect = [chat_response(" \t\n"), chat_response(retry_content)]
+
+    assert core.call_llm(MESSAGES, max_tokens=73, temperature=0.0, provider=provider) == retry_content
+
+    url = core.KOBOLD_URL if provider == "kobold" else core.get_llama_url.return_value
+    payload = {"model": "local", "messages": MESSAGES, "temperature": 0.0, "max_tokens": 73, "top_p": 0.8, "seed": 0}
+    assert shared_session.post.call_args_list == [
+        call(url, json=payload, headers=None, timeout=25.5),
+        call(url, json={**payload, "think": False, "max_tokens": 146}, headers=None, timeout=25.5),
+    ]
+
+
+@pytest.mark.parametrize("provider", ["kobold", "llama", "auto"])
+def test_read_timeout_during_thinking_retry_only_falls_back_in_auto_mode(core, net, shared_session, monkeypatch, provider):
+    monkeypatch.setattr(core, "get_backend", Mock(return_value="llama"))
+    fallback = Mock(return_value="Cloud fallback")
+    monkeypatch.setattr(core, "_try_cloud_chain", fallback)
+    shared_session.post.side_effect = [chat_response(""), requests.ReadTimeout("retry response timed out")]
+
+    result = core.call_llm(MESSAGES, max_tokens=73, temperature=0.2, provider=provider)
+
+    if provider == "auto":
+        assert result == "Cloud fallback"
+        fallback.assert_called_once_with(
+            MESSAGES, 73, 0.2,
+            reason=f"Локальный сервер {core.get_llama_url.return_value} недоступен (повторено 2 раз)",
+        )
+    else:
+        assert result == "[Ошибка] Сервер недоступен или таймаут запроса."
+        fallback.assert_not_called()
+    assert shared_session.post.call_count == 2
+    assert shared_session.post.call_args.kwargs["json"]["think"] is False
+    assert shared_session.post.call_args.kwargs["json"]["max_tokens"] == 146
+    net.time.sleep.assert_not_called()
 
 
 def test_debug_log_writes_utf8_and_always_prints(core, monkeypatch, capsys):
