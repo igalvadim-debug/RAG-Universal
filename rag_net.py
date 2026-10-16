@@ -3,7 +3,8 @@ rag_net.py — сетевой слой: переиспользуемый request
 
 Все HTTP-запросы к LLM-бэкендам (локальным и облачным) идут через http_post()/http_get():
   * одно TCP/TLS-соединение переиспользуется (Session),
-  * сетевые сбои и 429/5xx повторяются с экспоненциальным backoff,
+  * POST повторяется только при ConnectTimeout (до отправки запроса),
+  * GET повторяется при сетевых сбоях и таймаутах с экспоненциальным backoff,
   * таймауты берутся из rag_config.NET.
 """
 
@@ -24,15 +25,13 @@ from rag_config import NET
 
 log = logging.getLogger("rag.net")
 
-RETRY_STATUS = (429, 500, 502, 503, 504)
-
 
 def make_session() -> requests.Session:
     """Create a session with connection pooling and transport retries disabled.
 
-    Retry budgets are managed by http_post and http_get. Only http_post
-    retries RETRY_STATUS responses; http_get retries connection failures
-    and timeouts only.
+    Retry budgets are managed by http_post and http_get. POST retries only
+    connect timeouts; GET retries connection failures and timeouts.
+    HTTP error responses are not retried.
     """
     s = requests.Session()
     if Retry is not None:
@@ -71,14 +70,15 @@ def http_post(url: str, json_payload: dict, headers: dict | None = None,
     for URLs containing '://' but neither '127.0.0.1' nor 'localhost'; other
     URLs use NET.local_timeout.
 
-    Retry connection errors (including connect timeouts) and RETRY_STATUS
-    responses with exponential backoff for up to NET.max_retries session calls
-    in total. Retries can resend a POST; no idempotency guarantee is provided.
+    Retry only ConnectTimeout, which occurs before transmission, with
+    exponential backoff for up to NET.max_retries session calls in total.
+    No provider-supported idempotency key is configured, so HTTP error
+    responses and ambiguous connection failures must not resend a POST.
 
-    Raise NetworkError immediately for other timeouts, including read timeouts,
-    after connection-error attempts are exhausted, or if no attempts are
-    configured. HTTPError propagates for failing HTTP statuses,
-    including exhausted status retries. Other Requests errors also propagate.
+    Raise NetworkError immediately for other timeouts and ambiguous connection
+    failures, or after connect-timeout attempts are exhausted (including when
+    no attempts are configured). HTTPError propagates for failing HTTP statuses.
+    Other Requests errors also propagate.
     """
     if timeout is None:
         timeout = NET.cloud_timeout if "://" in url and "127.0.0.1" not in url and "localhost" not in url else NET.local_timeout
@@ -87,29 +87,22 @@ def http_post(url: str, json_payload: dict, headers: dict | None = None,
     for attempt in range(1, NET.max_retries + 1):
         try:
             resp = sess.post(url, json=json_payload, headers=headers, timeout=timeout)
-            # 429/5xx повторяем здесь же (общий бюджет, тот же backoff)
-            if resp.status_code in RETRY_STATUS and attempt < NET.max_retries:
-                wait = NET.backoff_base * (2 ** (attempt - 1))
-                log.warning("HTTP %s от %s — попытка %d/%d, жду %.1f c",
-                            resp.status_code, url, attempt, NET.max_retries, wait)
-                time.sleep(wait)
-                continue
             resp.raise_for_status()
             return resp
-        except requests.ConnectionError as e:
-            # Сбой до отправки запроса (отказ соединения/DNS) — безопасно повторить.
+        except requests.ConnectTimeout as e:
+            # ConnectTimeout гарантирует сбой до отправки запроса.
             last_exc = e
             if attempt < NET.max_retries:
                 wait = NET.backoff_base * (2 ** (attempt - 1))
                 log.warning("%s при POST %s — попытка %d/%d, жду %.1f c",
                             type(e).__name__, url, attempt, NET.max_retries, wait)
                 time.sleep(wait)
-        except requests.Timeout as e:
-            # ReadTimeout: запрос уже мог достичь провайдера; без гарантии
+        except (requests.ConnectionError, requests.Timeout) as e:
+            # Запрос уже мог достичь провайдера; без гарантии
             # идемпотентности POST не повторяем — сразу наружу.
-            raise NetworkError(f"POST {url} прерван по таймауту (запрос мог быть получен провайдером, повтор POST запрещён): {e}") from e
+            raise NetworkError(f"POST {url} прерван (запрос мог быть получен провайдером, повтор POST запрещён): {e}") from e
         except requests.HTTPError:
-            raise  # 4xx (кроме повторённых 429/5xx) — сразу наружу
+            raise  # Любой HTTP-статус с ошибкой — сразу наружу
     raise NetworkError(f"POST {url} не удался после {NET.max_retries} попыток: {last_exc}")
 
 

@@ -38,11 +38,8 @@ def test_make_session_configures_both_transports(net, monkeypatch):
     with net.make_session() as session:
         adapter = session.get_adapter("https://")
         assert adapter is session.get_adapter("http://")
-        assert adapter.max_retries.total == 4
-        assert adapter.max_retries.backoff_factor == 0.3
-        assert set(adapter.max_retries.status_forcelist) == {429, 500, 502, 503, 504}
-        assert adapter.max_retries.allowed_methods == frozenset({"GET", "POST"})
-        assert adapter.max_retries.respect_retry_after_header is True
+        assert adapter.max_retries.total == 0
+        assert "POST" not in adapter.max_retries.allowed_methods
 
 
 def test_make_session_without_urllib3_retry_still_returns_usable_session(net, monkeypatch):
@@ -111,8 +108,10 @@ def test_explicit_zero_timeout_is_not_replaced_by_a_default(net, session, method
     assert getattr(session, method).call_args.kwargs["timeout"] == 0
 
 
-@pytest.mark.parametrize("method", ["get", "post"])
-@pytest.mark.parametrize("error_type", [requests.ConnectionError, requests.Timeout])
+@pytest.mark.parametrize(
+    ("method", "error_type"),
+    [("get", requests.ConnectionError), ("get", requests.Timeout), ("post", requests.ConnectTimeout)],
+)
 def test_transient_failures_retry_with_exponential_backoff(net, session, monkeypatch, method, error_type):
     monkeypatch.setattr(net, "NET", replace(net.NET, max_retries=4, backoff_base=0.25))
     success = response()
@@ -126,8 +125,10 @@ def test_transient_failures_retry_with_exponential_backoff(net, session, monkeyp
     assert net.time.sleep.call_args_list == [call(0.25), call(0.5), call(1.0)]
 
 
-@pytest.mark.parametrize("method", ["get", "post"])
-@pytest.mark.parametrize("error_type", [requests.ConnectionError, requests.Timeout])
+@pytest.mark.parametrize(
+    ("method", "error_type"),
+    [("get", requests.ConnectionError), ("get", requests.Timeout), ("post", requests.ConnectTimeout)],
+)
 def test_exhaustion_reports_the_last_failure_and_does_not_sleep_afterwards(
     net, session, method, error_type,
 ):
@@ -144,6 +145,19 @@ def test_exhaustion_reports_the_last_failure_and_does_not_sleep_afterwards(
     assert "last failure" in str(caught.value)
     assert transport.call_count == 3
     assert net.time.sleep.call_args_list == [call(1.0), call(2.0)]
+
+
+@pytest.mark.parametrize("error_type", [requests.ConnectionError, requests.ReadTimeout, requests.Timeout])
+def test_post_does_not_retry_failures_that_may_follow_transmission(net, session, error_type):
+    failure = error_type("response lost after request was sent")
+    session.post.side_effect = [failure, response()]
+
+    with pytest.raises(net.NetworkError) as caught:
+        net.http_post(URL, PAYLOAD)
+
+    assert caught.value.__cause__ is failure
+    assert session.post.call_count == 1
+    net.time.sleep.assert_not_called()
 
 
 @pytest.mark.parametrize("method", ["get", "post"])
@@ -174,46 +188,49 @@ def test_client_errors_preserve_the_response_and_fail_without_retry(net, session
 
 
 @pytest.mark.parametrize("status", [429, 500, 502, 503, 504])
-def test_post_manually_retries_retryable_status_when_transport_retry_is_unavailable(
-    net, session, monkeypatch, status,
+@pytest.mark.parametrize("transport_retry_available", [True, False])
+def test_post_does_not_retry_http_errors_after_transmission(
+    net, session, monkeypatch, status, transport_retry_available,
 ):
-    monkeypatch.setattr(net, "Retry", None)
-    success = response()
-    session.post.side_effect = [response(status), response(status), success]
-
-    assert net.http_post(URL, PAYLOAD) is success
-
-    assert session.post.call_count == 3
-    assert net.time.sleep.call_args_list == [call(1.0), call(2.0)]
-
-
-@pytest.mark.parametrize("status", [429, 500, 502, 503, 504])
-def test_post_preserves_terminal_http_error_after_manual_retries(net, session, monkeypatch, status):
-    monkeypatch.setattr(net, "Retry", None)
+    if not transport_retry_available:
+        monkeypatch.setattr(net, "Retry", None)
     failure = response(status)
-    session.post.return_value = failure
+    session.post.side_effect = [failure, response()]
 
     with pytest.raises(requests.HTTPError) as caught:
         net.http_post(URL, PAYLOAD)
 
     assert caught.value.response is failure
-    assert session.post.call_count == 3
-    assert net.time.sleep.call_args_list == [call(1.0), call(2.0)]
+    assert session.post.call_count == 1
+    net.time.sleep.assert_not_called()
 
 
-def test_post_handles_mixed_connection_and_http_failures_with_one_attempt_budget(net, session, monkeypatch):
-    monkeypatch.setattr(net, "Retry", None)
-    success = response()
-    session.post.side_effect = [requests.ConnectionError("connection reset"), response(503), success]
+def test_post_stops_on_http_error_after_safe_connect_timeout_retry(net, session):
+    failure = response(503)
+    session.post.side_effect = [requests.ConnectTimeout("connect timed out"), failure, response()]
 
-    assert net.http_post(URL, PAYLOAD) is success
+    with pytest.raises(requests.HTTPError) as caught:
+        net.http_post(URL, PAYLOAD)
 
-    assert session.post.call_count == 3
-    assert net.time.sleep.call_args_list == [call(1.0), call(2.0)]
+    assert caught.value.response is failure
+    assert session.post.call_count == 2
+    net.time.sleep.assert_called_once_with(1.0)
+
+
+def test_post_stops_on_ambiguous_failure_after_safe_connect_timeout_retry(net, session):
+    failure = requests.ConnectionError("connection reset after transmission")
+    session.post.side_effect = [requests.ConnectTimeout("connect timed out"), failure, response()]
+
+    with pytest.raises(net.NetworkError) as caught:
+        net.http_post(URL, PAYLOAD)
+
+    assert caught.value.__cause__ is failure
+    assert session.post.call_count == 2
+    net.time.sleep.assert_called_once_with(1.0)
 
 
 @pytest.mark.parametrize("method", ["get", "post"])
-def test_http_status_retry_is_left_to_the_configured_transport(net, session, method):
+def test_http_errors_are_not_retried(net, session, method):
     getattr(session, method).return_value = response(503)
 
     with pytest.raises(requests.HTTPError):
