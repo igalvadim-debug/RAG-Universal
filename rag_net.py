@@ -28,16 +28,16 @@ RETRY_STATUS = (429, 500, 502, 503, 504)
 
 
 def make_session() -> requests.Session:
-    """Session с пулом соединений и базовыми retry на уровне транспорта."""
+    """Session с пулом соединений; транспортные повторы ВЫКЛЮЧЕНЫ.
+
+    Единый бюджет повторов NET.max_retries применяется только одним слоем —
+    внешним циклом в http_post()/http_get() (соединения, таймауты и 429/5xx).
+    urllib3-Retry отключён (total=0), иначе его статус-повторы складывались бы
+    с повторами внешнего цикла (до max_retries^2 запросов на один вызов).
+    """
     s = requests.Session()
     if Retry is not None:
-        retry = Retry(
-            total=NET.max_retries,
-            backoff_factor=NET.backoff_base / 2.0,  # urllib3 ждёт half-factor'ом
-            status_forcelist=RETRY_STATUS,
-            allowed_methods=frozenset({"GET", "POST"}),
-            respect_retry_after_header=True,
-        )
+        retry = Retry(total=0)  # все повторы — во внешнем цикле http_post/http_get
         adapter = HTTPAdapter(max_retries=retry, pool_connections=8, pool_maxsize=16)
         s.mount("http://", adapter)
         s.mount("https://", adapter)
@@ -63,6 +63,10 @@ def http_post(url: str, json_payload: dict, headers: dict | None = None,
               timeout: float | None = None) -> requests.Response:
     """POST с повторными попытками (экспоненциальный backoff).
 
+    Единый слой повторов: транспортный urllib3-Retry отключён в make_session(),
+    поэтому соединения, таймауты и 429/5xx повторяются только этим циклом —
+    один общий бюджет NET.max_retries на запрос.
+
     Бросает NetworkError, если все попытки исчерпаны.
     """
     if timeout is None:
@@ -72,8 +76,8 @@ def http_post(url: str, json_payload: dict, headers: dict | None = None,
     for attempt in range(1, NET.max_retries + 1):
         try:
             resp = sess.post(url, json=json_payload, headers=headers, timeout=timeout)
-            # 429/5xx здесь повторяем вручную (для Session без urllib3-Retry)
-            if Retry is None and resp.status_code in RETRY_STATUS and attempt < NET.max_retries:
+            # 429/5xx повторяем здесь же (общий бюджет, тот же backoff)
+            if resp.status_code in RETRY_STATUS and attempt < NET.max_retries:
                 wait = NET.backoff_base * (2 ** (attempt - 1))
                 log.warning("HTTP %s от %s — попытка %d/%d, жду %.1f c",
                             resp.status_code, url, attempt, NET.max_retries, wait)

@@ -80,7 +80,10 @@ class NetConfig:
     cloud_timeout: float = float(_env("CLOUD_TIMEOUT", "120"))
     local_timeout: float = float(_env("LOCAL_TIMEOUT", "600"))
 
-    # Повторные попытки для сетевых запросов
+    # Повторные попытки для сетевых запросов.
+    # Единый бюджет повторов применяется только внешним циклом http_post/http_get
+    # (соединения, таймауты и 429/5xx); транспортный urllib3-Retry отключён
+    # (см. rag_net.make_session), чтобы слои повторов не перемножались.
     max_retries: int = int(_env("HTTP_RETRIES", "3"))
     backoff_base: float = float(_env("HTTP_BACKOFF_BASE", "1.0"))  # сек; 1→2→4
 
