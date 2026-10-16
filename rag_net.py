@@ -134,9 +134,18 @@ def http_get(url: str, timeout: float | None = None,
 
 
 def is_alive(url: str, timeout: float | None = None) -> bool:
-    """Быстрая проверка доступности (1 попытка, без ретраев — для health-опросов)."""
+    """Быстрая проверка доступности health-endpoint'а.
+
+    * РОВНО одна сетевая попытка: запрос идёт через временную Session БЕЗ
+      retry-adapter'а (не через get_session()) — health-опросы не должны
+      тратить бюджет повторов http_get().
+    * Здоровым считается только успешный ответ (r.ok = 2xx; редиректы
+      отслеживаются и оценивается финальный статус). 404 на /health или
+      /api/v1/info означает «эндпоинт не найден» — бэкенд нездоров.
+    """
     try:
-        r = get_session().get(url, timeout=timeout or NET.health_timeout)
-        return r.status_code < 500
+        with requests.Session() as sess:  # свежая сессия, adapter без Retry
+            r = sess.get(url, timeout=timeout or NET.health_timeout)
+            return r.ok  # только 2xx; 404 (и прочее >=400) — unhealthy
     except requests.RequestException:
         return False
