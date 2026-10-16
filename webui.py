@@ -444,6 +444,16 @@ def do_topics(seed: str, cloud_provider: str = "auto", collection_name: str = ""
 
 
 def do_update_db():
+    """Index new Markdown documents and return newline-joined update messages.
+
+    Run the updater twice if the first run and cache cleanup succeed.
+    Clear the search and health caches and unload the cached embedding model
+    after the first attempt, even if it fails. Clear the search cache again
+    after the second run succeeds.
+
+    Errors raised by the updater or cache cleanup propagate instead of
+    returning messages; a cleanup error can supersede an indexing error.
+    """
     lines = []
     def cb(msg):
         lines.append(msg)
