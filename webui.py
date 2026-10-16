@@ -444,9 +444,23 @@ def do_topics(seed: str, cloud_provider: str = "auto", collection_name: str = ""
 
 
 def do_update_db():
+    """Index new Markdown documents and return newline-joined update messages.
+
+    Run the updater twice if the first run and cache cleanup succeed.
+    Clear the search and health caches and unload the cached embedding model
+    after the first attempt, even if it fails. Clear the search cache again
+    after the second run succeeds.
+
+    Errors raised by the updater or cache cleanup propagate instead of
+    returning messages; a cleanup error can supersede an indexing error.
+    """
     lines = []
     def cb(msg):
         lines.append(msg)
+    try:
+        update_db.main(log_callback=cb)
+    finally:
+        rag_core.clear_cache()
     update_db.main(log_callback=cb)
     rag_core.clear_search_cache()  # база изменилась — кэш поиска неактуален
     return "\n".join(lines)
