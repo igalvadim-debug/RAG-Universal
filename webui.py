@@ -451,6 +451,8 @@ def do_update_db():
         update_db.main(log_callback=cb)
     finally:
         rag_core.clear_cache()
+    update_db.main(log_callback=cb)
+    rag_core.clear_search_cache()  # база изменилась — кэш поиска неактуален
     return "\n".join(lines)
 
 
