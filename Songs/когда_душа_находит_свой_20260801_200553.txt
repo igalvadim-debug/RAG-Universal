@@ -1,0 +1,35 @@
+# Song: когда_душа_находит_свой
+# Stil: 1. Afro-Pop with Zouk & Compa Love (French)
+# Sänger: женщина
+# Sprache: русский
+# Gespeichert: 2026-08-01T20:05:53
+============================================================
+
+=== GLOBAL PROMPT ===
+A music video in the style of: 1. Afro-Pop with Zouk & Compa Love (French).
+
+=== SONG PROMPT ===
+Genre/Style: 1. Afro-Pop with Zouk & Compa Love (French)
+An Afro-pop song with Zouk and Compa Love influences, in French. Danceable 105 BPM rhythm with a melodic, groovy bass, syncopated tropical percussion (drums and shakers) and warm synth pads. The vibe is sensual, romantic and sunny, evoking a summer night at the beach. Smooth, rhythmic male vocals with a catchy, repetitive chorus 'Foli foli'. Clean, modern studio production with a wide stereo image.
+Vocal style: a female singer
+
+=== SONGTEXT / LYRICS (2 Strophen + Refrain) ===
+[Strophe 1]
+Когда душа находит свой покой и свет,
+И в сердце рождается нежданный зов;
+Как будто солнце греет нас целый рассвет,
+Из самых сладких снов явился новый кров.
+
+[Refrain / Chorus]
+Наш тайный ритм – волна тепла внутри,
+Где тело шепчет о мечте любви порой. (Foli foli)
+
+[Strophe 2]
+Мы связаны силой и нежным движеньем в час,
+В нём слышен пульс тропических морских вод;
+Наш путь сливается с биением прибоя нас вечным,
+Где каждый вздох звучит мелодией огней.
+
+[Refrain / Chorus (final)]
+Наш тайный ритм – волна тепла внутри,
+Где тело шепчет о мечте любви порой.

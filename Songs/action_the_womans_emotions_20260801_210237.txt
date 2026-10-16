@@ -1,0 +1,45 @@
+# Song: action_the_womans_emotions
+# Stil: 1. Afro-Pop with Zouk & Compa Love (French)
+# Sänger: женщина
+# Sprache: русский
+# Gespeichert: 2026-08-01T21:02:37
+============================================================
+
+---GLOBAL_PROMPT_START---
+An LTX 2.3 Director prompt capturing a raw and desperate emotional climax, blending the intensity of Rock Metal with moments of stark existential dread; the mood is volatile—shifting from fiery frustration to deep internal questioning. Lighting should be high-contrast chiaroscuro, utilizing harsh practical lights against oppressive shadows (gritty realism). The color palette leans toward desaturated reds, blacks, and cold blues during introspective beats. Broad audio atmosphere must cycle between aggressive instrumentation bursts and moments of near silence punctuated by raw vocal delivery—a documentary feel capturing psychological collapse under pressure.
+---GLOBAL_PROMPT_END---
+
+---SEQUENCE 1_START---
+Director Node: Extreme close-up on the woman's eyes, which are wide with sudden realization; slow push-in motion focusing solely on her pupils as she begins to sing.
+Cinematographer Directive: Harsh side lighting (Rembrandt style) casting deep shadows across half of her face, emphasizing texture and strain in the skin; shallow depth of field isolates only her gaze against a dark background. Color temperature is cold blue/grey initially. Focus pulls subtly from iris detail outward during vocal emphasis.
+Audio Trigger: The music explodes with an urgent, driving electronic beat layered underneath heavy distorted guitar riffing (mid-tempo aggression). A high-pitched synthesizer line enters abruptly to signify panic; subtle sound of a distant computer beep under the mix builds tension.
+Dialogue Trigger: "the performer sings in perfect synchronization with the audible music track, lips matching the sung lyrics phonetically: 'Я задаюсь вопросом, есть ли смысл в моей жизни, без тебя я не могу найти ответ'" (The song features driving electronic drums and a soaring synth lead).
+---SEQUENCE 1_END---
+
+---SEQUENCE 2_START---
+Director Node: Wide shot capturing the performer in her environment—a sparsely furnished but high-tech room; slow tracking dolly moving backward, increasing distance between camera and subject. The woman begins to physically recoil from an unseen pressure point off-camera while singing.
+Cinematographer Directive: Lighting shifts slightly warmer (desaturated red tones) as she expresses frustration, using practical light sources within the set to create pockets of intense illumination against deep black negative space; medium depth of field allows environmental details—cables, monitors—to become visible but blurred by emotional chaos. Focus remains sharp on her body language rather than just facial features.
+Audio Trigger: The aggressive guitar riff becomes more distorted and cyclical (frustration motif). A heavy, driving bass line enters forcefully beneath the vocals; ambient sound of a low-frequency electronic hum underlies all music to suggest systemic pressure or anxiety attack building up around her.
+Dialogue Trigger: "the performer sings in perfect synchronization with the audible music track, lips matching the sung lyrics phonetically: 'Я задаюсь вопросом, есть ли смысл в моей жизни, без тебя я не могу найти ответ'" (The song maintains its urgent electronic beat structure).
+---SEQUENCE 2_END---
+
+---SEQUENCE 3_START---
+Director Node: Low-angle shot looking up at the performer from near floor level; rapid handheld camera movement simulating internal turmoil—a slight shake synchronized with vocal intensity. She throws her head back in a moment of raw, desperate outcry mid-lyric phrase.
+Cinematographer Directive: Lighting becomes extremely high contrast (spotlight effect), isolating her figure against an almost pure black void background to symbolize isolation; color palette leans heavily into deep crimson and shadow interplay—the 'boiling point' visual representation. Focus is razor sharp on the sweat/tears visible under harsh light, blurring everything else dramatically.
+Audio Trigger: The music briefly drops out of its electronic beat structure for a moment (a sudden rhythmic void), leaving only raw vocal texture amplified by heavy reverb and delay; this silence is immediately shattered by an aggressive burst from distorted bass guitar re-entering the track with maximum aggression/frustration impact. Environmental sound includes sharp, ragged intake of breath before singing resumes.
+Dialogue Trigger: "the performer sings in perfect synchronization with the audible music track, lips matching the sung lyrics phonetically: 'Я задаюсь вопросом, есть ли смысл в моей жизни, без тебя я не могу найти ответ'" (The song emphasizes raw vocal delivery over complex instrumentation).
+---SEQUENCE 3_END---
+
+---SEQUENCE 4_START---
+Director Node: Medium close-up shot; the camera executes a slow orbit around the performer as she transitions from explosive anger to profound existential questioning. Her movements become less frantic and more weighted, defeated by her internal conflict while singing softer lines of desperation.
+Cinematographer Directive: Lighting softens slightly but remains moody—a diffused practical light source (like an office lamp) illuminates one side of her face gently; the color palette shifts toward cold steel blues again, indicating intellectual/emotional exhaustion rather than pure rage. Depth of field increases subtly to reveal more context in the background room without losing focus on emotional nuance.
+Audio Trigger: The driving beat softens into a slower, heavier 4/4 pulse (more doom-like rhythm); the soaring synthesizer lead returns but is heavily modulated and melancholic instead of urgent; ambient sound incorporates faint static hiss layered under the music to represent mental noise or uncertainty creeping in.
+Dialogue Trigger: "the performer sings in perfect synchronization with the audible music track, lips matching the sung lyrics phonetically: 'Я задаюсь вопросом, есть ли смысл в моей жизни, без тебя я не могу найти ответ'" (The song slows its pace while maintaining harmonic complexity).
+---SEQUENCE 4_END---
+
+---SEQUENCE 5_START---
+Director Node: Extreme wide shot from a high crane angle looking down onto the performer; extremely slow vertical tilt downward as she finishes her final sustained note, sinking into stillness. The camera holds this position until the music fades to near silence.
+Cinematographer Directive: Lighting becomes almost entirely naturalistic/flat (like overcast daylight filtering through studio windows), removing all dramatic shadows—a visual representation of emotional depletion and stark reality; color palette is muted grey tones dominating the frame, symbolizing resignation or emptiness after peak intensity. Focus remains deep throughout as she settles into stillness within her space.
+Audio Trigger: All aggressive instrumentation cuts out abruptly on the final sung word (hard cut); only a lingering echo/reverb tail of the vocal line and an extremely faint, distant environmental sound—perhaps wind outside or very quiet machinery hum—remains for several seconds before complete silence takes over. No new musical layers are introduced; this is dissipation.
+Dialogue Trigger: "the performer sings in perfect synchronization with the audible music track, lips matching the sung lyrics phonetically: 'Я задаюсь вопросом, есть ли смысл в моей жизни, без тебя я не могу найти ответ'" (The final sustained note fades into silence).
+---SEQUENCE 5_END---

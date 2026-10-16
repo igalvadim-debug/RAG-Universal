@@ -1,0 +1,90 @@
+============================================================
+🎬 Tripple.json — промты и длительность видео
+============================================================
+
+📦 Нода «Tripple» (id: 5026)
+
+🟢 GLOBAL POSITIVE:
+Photorealistic live-action present-day supernatural crime film, mature villain lifestyle, realistic human anatomy and faces, premium practical production design, expensive tailored clothing, controlled theatrical smoke, grounded physical stunts, natural skin texture, cinematic contrast, subtle film grain, anamorphic lens character, deliberate camera movement, deep blacks, warm gold highlights, blood-red accents, no futuristic technology.
+
+CONTINUITY RULE: Keep every named subject, costume, creature, vehicle, and recurring location exactly identical to its locked description.
+
+ENVIRONMENT LOCK: The same narrow two-lane mountain road descending through dense pine forest, wet black asphalt, faded white center line, stone guard wall on the cliff edge, reflective road markers, light rain, mist in the valley and no streetlights except at sharp turns.
+
+Arman Vale, the same 34-year-old South Asian man in every shot: athletic broad-shouldered build, medium warm-brown skin, angular face, strong jaw, high cheekbones, deep-set dark brown eyes, short slicked-back jet-black hair with a clean side part, precisely trimmed short black beard, thin vertical scar through the outer edge of his left eyebrow. He wears the same tailored matte-black suit, open-collar ivory shirt, black leather boots, silver signet ring, and steel watch. Calm, controlled, intimidating expression.
+
+WARDROBE: Tailored matte-black single-breasted suit, open-collar ivory dress shirt, black leather boots, silver signet ring on right index finger, steel luxury watch on left wrist, no tie.
+
+PERFORMANCE: Calm, controlled, intimidating, rarely smiles, never appears hurried or frightened.
+
+POWER: Human telekinesis expressed as a powerful invisible pressure wave that moves dust, clothing, glass, people, and vehicles; no glowing technology and no superhero aura.
+
+VOICE: Low, measured male baritone with a restrained South Asian accent; speaks slowly and never shouts.
+
+Selene Voss, the same 29-year-old adult Mediterranean woman in every shot: tall athletic build, olive skin, oval face, defined cheekbones, hazel eyes, full lips, small beauty mark beneath her left eye, long glossy dark-brown wavy hair worn over her right shoulder. She wears the same deep-crimson satin evening dress with asymmetric one-shoulder neckline, black heels, and thin gold bracelet. Fearless, composed expression. Exact face, hair, skin tone and dress from the reference photo.
+
+WARDROBE: Deep-crimson satin evening dress with asymmetric neckline and subtle cleavage, black heels, thin gold bracelet, small gold hoop earring, no necklace.
+
+PERFORMANCE: Fearless, intelligent, seductive without being submissive, composed under pressure.
+
+POWER: Human fire manipulation generated naturally from her bare hands; realistic orange fire, heat distortion, smoke, and reflected light; no magical costume and no technology.
+
+VOICE: Confident adult female contralto, precise international English accent.
+
+CREATURE LOCK: Nyx, the same massive jet-black Persian cat in every shot: extremely large, long luxurious flowing fur, flat face, amber eyes, distinctive torn notch in the left ear. Realistic feline weight, anatomy, muscle movement, and environmental interaction; breathes realistic orange fire with heat distortion and smoke.
+
+CREATURE LOCK: Ember, the same large dark-red Persian cat in every shot: extremely large, long luxurious flowing fur, bronze eyes, one notched right ear, broad chest, realistic anatomy and movement; breathes realistic orange fire with heat distortion and smoke.
+
+VEHICLE LOCK: The same modern black two-door muscle car in every shot: long hood, wide stance, gloss-black paint, black five-spoke wheels, dark-red leather interior, narrow white LED headlights, no visible brand badge, no damage unless the shot explicitly requests it.
+
+VEHICLE LOCK: Three consistent rival vehicles: a dark-gray sports coupe, a deep-red performance sedan, and a black scrambler motorcycle, all present-day and realistic, with no futuristic modifications.
+
+All body movements should be smooth, fluid and physically believable, with natural posture, realistic weight distribution, convincing balance and accurate interaction with the surrounding environment. Hand movements, finger motion, eye movement, blinking, breathing and facial expressions should appear lifelike and synchronized with the character's actions. Motion should remain stable across every frame without flickering, jitter, ghosting, warping, morphing or identity drift.
+
+Camera work should resemble a professionally produced cinematic film, using smooth camera movement, stable composition, realistic lens behavior and natural perspective. Depth of field should only be used when it enhances realism, never as an artificial effect. Lighting should remain physically accurate and temporally stable, producing realistic shadows, reflections, global illumination and natural color reproduction with balanced exposure and high dynamic range.
+
+If the character is speaking, mouth movement must remain perfectly synchronized with the spoken dialogue. Lip movement, jaw motion, tongue placement and facial muscle animation should naturally follow speech while maintaining accurate pronunciation and believable articulation. Blinking, breathing, subtle head movement and emotional facial expressions should complement the dialogue naturally without exaggeration. Speech timing, facial animation and body language should remain fully synchronized throughout the performance.
+
+If audio is generated or synchronized, it should sound clean, natural and cinematic with clear dialogue, balanced volume, realistic ambience and immersive environmental sound. Footsteps, clothing movement, object interaction and environmental effects should remain synchronized with the visual animation. Every visual and audio element should contribute to a seamless, immersive and professional cinematic experience with maximum realism, consistency and production quality.
+
+🔵 SCENE PROMPT:
+
+SHOT ACTION (20 seconds total):
+[00:00–00:06] Tight interior two-shot. Arman drives, eyes on the wet road. Selene turns her head slowly toward him, intense focused gaze, rain streaking the side window.  
+Arman (low, measured): “They’re getting closer.”  
+Selene (calm, confident): “Let them. Nyx and Ember are already above.”
+
+[00:06–00:13] Low exterior tracking shot beside the rear wheel as the muscle car drifts around a wet hairpin. A rival coupe loses control and strikes the stone barrier. The two massive fire-spitting Persian cats (Nyx and Ember) leap and bound overhead across the road; falling embers light the wet asphalt but do not hit the hero car.
+
+[00:13–00:20] Return to interior. Selene glances at Arman with a small, sharp smile.  
+Selene: “Still think this was a quiet night?”  
+Arman keeps his eyes on the road, voice steady: “Quiet nights are overrated.”  
+Camera holds on their faces as the car accelerates into the mist.
+
+CAMERA: Begin with a tight interior profile of Arman and Selene, cut to a low exterior tracking shot beside the rear wheel, finish wide above the hairpin then return to the interior two-shot.
+
+
+   Сегменты сцены:
+   1. [00:00–00:06] Tight interior two-shot. Arman drives, eyes on the wet road. Selene turns her head slowly toward him, intense focused gaze, rain streaking the side window. Arman (low, measured): “They’re getting closer.” Selene (calm, confident): “Let them. Nyx and Ember are already above.”
+   2. [00:06–00:13] Low exterior tracking shot beside the rear wheel as the muscle car drifts around a wet hairpin. A rival coupe loses control and strikes the stone barrier. The two massive fire-spitting Persian cats (Nyx and Ember) leap and bound overhead across the road; falling embers light the wet asphalt but do not hit the hero car.
+   3. [00:13–00:20] Return to interior. Selene glances at Arman with a small, sharp smile. Selene: “Still think this was a quiet night?” Arman keeps his eyes on the road, voice steady: “Quiet nights are overrated.” Camera holds on their faces as the car accelerates into the mist. CAMERA: Begin with a tight interior profile of Arman and Selene, cut to a low exterior tracking shot beside the rear wheel, finish wide above the hairpin then return to the interior two-shot.
+
+🔴 GLOBAL NEGATIVE:
+AVOID: Avoid youthful-looking party guests, graphic violence, robots, cyborgs, mechanical armor, spaceships, futuristic cities, science-fiction weapons, aliens, cartoon style, anime, plastic skin, face swapping, changing facial features, changing hair, duplicate main characters, extra limbs, malformed hands, warped vehicles, floating props, random text, subtitles, logos and watermarks.
+
+Avoid any loss of visual quality, temporal consistency or realism throughout the entire video. Do not generate blurry, noisy, pixelated or low-resolution imagery. Avoid compression artifacts, oversharpening, excessive noise reduction, unrealistic lighting, incorrect exposure, inaccurate colors or unnatural shadows. Never generate watermarks, logos, subtitles, captions, text overlays, signatures or unwanted graphical elements.
+
+Do not change the character's identity, facial structure, hairstyle, clothing, body proportions or skin tone between frames. Avoid identity drift, facial distortion, morphing, flickering, temporal instability, frame jitter, ghosting, duplicated subjects, cloned body parts or inconsistent appearance. Human anatomy must remain realistic at all times. Avoid deformed faces, asymmetrical facial features, crossed eyes, malformed eyes, unrealistic expressions, incorrect teeth, unnatural tongue movement, broken jaw animation, bad hands, fused fingers, missing fingers, extra fingers, extra limbs, missing limbs, distorted body proportions, impossible poses or physically implausible movement.
+
+Avoid unrealistic body physics, sliding feet, floating objects, object clipping, unstable backgrounds, broken geometry, scene corruption, sudden camera jumps, unwanted scene cuts, abrupt transitions or frozen frames. Camera movement should never feel erratic, shaky or physically impossible.
+
+When the character is speaking, avoid inaccurate lip synchronization, delayed mouth movement, incorrect jaw motion, unnatural tongue animation, mismatched facial expressions, unsynchronized blinking or unrealistic breathing. Speech animation should never drift away from the dialogue.
+
+If audio is generated or synchronized, avoid distorted voices, robotic speech, clipping, crackling, background noise, audio dropouts, desynchronized dialogue, incorrect timing, inconsistent ambience or mismatched environmental sounds. Audio should never lag behind or lead the visual performance.
+
+Avoid anything that reduces immersion, realism, continuity or cinematic quality. Every frame and every moment should remain visually stable, physically believable, temporally coherent and fully consistent from beginning to end.
+
+🟠 SCENE NEGATIVE:
+(пусто)
+
+🎬 Длительность видео: 10 сек (240 кадров @ 24 fps) — нода Tripple (id 5026)

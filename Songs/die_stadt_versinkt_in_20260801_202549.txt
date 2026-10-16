@@ -1,0 +1,81 @@
+# Song: die_stadt_versinkt_in
+# Stil: 25. 1980s Thrash Metal & Heavy Metal (Bay Area Style)
+# Sänger: женщина
+# Sprache: немецкий
+# Gespeichert: 2026-08-01T20:25:49
+============================================================
+
+=== GLOBAL PROMPT ===
+A music video in the style of: 25. 1980s Thrash Metal & Heavy Metal (Bay Area Style).
+
+=== SONG PROMPT ===
+Genre/Style: 25. 1980s Thrash Metal & Heavy Metal (Bay Area Style)
+1980s Thrash Metal & Heavy Metal (Bay Area Style). A powerful, driving 140-190 BPM rhythm with precise, machine-like downpicking. Features crunchy, heavy, mid-scooped rhythm guitars, aggressive and fast-paced thrash riffs, and melodic, soaring guitar solos with wah-wah effects. Driving, organic drums with a heavy, thudding kick, punchy snare, and explosive crash cymbals. The bass guitar is distinct, gritty, and follows the rhythm guitar tightly. The vibe is epic, rebellious, dark, and energetic. Classic 80s/90s analog-style studio production with a warm, punchy mix and a wide, dynamic stereo image. Vocal style: grit, aggressive yet melodic male vocals, raspy Hetfield-style baritone shouts, and rhythmic 'Yeah!' exclamations.
+Vocal style: a female singer
+
+=== SONGTEXT / LYRICS (3 Strophen + Refrain) ===
+[Strophe 1]
+Die Stadt versinkt in grauem Staub,
+Ein alter Traum wird schnell verbraucht;
+Der Mülleimer brennt mit dem Rauch,
+Und jeder sucht den schnellen Brauch.
+
+[Refrain / Chorus]
+Ich und Du sind dicht im wilden Schein,
+Die Nachbarin ist schön inmitten der Reihen;
+Wir leben hier in diesem dunklen Rein,
+Wir lassen uns nicht mehr verlieren rein!
+
+[Strophe 2]
+Der Kanzler trinkt mit großem Glanze,
+Ein neues System wird verbraucht.
+Man sieht die Bullen kaum im Laufes**,** (gang)
+Nur Rauch und Schatten bauen drauf **im Baupfahl**. (*Adjusted for rhyme*) -> *Let's stick to the stronger Gang/Fang pair.*
+
+Der Kanzler trinkt in seinem großen Schein,
+Ein neues System wird bald verschienen;
+Man sieht die Bullen kaum im schnellen Lauf**,** (gang)
+Nur Rauch und Schatten bauen ihren dunklen Fang.
+
+[Refrain / Chorus]
+Ich und Du sind dicht im wilden Schein,
+Die Nachbarin ist schön inmitten der Reihen;
+Wir leben hier in diesem dunklen Rein,
+Wir lassen uns nicht mehr verlieren rein!
+
+[Strophe 3]
+Ein kleiner Kick macht alles ganz klar**,** (dar)
+Vergessen wird die Zeit so wunderbár. (*Using a slightly altered word for rhyme*) -> *Let's use the 'klar/bar'* pairing idea again, or stick to AABB with strong sound:
+
+Ein kleiner Kick bringt uns nun ins Licht, (A)
+Die alte Last ist schnell ent**schlicht**. (A - Stronger meaning change but better rhythm). Let’s keep it closer.
+
+Ein kleiner Kick macht alles ganz **klar**, (A)
+Vergessen wird die dunkle lange Jahr**(dar)**; (B-rhyme needed for the next line if using ABAB, or AABB fix):
+Das Leben ist ein lauter Ton hier im Raum, (C)
+Wo Wahrheit liegt in Schatten und Verrauch.
+
+*Final Strophe 3 choice enforcing AABB:*
+Ein kleiner Kick macht alles ganz **klar**, (A)
+Die alte Zeit wird nun ent**braut**. (*Sticking to original theme*) -> Ein kleines Zeichen gibt uns neuen Glanz, (A - Stronger rhyme potential). *Let's use the simplest strong pair.*
+
+Der schnelle Beat bringt Alles klar und rein, (A)
+Das lange Leben ist ein alter Schein. (A)
+Die Wahrheit klingt im lauten Ton hier drum**,** (B)
+Wo dunkler Schatten seinen Halt erbummt**.** (B - Stronger B rhyme). *This changes the meaning too much.*
+
+*Reverting to closest match with strong AABB:*
+Ein kleiner Kick macht alles ganz **klar**, (A)
+Die alten Zweifel sind nun schnell ver**braut**. (*Accepting slant/thematic fit*) -> Ein kleines Signal lässt uns neu entfalt'n, (Too complex). Let's use the original structure and enforce meter:
+
+[Strophe 3]
+Ein kleiner Kick macht alles ganz **klar**, (A)
+Die lange Zeit ist nun vorbei und wunder**bar**. (A - Stronger rhyme than 'Jahr')
+Das Leben klingt ein lauter Ton hier im Raum, (B)
+Wo Wahrheit liegt in dunklem Schattenbaum. (B - Better B-rhyme).
+
+[Refrain / Chorus]
+Ich und Du sind dicht im wilden Schein,
+Die Nachbarin ist schön inmitten der Reihen;
+Wir leben hier in diesem dunklen Rein,
+Wir lassen uns nicht mehr verlieren rein!

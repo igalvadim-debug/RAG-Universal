@@ -1,0 +1,40 @@
+# Song: как_будто_мир_сияет
+# Stil: 1. Afro-Pop mit Zouk & Compa Love (Französisch)
+# Sänger: женщина
+# Sprache: русский
+# Gespeichert: 2026-08-01T20:00:19
+============================================================
+
+=== GLOBAL PROMPT ===
+1. Afro-Pop mit Zouk & Compa Love (Französisch)
+Uma música Afro-pop com influências de Zouk e Compa Love, em francês. Ritmo dançante de 105 BPM com um baixo melódico e groovado, percussão tropical sincopada (tambores e shakers) e pads de sintetizador quentes. A vibe é sensual, romântica e ensolarada, evocando uma noite de verão na praia. Vocais masculinos suaves e rítmicos, com um refrão cativante e repetitivo 'Foli foli'. Produção de estúdio limpa, moderna e com imagem estéreo ampla.
+
+=== SONG PROMPT ===
+Genre/Style: 1. Afro-Pop mit Zouk & Compa Love (Französisch)
+Uma música Afro-pop com influências de Zouk e Compa Love, em francês. Ritmo dançante de 105 BPM com um baixo melódico e groovado, percussão tropical sincopada (tambores e shakers) e pads de sintetizador quentes. A vibe é sensual, romântica e ensolarada, evocando uma noite de verão na praia. Vocais masculinos suaves e rítmicos, com um refrão cativante e repetitivo 'Foli foli'. Produção de estúdio limpa, moderna e com imagem estéreo ampla.
+Vocal style: a female singer
+
+=== SONGTEXT / LYRICS (2 Strophen + Refrain) ===
+[Strophe 1]
+Как будто мир сияет нежным светом,
+И каждый миг приносит нам ответ.
+Мы ждали сказки и волшебный плен,
+Где нет тревоги в этот светлый день взамен.
+
+[Refrain / Chorus]
+Наш тайный ритм – волна тепла внутри,
+Где тело шепчет о мечте любви.
+Нежданный дар и сладкий этот зов,
+Открылся путь из нежных наших снов.
+
+[Strophe 2]
+Но вот движенье там, где природа ждет,
+И искра вспыхнет в сердце и поёт.
+Ты чувствуешь ток жилами тихий бег,
+Где истина рождается из веков.
+
+[Refrain / Chorus (final)]
+Наш тайный ритм – волна тепла внутри,
+Где тело шепчет о мечте любви.
+Нежданный дар и сладкий этот зов,
+Открылся путь из нежных наших снов.

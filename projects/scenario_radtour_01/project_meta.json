@@ -1,0 +1,15 @@
+{
+  "created": "2026-06-09T21:24:57.328536",
+  "question": "radtour",
+  "narrator": "music: latino pop",
+  "n_sequences": 5,
+  "flux_style": "vibrant sunny photography, golden hour light, tropical colors, warm saturated tones, photorealistic, festive atmosphere",
+  "cloud_provider": "auto",
+  "timeline_pcts": [
+    "0%",
+    "25%",
+    "50%",
+    "75%",
+    "100%"
+  ]
+}

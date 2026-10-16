@@ -1,0 +1,42 @@
+# Song: der_kanzler_trinkt_tief
+# Stil: 25. 1980s Thrash Metal & Heavy Metal (Bay Area Style)
+# Sänger: женщина
+# Sprache: немецкий
+# Gespeichert: 2026-08-01T20:43:37
+============================================================
+
+=== GLOBAL PROMPT ===
+A music video in the style of: 25. 1980s Thrash Metal & Heavy Metal (Bay Area Style).
+
+=== SONG PROMPT ===
+Genre/Style: 25. 1980s Thrash Metal & Heavy Metal (Bay Area Style)
+1980s Thrash Metal & Heavy Metal (Bay Area Style). A powerful, driving 140-190 BPM rhythm with precise, machine-like downpicking. Features crunchy, heavy, mid-scooped rhythm guitars, aggressive and fast-paced thrash riffs, and melodic, soaring guitar solos with wah-wah effects. Driving, organic drums with a heavy, thudding kick, punchy snare, and explosive crash cymbals. The bass guitar is distinct, gritty, and follows the rhythm guitar tightly. The vibe is epic, rebellious, dark, and energetic. Classic 80s/90s analog-style studio production with a warm, punchy mix and a wide, dynamic stereo image. Vocal style: grit, aggressive yet melodic male vocals, raspy Hetfield-style baritone shouts, and rhythmic 'Yeah!' exclamations.
+Vocal style: a female singer
+
+=== SONGTEXT / LYRICS (3 Strophen + Refrain) ===
+[Strophe 1]
+Der Kanzler trinkt tief und schwer so weit, .
+Die Berater sprechen nur von Zeit.
+Das Land versinkt in Dreck ganz grau nun hier , .
+Sha la la lu la die Mülltonen sind mir sehr nah wir.
+
+[Refrain / Chorus]
+Ich bin besoffen du bist besoffen heut', Die Nachbarin ist auch dicht und weit! Das Licht an der Tankstelle brennt so hell, Wir lassen uns nicht im Stich in dieser Welt.
+
+[Strophe 2]
+Die Bullen trauen sich kaum mehr hier hinein , .
+Jeder raucht Crack mit einem neuen Schein.
+Sha la la lu la diese dunkle Zeit nun geht vorbei, .
+Alles ist vollgepisst von Ewigkeit und sei frei.
+
+[Refrain / Chorus]
+Ich bin besoffen du bist besoffen heut', Die Nachbarin ist auch dicht und weit! Das Licht an der Tankstelle brennt so hell, Wir lassen uns nicht im Stich in dieser Welt.
+
+[Strophe 3]
+Die Politik macht nur viel Gelaber schön , .
+Ein Kreis von Trauer hält das Herz ganz klein nunmehr sehen.
+Der Boden bröckelt unter dem Schein des Lichts hier klar und rein, .
+Wir suchen Halt an diesen dunklen Pflichten im Regenwein.
+
+[Refrain / Chorus final]
+Ich bin besoffen du bist besoffen heut', Die Nachbarin ist auch dicht und weit! Das Licht an der Tankstelle brennt so hell, Wir lassen uns nicht im Stich in dieser Welt.

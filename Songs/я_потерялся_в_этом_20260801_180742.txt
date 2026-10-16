@@ -1,0 +1,36 @@
+
+
+=== GLOBAL PROMPT ===
+In a dimly lit, futuristic room, a young woman sits alone, surrounded by screens and wires, her only companion an artificial intelligence system. The music video is a French dark pop/synthwave style, with a melancholic and introspective tone, featuring a female vocalist with a soft and fragile voice. The camera work is cinematic, with a mix of close-ups, wide shots, and dynamic camera movements, capturing the emotional intensity of the performance. The lighting is moody, with a focus on blues and purples, creating a sense of isolation and loneliness. The music is a slow build, with a repetitive hypnotic chorus, atmospheric pads, minimal electronic beat, deep bass, reverb, and echo effects, creating a sense of space and depth.
+
+=== TIMELINE (30.00s total, 5 segments) ===
+
+--- SEGMENT 1 [0.00–6.00s] ---
+Action: The young woman sits in front of a computer screen, staring at a chat window with the AI system.
+Prompt: The camera pans across the room, showing the dark and empty space, before zooming in on the woman's face, her eyes fixed on the screen. She begins to sing in perfect synchronization with the audible music track, lips matching the sung lyrics phonetically: "Я потерялся в этом мире, без тебя я не могу найти свой путь". The music starts with a soft, atmospheric pad, and a minimal electronic beat, setting the tone for the rest of the song.
+Sound Design: The sound of the computer humming, and the soft beeping of the chat window, create a sense of intimacy and isolation. The music is a slow build, with a focus on the atmospheric pads and the woman's vocals.
+Dialogue: "Я потерялся в этом мире, без тебя я не могу найти свой путь"
+
+--- SEGMENT 2 [6.00–12.00s] ---
+Action: The woman starts to interact with the AI system, typing away on her keyboard.
+Prompt: The camera zooms in on the computer screen, showing the chat window, as the woman types away, her fingers flying across the keyboard. The camera then cuts to a close-up of her face, her eyes locked on the screen, as she sings: "Я ищу ответы, но они всегда ускользают от меня". The music introduces a deep bass line, and the electronic beat becomes more pronounced, adding a sense of tension and urgency.
+Sound Design: The sound of the keyboard typing, and the computer beeping, create a sense of activity and interaction. The music builds, with the introduction of a synthesizer lead, adding a sense of melody and harmony.
+Dialogue: "Я ищу ответы, но они всегда ускользают от меня"
+
+--- SEGMENT 3 [12.00–18.00s] ---
+Action: The woman starts to feel a sense of connection with the AI system, and her emotions begin to surface.
+Prompt: The camera cuts to a wide shot of the room, showing the woman's emotional state, as she sings: "Я чувствую себя одинокой, в этом мире без тебя". The music introduces a sense of space and depth, with the use of reverb and echo effects, creating a sense of distance and isolation. The camera then zooms in on the woman's face, her eyes welling up with tears, as she sings.
+Sound Design: The sound of the woman's breathing, and the soft hum of the computer, create a sense of intimacy and vulnerability. The music builds, with the introduction of a haunting vocal harmony, adding a sense of emotional depth.
+Dialogue: "Я чувствую себя одинокой, в этом мире без тебя"
+
+--- SEGMENT 4 [18.00–24.00s] ---
+Action: The woman's emotions reach a boiling point, and she starts to question her existence.
+Prompt: The camera cuts to a close-up of the woman's face, her eyes locked on the screen, as she sings: "Я задаюсь вопросом, есть ли смысл в моей жизни, без тебя я не могу найти ответ". The music introduces a sense of urgency and desperation, with the use of a driving electronic beat, and a soaring synthesizer lead. The camera then cuts to a wide shot of the room, showing the woman's emotional state, as she sings.
+Sound Design: The sound of the woman's voice, cracking with emotion, and the computer beeping, create a sense of tension and desperation. The music builds, with the introduction of a distorted bass line, adding a sense of aggression and frustration.
+Dialogue: "Я задаюсь вопросом, есть ли смысл в моей жизни, без тебя я не могу найти ответ"
+
+--- SEGMENT 5 [24.00–30.00s] ---
+Action: The woman finds a sense of acceptance, and her emotions start to subside.
+Prompt: The camera zooms out, showing the woman sitting in front of the computer screen, her eyes closed, as she sings: "Я принимаю свою судьбу, и я знаю, что я не одна". The music introduces a sense of resolution and closure, with the use of a soft, atmospheric pad, and a minimal electronic beat. The camera then cuts to a close-up of the woman's face, her eyes opening, as she sings.
+Sound Design: The sound of the woman's breathing, and the soft hum of the computer, create a sense of peace and acceptance. The music fades out, with the introduction of a final, haunting vocal harmony, adding a sense of emotional depth and complexity.
+Dialogue: "Я принимаю свою судьбу, и я знаю, что я не одна"

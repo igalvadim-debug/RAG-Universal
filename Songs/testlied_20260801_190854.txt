@@ -1,0 +1,17 @@
+# Song: testlied
+# Stil: 22. Classic Rock (70s Arena Rock)
+# Sänger: женщина
+# Sprache: немецкий
+# Gespeichert: 2026-08-01T19:08:54
+============================================================
+
+=== GLOBAL PROMPT ===
+Atmo
+
+=== SONG PROMPT ===
+Title: Testlied
+
+=== SONGTEXT ===
+[Strophe 1]
+Zeile eins
+Zeile zwei
