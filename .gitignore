@@ -1,0 +1,4 @@
+*.log
+*.bak
+*.bak2
+.env

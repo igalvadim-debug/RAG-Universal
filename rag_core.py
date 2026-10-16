@@ -3,15 +3,22 @@ rag_core.py — ядро RAG: эмбеддинги, поиск по Chroma, ге
 Все пути относительные от папки скрипта.
 """
 
+import json
+import logging
 import os
 import re
 import subprocess
 import time
-import json
-import requests
 from pathlib import Path
-from sentence_transformers import SentenceTransformer
+
 import chromadb
+import requests
+from sentence_transformers import SentenceTransformer
+
+from rag_config import BASE_DIR, CLOUD_PROVIDERS, KEY_ALIASES, NET, PATHS, RAG
+from rag_net import NetworkError, http_post, is_alive
+
+log = logging.getLogger("rag.core")
 
 # Последние VL-описания @ref1/@ref2/@ref3 (CS LTX Director) — webui.py берёт их при экспорте
 _last_ref_descriptions = []
@@ -19,14 +26,14 @@ _last_ref_descriptions = []
 # ──────────────────────────────────────────────
 # ПУТИ (все относительные от папки этого файла)
 # ──────────────────────────────────────────────
-BASE_DIR        = Path(__file__).parent
-MODEL_DIR       = BASE_DIR / "model"
-CHROMA_DIR      = Path(os.environ.get("RAG_DB", str(BASE_DIR / "chroma_zaebalo")))
-BOOKRAG_DIR     = BASE_DIR / "bookrag"   # вторая база Chroma (книги) — по выбору в UI
-DOCS_DIR        = BASE_DIR / "docs"
-ENV_FILE        = BASE_DIR / ".env"
-STYLEMUSIC_PATH = BASE_DIR / "stylemusic.json"
-SETTINGS_PATH   = BASE_DIR / "settings.txt"
+BASE_DIR        = PATHS.projects_dir.parent   # совпадает с rag_config.BASE_DIR
+MODEL_DIR       = PATHS.model_dir
+CHROMA_DIR      = PATHS.chroma_dir
+BOOKRAG_DIR     = PATHS.bookrag_dir   # вторая база Chroma (книги) — по выбору в UI
+DOCS_DIR        = PATHS.docs_dir
+ENV_FILE        = PATHS.env_file
+STYLEMUSIC_PATH = PATHS.stylemusic_path
+SETTINGS_PATH   = PATHS.settings_path
 
 # ──────────────────────────────────────────────
 # ЧТЕНИЕ .env (портативно— без системных переменных)
@@ -44,6 +51,15 @@ def load_env() -> dict:
         k, _, v = line.partition("=")
         env[k.strip()] = v.strip()
     return env
+
+
+def has_api_key(env: dict, prov_name: str) -> bool:
+    """Есть ли у провайдера заполненный ключ (с учётом старых алиасов имён)."""
+    key_var = CLOUD_PROVIDERS[prov_name]["key_var"]
+    for k in [key_var] + KEY_ALIASES.get(key_var, []):
+        if env.get(k, "").strip():
+            return True
+    return False
 
 
 def save_env(updates: dict):
@@ -159,36 +175,26 @@ def _split_notes(text: str) -> tuple[str, str]:
 # DEBUG-LOG — zentrale Logdatei für Diagnose
 # ──────────────────────────────────────────────
 
-DEBUG_LOG = BASE_DIR / "webui_debug.log"
+DEBUG_LOG = PATHS.debug_log
 
 
 def _debug_log(msg: str):
     """Schreibt eine Zeile mit Zeitstempel in webui_debug.log (und Konsole)."""
+    line = f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {msg}"
     try:
-        line = f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {msg}"
         with open(DEBUG_LOG, "a", encoding="utf-8") as f:
             f.write(line + "\n")
-        print(line)
-    except Exception:
-        pass
+    except OSError as e:
+        log.warning("Debug-Log nicht schreibbar (%s): %s", DEBUG_LOG, e)
+    print(line)
 
 
 # ──────────────────────────────────────────────
 # ОБЛАЧНЫЕ ПРОВАЙДЕРЫ
 # ──────────────────────────────────────────────
 
-# Конфигурация провайдеров: url, модель по умолчанию, ключ из .env
-CLOUD_PROVIDERS = {
-    "OpenAI":      {"url": "https://api.openai.com/v1/chat/completions",             "model": "gpt-4o-mini",                  "key_var": "OPENAI_API_KEY"},
-    "Groq":        {"url": "https://api.groq.com/openai/v1/chat/completions",        "model": "llama-3.3-70b-versatile",       "key_var": "GROQ_API_KEY"},
-    "DeepSeek":    {"url": "https://api.deepseek.com/chat/completions",               "model": "deepseek-chat",                "key_var": "DEEPSEEK_API_KEY"},
-    "NVIDIA_NIM":  {"url": "https://integrate.api.nvidia.com/v1/chat/completions",   "model": "meta/llama-3.3-70b-instruct",   "key_var": "NVIDIA_NIM_API_KEY"},
-    "OpenRouter":  {"url": "https://openrouter.ai/api/v1/chat/completions",           "model": "openai/gpt-4o-mini",           "key_var": "OPENROUTER_API_KEY"},
-    "Google":      {"url": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", "model": "gemini-2.0-flash", "key_var": "GOOGLE_API_KEY"},
-    "Mistral":     {"url": "https://api.mistral.ai/v1/chat/completions", "model": "mistral-large-latest", "key_var": "MISTRAL_API_KEY"},
-    "Odirouter":   {"url": "https://api.odirouter.ai/v1/chat/completions", "model": "grok-4.5", "key_var": "ODIROUTER_API_KEY"},
-    "Agnes":       {"url": "https://apihub.agnes-ai.com/v1/chat/completions", "model": "agnes-2.5-flash", "key_var": "agnes_API_KEY"},
-}
+# Конфигурация провайдеров (url, модель, ключ из .env) — единый источник: rag_config.CLOUD_PROVIDERS
+CLOUD_PROVIDERS = CLOUD_PROVIDERS  # noqa: PLW0127 — реэкспорт для совместимости (webui.py и др.)
 
 # llama-server бинарник — ищем в известных местах (порядок важен).
 # ВНИМАНИЕ: Unsloth-сервер (D:\Unsloth\C-claude\LlamaCpp.bat) пользователь запускает САМ —
@@ -202,26 +208,21 @@ LLAMA_CANDIDATES = [
     BASE_DIR / "llama" / "llama-server.exe",
 ]
 
-KOBOLD_URL  = "http://127.0.0.1:5001/v1/chat/completions"
-LLAMA_URL   = "http://127.0.0.1:8080/v1/chat/completions"
+KOBOLD_URL  = NET.kobold_url
+LLAMA_URL   = NET.llama_url
 
-# Пары (health-URL, chat-URL) в порядке приоритета:
+# Пары (health-URL, chat-URL) в порядке приоритета — из rag_config.NET:
 #   1) локальный llama-server (8080) — автозапуск из WebUI,
-#   2) локальный MTP-сервер (8510) — gemma-4-E4B + MTP-draft, запускается лаунчером вручную,
-#   3) удалённый llama-server на другом ПК (192.168.181.93:7860).
-LLAMA_ENDPOINTS = [
-    ("http://127.0.0.1:8080/health",      "http://127.0.0.1:8080/v1/chat/completions"),
-    ("http://127.0.0.1:8510/health",      "http://127.0.0.1:8510/v1/chat/completions"),
-    ("http://192.168.181.93:7860/health", "http://192.168.181.93:7860/v1/chat/completions"),
-]
-LLAMA_HEALTH_URLS = [h for h, _ in LLAMA_ENDPOINTS]
+#   2) локальный MTP-сервер (8510),
+#   3) удалённый llama-server на другом ПК.
+LLAMA_ENDPOINTS    = NET.llama_endpoints
+LLAMA_HEALTH_URLS  = [h for h, _ in LLAMA_ENDPOINTS]
 
-# Таймаут ПРОВЕРКИ ДОСТУПНОСТИ (/health) — 5 сек. Сама генерация всегда 600 сек:
-# если сервер жив, но долго думает — ждём, не обрываем.
-LLAMA_HEALTH_TIMEOUT    = 5
+# Таймаут ПРОВЕРКИ ДОСТУПНОСТИ (/health). Сама генерация всегда LOCAL_TIMEOUT сек.
+LLAMA_HEALTH_TIMEOUT = NET.health_timeout
 
-TOP_K       = 7
-COLLECTION  = os.environ.get("RAG_COLLECTION", "zaebalo")
+TOP_K       = RAG.top_k
+COLLECTION  = RAG.collection
 
 # ──────────────────────────────────────────────
 # ГЛОБАЛЬНЫЕ ОБЪЕКТЫ (ленивая загрузка)
@@ -266,7 +267,8 @@ def list_collections() -> list[str]:
             client = chromadb.PersistentClient(path=str(db_path))
             for c in client.list_collections():
                 result.append(f"{db_label}:{c.name}")
-        except Exception:
+        except Exception as e:
+            log.warning("ChromaDB %s (%s) недоступна: %s", db_label, db_path, e)
             continue
     return result
 
@@ -302,47 +304,35 @@ def find_llama_server() -> Path | None:
 
 
 def kobold_alive() -> bool:
-    """Проверяет доступность KoboldCpp на порту 5001."""
-    try:
-        r = requests.get("http://127.0.0.1:5001/api/v1/info", timeout=2)
-        return r.status_code < 500
-    except Exception:
-        return False
+    """Проверяет доступность KoboldCpp (порт берётся из rag_config.NET)."""
+    return is_alive(NET.kobold_info_url, timeout=2)
 
 
 def llama_alive() -> bool:
-    """Проверяет доступность llama-server: локально (8080) или удалённый ПК (192.168.181.93:7860)."""
+    """Проверяет доступность llama-server: локально, MTP или удалённый ПК."""
     for h in LLAMA_HEALTH_URLS:
-        try:
-            r = requests.get(h, timeout=LLAMA_HEALTH_TIMEOUT)
-            if r.status_code == 200:
-                return True
-        except Exception:
-            continue
+        if is_alive(h):
+            return True
     return False
 
 
 def get_llama_url() -> str:
-    """Возвращает URL живого llama-сервера: 8080 → MTP 8510 → удалённый 192.168.181.93:7860."""
+    """Возвращает URL живого llama-сервера: основной порт → MTP → удалённый."""
     for h, url in LLAMA_ENDPOINTS:
-        try:
-            r = requests.get(h, timeout=LLAMA_HEALTH_TIMEOUT)
-            if r.status_code == 200:
-                return url
-        except Exception:
-            continue
+        if is_alive(h):
+            return url
     return LLAMA_URL
 
 
 def get_llama_port() -> int | None:
     """Порт живого llama-сервера (для статуса в UI) или None."""
     for h, _ in LLAMA_ENDPOINTS:
-        try:
-            r = requests.get(h, timeout=LLAMA_HEALTH_TIMEOUT)
-            if r.status_code == 200:
+        if is_alive(h):
+            try:
                 return int(h.split(":")[2].split("/")[0])
-        except Exception:
-            continue
+            except (IndexError, ValueError) as e:
+                log.warning("Не удалось распарсить порт из %s: %s", h, e)
+                continue
     return None
 
 
@@ -505,7 +495,8 @@ def _try_cloud_provider(prov_name: str, messages: list[dict], max_tokens: int, t
     """Пробует один облачный API. Возвращает (ответ, None) или (None, ошибка)."""
     cfg = CLOUD_PROVIDERS[prov_name]
     env = load_env()
-    api_key = env.get(cfg["key_var"], "")
+    key_names = [cfg["key_var"]] + KEY_ALIASES.get(cfg["key_var"], [])
+    api_key = next((env[k].strip() for k in key_names if env.get(k, "").strip()), "")
     if not api_key:
         return None, f"[{prov_name}] API ключ не найден в .env"
     headers = {
@@ -519,21 +510,20 @@ def _try_cloud_provider(prov_name: str, messages: list[dict], max_tokens: int, t
         "max_tokens":  max_tokens,
     }
     try:
-        # 120 сек: генерация до 6000 токенов (DeepSeek/Groq/Google) занимает 30-120 сек,
-        # таймаут 10 сек гарантированно отрубал ответ → «не ответил».
-        resp = requests.post(cfg["url"], json=payload, headers=headers, timeout=120)
-        resp.raise_for_status()
+        # Сессия с переиспользованием соединений + retry/backoff (rag_net.http_post).
+        resp = http_post(cfg["url"], payload, headers=headers, timeout=NET.cloud_timeout)
         return resp.json()["choices"][0]["message"]["content"], None
-    except requests.exceptions.Timeout:
-        return None, f"[{prov_name}] таймаут (120 сек)"
-    except requests.exceptions.ConnectionError:
-        return None, f"[{prov_name}] нет соединения"
     except requests.exceptions.HTTPError as e:
-        code = e.response.status_code if e.response else 0
+        code = e.response.status_code if e.response is not None else 0
         if code in (429, 503):
             return None, f"[{prov_name}] лимит запросов (HTTP {code})"
         return None, f"[{prov_name}] HTTP {code}: {e}"
+    except NetworkError:
+        return None, f"[{prov_name}] нет соединения (повторено {NET.max_retries} раз)"
+    except (KeyError, ValueError) as e:
+        return None, f"[{prov_name}] неожиданный формат ответа: {e}"
     except Exception as e:
+        log.exception("Неизвестная ошибка провайдера %s", prov_name)
         return None, f"[{prov_name}] {e}"
 
 
@@ -634,8 +624,7 @@ def call_llm(messages: list[dict], max_tokens: int = 6000, temperature: float = 
     if settings.get("disable_thinking"):
         payload["think"] = False
     try:
-        resp = requests.post(url, json=payload, timeout=600)
-        resp.raise_for_status()
+        resp = http_post(url, payload, timeout=NET.local_timeout)
         content = resp.json()["choices"][0]["message"]["content"]
         # Leere Antwort (Thinking hat max_tokens aufgebraucht) → Retry ohne Thinking, doppelter Budget
         if content is None or not content.strip():
@@ -643,23 +632,23 @@ def call_llm(messages: list[dict], max_tokens: int = 6000, temperature: float = 
             _p2 = dict(payload)
             _p2["think"] = False
             _p2["max_tokens"] = max_tokens * 2
-            _r2 = requests.post(url, json=_p2, timeout=600)
-            _r2.raise_for_status()
+            _r2 = http_post(url, _p2, timeout=NET.local_timeout)
             content = _r2.json()["choices"][0]["message"]["content"]
         return content
-    except requests.exceptions.ConnectionError:
-        _debug_log(f"❌ Server nicht erreichbar: {url}")
+    except requests.exceptions.HTTPError as e:
+        _debug_log(f"❌ HTTP-Fehler von {url}: {e}")
         if provider == "auto":
             return _try_cloud_chain(messages, max_tokens, temperature,
-                                    reason=f"Локальный сервер {url} недоступен")
-        return "[Ошибка] Сервер недоступен."
-    except requests.exceptions.Timeout:
-        _debug_log(f"❌ Timeout: {url}")
+                                    reason=f"Локальный сервер {url}: HTTP ошибка")
+        return f"[Ошибка] HTTP {e.response.status_code if e.response is not None else ''}"
+    except NetworkError:
+        _debug_log(f"❌ Server nicht erreichbar/Timeout: {url}")
         if provider == "auto":
             return _try_cloud_chain(messages, max_tokens, temperature,
-                                    reason=f"Локальный сервер {url} не ответил (таймаут)")
-        return "[Ошибка] Таймаут запроса."
+                                    reason=f"Локальный сервер {url} недоступен (повторено {NET.max_retries} раз)")
+        return "[Ошибка] Сервер недоступен или таймаут запроса."
     except Exception as e:
+        log.exception("LLM-Fehler (%s)", url)
         _debug_log(f"❌ LLM-Fehler: {e}")
         if provider == "auto":
             return _try_cloud_chain(messages, max_tokens, temperature,
