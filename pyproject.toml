@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rag-video-prompts"
+version = "1.0.0"
+description = "RAG-System für KI-Videoproduktion: Szenario → FLUX → LTX → ComfyUI"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+dependencies = [
+    # Core RAG
+    "sentence-transformers==5.5.1",
+    "chromadb==1.5.9",
+    "transformers==4.57.6",
+    # Web UI
+    "gradio==5.50.0",
+    # Utilities
+    "requests==2.34.2",
+    "python-dotenv==1.2.2",
+    "huggingface_hub==0.36.2",
+]
+
+[project.optional-dependencies]
+# Torch mit CUDA 12.8 separat installieren:
+#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+cuda = []            # Platzhalter: torch kommt über den CUDA-Index (install_packages.bat)
+html = ["beautifulsoup4==4.13.4"]                 # extract_to_md.py / HTML-Dumps
+vision = ["pillow"]                                # Bildverarbeitung (Florence/Qwen-VL)
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+    "mypy>=1.10",
+]
+
+[tool.setuptools]
+py-modules = [
+    "rag_core", "webui", "rag_index", "rag_query", "update_db", "stats",
+    "tokens", "extract_to_md", "project_manager", "image_captioning",
+    "zimage_generate", "rag_config", "rag_net",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+exclude = ["*backup*", "*.bak*", "projects", "model", "florence-2-large", "chroma_zaebalo", "bookrag"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]   # I = import sorting, B = bugbear, UP = pyupgrade
+ignore = ["E501"]                       # lange Zeilen (Prompts) tolerieren
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+# Schrittweise Einführung: neue Module streng, Legacy locker
+[[tool.mypy.overrides]]
+module = ["rag_core", "webui"]
+disable_error_code = ["no-untyped-def"]
