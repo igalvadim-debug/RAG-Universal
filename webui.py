@@ -447,7 +447,10 @@ def do_update_db():
     lines = []
     def cb(msg):
         lines.append(msg)
-    update_db.main(log_callback=cb)
+    try:
+        update_db.main(log_callback=cb)
+    finally:
+        rag_core.clear_cache()
     return "\n".join(lines)
 
 
