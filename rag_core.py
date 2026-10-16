@@ -3,16 +3,23 @@ rag_core.py — ядро RAG: эмбеддинги, поиск по Chroma, ге
 Все пути относительные от папки скрипта.
 """
 
+import json
+import logging
 import os
 import re
 import subprocess
 import threading
 import time
-import json
-import requests
 from pathlib import Path
-from sentence_transformers import SentenceTransformer
+
 import chromadb
+import requests
+from sentence_transformers import SentenceTransformer
+
+from rag_config import BASE_DIR, CLOUD_PROVIDERS, KEY_ALIASES, NET, PATHS, RAG
+from rag_net import NetworkError, http_post, is_alive
+
+log = logging.getLogger("rag.core")
 
 # Последние VL-описания @ref1/@ref2/@ref3 (CS LTX Director) — webui.py берёт их при экспорте
 _last_ref_descriptions = []
@@ -20,14 +27,14 @@ _last_ref_descriptions = []
 # ──────────────────────────────────────────────
 # ПУТИ (все относительные от папки этого файла)
 # ──────────────────────────────────────────────
-BASE_DIR        = Path(__file__).parent
-MODEL_DIR       = BASE_DIR / "model"
-CHROMA_DIR      = Path(os.environ.get("RAG_DB", str(BASE_DIR / "chroma_zaebalo")))
-BOOKRAG_DIR     = BASE_DIR / "bookrag"   # вторая база Chroma (книги) — по выбору в UI
-DOCS_DIR        = BASE_DIR / "docs"
-ENV_FILE        = BASE_DIR / ".env"
-STYLEMUSIC_PATH = BASE_DIR / "stylemusic.json"
-SETTINGS_PATH   = BASE_DIR / "settings.txt"
+BASE_DIR        = PATHS.projects_dir.parent   # совпадает с rag_config.BASE_DIR
+MODEL_DIR       = PATHS.model_dir
+CHROMA_DIR      = PATHS.chroma_dir
+BOOKRAG_DIR     = PATHS.bookrag_dir   # вторая база Chroma (книги) — по выбору в UI
+DOCS_DIR        = PATHS.docs_dir
+ENV_FILE        = PATHS.env_file
+STYLEMUSIC_PATH = PATHS.stylemusic_path
+SETTINGS_PATH   = PATHS.settings_path
 
 # ──────────────────────────────────────────────
 # ЧТЕНИЕ .env (портативно— без системных переменных)
@@ -52,6 +59,18 @@ def load_env() -> dict:
         env[k.strip()] = v.strip()
     _env_cache = (mtime, env)
     return env
+
+
+def has_api_key(env: dict, prov_name: str) -> bool:
+    """Return whether env has a nonblank provider key or supported legacy alias.
+
+    prov_name must name a CLOUD_PROVIDERS entry; otherwise raise KeyError.
+    """
+    key_var = CLOUD_PROVIDERS[prov_name]["key_var"]
+    for k in [key_var] + KEY_ALIASES.get(key_var, []):
+        if env.get(k, "").strip():
+            return True
+    return False
 
 
 def save_env(updates: dict):
@@ -169,36 +188,26 @@ def _split_notes(text: str) -> tuple[str, str]:
 # DEBUG-LOG — zentrale Logdatei für Diagnose
 # ──────────────────────────────────────────────
 
-DEBUG_LOG = BASE_DIR / "webui_debug.log"
+DEBUG_LOG = PATHS.debug_log
 
 
 def _debug_log(msg: str):
     """Schreibt eine Zeile mit Zeitstempel in webui_debug.log (und Konsole)."""
+    line = f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {msg}"
     try:
-        line = f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {msg}"
         with open(DEBUG_LOG, "a", encoding="utf-8") as f:
             f.write(line + "\n")
-        print(line)
-    except Exception:
-        pass
+    except OSError as e:
+        log.warning("Debug-Log nicht schreibbar (%s): %s", DEBUG_LOG, e)
+    print(line)
 
 
 # ──────────────────────────────────────────────
 # ОБЛАЧНЫЕ ПРОВАЙДЕРЫ
 # ──────────────────────────────────────────────
 
-# Конфигурация провайдеров: url, модель по умолчанию, ключ из .env
-CLOUD_PROVIDERS = {
-    "OpenAI":      {"url": "https://api.openai.com/v1/chat/completions",             "model": "gpt-4o-mini",                  "key_var": "OPENAI_API_KEY"},
-    "Groq":        {"url": "https://api.groq.com/openai/v1/chat/completions",        "model": "llama-3.3-70b-versatile",       "key_var": "GROQ_API_KEY"},
-    "DeepSeek":    {"url": "https://api.deepseek.com/chat/completions",               "model": "deepseek-chat",                "key_var": "DEEPSEEK_API_KEY"},
-    "NVIDIA_NIM":  {"url": "https://integrate.api.nvidia.com/v1/chat/completions",   "model": "meta/llama-3.3-70b-instruct",   "key_var": "NVIDIA_NIM_API_KEY"},
-    "OpenRouter":  {"url": "https://openrouter.ai/api/v1/chat/completions",           "model": "openai/gpt-4o-mini",           "key_var": "OPENROUTER_API_KEY"},
-    "Google":      {"url": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", "model": "gemini-2.0-flash", "key_var": "GOOGLE_API_KEY"},
-    "Mistral":     {"url": "https://api.mistral.ai/v1/chat/completions", "model": "mistral-large-latest", "key_var": "MISTRAL_API_KEY"},
-    "Odirouter":   {"url": "https://api.odirouter.ai/v1/chat/completions", "model": "grok-4.5", "key_var": "ODIROUTER_API_KEY"},
-    "Agnes":       {"url": "https://apihub.agnes-ai.com/v1/chat/completions", "model": "agnes-2.5-flash", "key_var": "agnes_API_KEY"},
-}
+# Конфигурация провайдеров (url, модель, ключ из .env) — единый источник: rag_config.CLOUD_PROVIDERS
+CLOUD_PROVIDERS = CLOUD_PROVIDERS  # noqa: PLW0127 — реэкспорт для совместимости (webui.py и др.)
 
 # llama-server бинарник — ищем в известных местах (порядок важен).
 # ВНИМАНИЕ: Unsloth-сервер (D:\Unsloth\C-claude\LlamaCpp.bat) пользователь запускает САМ —
@@ -212,19 +221,15 @@ LLAMA_CANDIDATES = [
     BASE_DIR / "llama" / "llama-server.exe",
 ]
 
-KOBOLD_URL  = "http://127.0.0.1:5001/v1/chat/completions"
-LLAMA_URL   = "http://127.0.0.1:8080/v1/chat/completions"
+KOBOLD_URL  = NET.kobold_url
+LLAMA_URL   = NET.llama_url
 
-# Пары (health-URL, chat-URL) в порядке приоритета:
+# Пары (health-URL, chat-URL) в порядке приоритета — из rag_config.NET:
 #   1) локальный llama-server (8080) — автозапуск из WebUI,
-#   2) локальный MTP-сервер (8510) — gemma-4-E4B + MTP-draft, запускается лаунчером вручную,
-#   3) удалённый llama-server на другом ПК (192.168.181.93:7860).
-LLAMA_ENDPOINTS = [
-    ("http://127.0.0.1:8080/health",      "http://127.0.0.1:8080/v1/chat/completions"),
-    ("http://127.0.0.1:8510/health",      "http://127.0.0.1:8510/v1/chat/completions"),
-    ("http://192.168.181.93:7860/health", "http://192.168.181.93:7860/v1/chat/completions"),
-]
-LLAMA_HEALTH_URLS = [h for h, _ in LLAMA_ENDPOINTS]
+#   2) локальный MTP-сервер (8510),
+#   3) удалённый llama-server на другом ПК.
+LLAMA_ENDPOINTS    = NET.llama_endpoints
+LLAMA_HEALTH_URLS  = [h for h, _ in LLAMA_ENDPOINTS]
 
 # Таймаут ПРОВЕРКИ ДОСТУПНОСТИ (/health) — 2 сек. Сама генерация всегда 600 сек:
 # если сервер жив, но долго думает — ждём, не обрываем.
@@ -235,9 +240,11 @@ LLAMA_HEALTH_TIMEOUT    = 2
 # Кэш результата health-проверок (сек). backend_status()/call_llm вызываются
 # при каждом взаимодействии с UI — повторные HTTP-запросы /health не нужны.
 HEALTH_CACHE_TTL        = 3.0
+# Таймаут ПРОВЕРКИ ДОСТУПНОСТИ (/health). Сама генерация всегда LOCAL_TIMEOUT сек.
+LLAMA_HEALTH_TIMEOUT = NET.health_timeout
 
-TOP_K       = 7
-COLLECTION  = os.environ.get("RAG_COLLECTION", "zaebalo")
+TOP_K       = RAG.top_k
+COLLECTION  = RAG.collection
 
 # ──────────────────────────────────────────────
 # ГЛОБАЛЬНЫЕ ОБЪЕКТЫ (ленивая загрузка)
@@ -280,10 +287,11 @@ def get_collection():
 
 
 def list_collections() -> list[str]:
-    """
-    Перечисляет существующие коллекции во ВСЕХ базах Chroma (без загрузки эмбеддинг-модели).
-    Имена с префиксом базы: "zaebalo:name" (основная) и "bookrag:name" (книги).
-    Пустой список = нет коллекций.
+    """List collections in the main and book databases without loading the embedding model.
+
+    Names use the prefixes 'zaebalo:' and 'bookrag:', respectively. Missing
+    databases and database errors are skipped, so results may be incomplete
+    or empty even when collections exist.
     """
     result = []
     for db_label, db_path in (("zaebalo", CHROMA_DIR), ("bookrag", BOOKRAG_DIR)):
@@ -293,7 +301,8 @@ def list_collections() -> list[str]:
             client = chromadb.PersistentClient(path=str(db_path))
             for c in client.list_collections():
                 result.append(f"{db_label}:{c.name}")
-        except Exception:
+        except Exception as e:
+            log.warning("ChromaDB %s (%s) недоступна: %s", db_label, db_path, e)
             continue
     return result
 
@@ -394,6 +403,47 @@ def get_llama_port() -> int | None:
     """Порт живого llama-сервера (для статуса в UI) или None (из кэша зонда)."""
     backend, _, port = _probe_health()
     return port if backend == "llama" else None
+def kobold_alive() -> bool:
+    """Check the configured KoboldCpp info URL with a two-second timeout.
+
+    Return True for a final status below 400, and False for Requests exceptions.
+    """
+    return is_alive(NET.kobold_info_url, timeout=2)
+
+
+def llama_alive() -> bool:
+    """Return whether any configured llama health URL passes is_alive.
+
+    Check primary, MTP, then remote endpoints. A final status below 400 counts
+    as available; Requests exceptions fail that endpoint's check.
+    """
+    for h in LLAMA_HEALTH_URLS:
+        if is_alive(h):
+            return True
+    return False
+
+
+def get_llama_url() -> str:
+    """Return the first llama chat URL whose health check passes is_alive.
+
+    Check primary, MTP, then remote endpoints; return LLAMA_URL if none pass.
+    """
+    for h, url in LLAMA_ENDPOINTS:
+        if is_alive(h):
+            return url
+    return LLAMA_URL
+
+
+def get_llama_port() -> int | None:
+    """Порт живого llama-сервера (для статуса в UI) или None."""
+    for h, _ in LLAMA_ENDPOINTS:
+        if is_alive(h):
+            try:
+                return int(h.split(":")[2].split("/")[0])
+            except (IndexError, ValueError) as e:
+                log.warning("Не удалось распарсить порт из %s: %s", h, e)
+                continue
+    return None
 
 
 def start_llama_server(gguf_path: str, log_callback=None) -> bool:
@@ -583,10 +633,17 @@ def extract_word_limit(text: str) -> int | None:
 
 
 def _try_cloud_provider(prov_name: str, messages: list[dict], max_tokens: int, temperature: float):
-    """Пробует один облачный API. Возвращает (ответ, None) или (None, ошибка)."""
+    """Request one provider using the first nonblank key or legacy alias in .env.
+
+    Return (content, None) on a parsed response, or (None, error_message) for
+    a missing key or a caught request/response error. Content is not validated
+    and may be empty or None. Unknown providers raise KeyError; errors reading
+    or decoding .env propagate before the request handler.
+    """
     cfg = CLOUD_PROVIDERS[prov_name]
     env = load_env()
-    api_key = env.get(cfg["key_var"], "")
+    key_names = [cfg["key_var"]] + KEY_ALIASES.get(cfg["key_var"], [])
+    api_key = next((env[k].strip() for k in key_names if env.get(k, "").strip()), "")
     if not api_key:
         return None, f"[{prov_name}] API ключ не найден в .env"
     headers = {
@@ -604,17 +661,20 @@ def _try_cloud_provider(prov_name: str, messages: list[dict], max_tokens: int, t
         # таймаут 10 сек гарантированно отрубал ответ → «не ответил».
         resp = _http.post(cfg["url"], json=payload, headers=headers, timeout=120)
         resp.raise_for_status()
+        # Сессия с переиспользованием соединений + retry/backoff (rag_net.http_post).
+        resp = http_post(cfg["url"], payload, headers=headers, timeout=NET.cloud_timeout)
         return resp.json()["choices"][0]["message"]["content"], None
-    except requests.exceptions.Timeout:
-        return None, f"[{prov_name}] таймаут (120 сек)"
-    except requests.exceptions.ConnectionError:
-        return None, f"[{prov_name}] нет соединения"
     except requests.exceptions.HTTPError as e:
-        code = e.response.status_code if e.response else 0
+        code = e.response.status_code if e.response is not None else 0
         if code in (429, 503):
             return None, f"[{prov_name}] лимит запросов (HTTP {code})"
         return None, f"[{prov_name}] HTTP {code}: {e}"
+    except NetworkError:
+        return None, f"[{prov_name}] нет соединения (повторено {NET.max_retries} раз)"
+    except (KeyError, ValueError) as e:
+        return None, f"[{prov_name}] неожиданный формат ответа: {e}"
     except Exception as e:
+        log.exception("Неизвестная ошибка провайдера %s", prov_name)
         return None, f"[{prov_name}] {e}"
 
 
@@ -655,12 +715,22 @@ def _try_cloud_chain(messages: list[dict], max_tokens: int, temperature: float,
 
 def call_llm(messages: list[dict], max_tokens: int = 6000, temperature: float = 0.75,
              provider: str = "auto") -> str:
-    """
-    Отправляет запрос в активный бэкенд.
-    provider: 'auto' | 'kobold' | 'llama' | 'OpenAI' | 'Google' | 'Groq' | 'NVIDIA' | 'DeepSeek'
+    """Request a chat completion from a local backend or cloud provider.
 
-    Порядок в режиме 'auto': локальный сервер (гемма на 8080 / KoboldCpp на 5001),
-    при его недоступности или ошибке — облачные провайдеры из .env.
+    provider accepts 'auto', 'kobold', 'llama', or a CLOUD_PROVIDERS key.
+    Auto prefers KoboldCpp, then a reachable llama endpoint, and falls back to
+    cloud providers with keys in .env. A successful cloud choice is cached for
+    later calls while no local backend is available. If the cached provider
+    fails, auto tries the remaining providers before retrying that provider.
+
+    Return response content or an error string for handled failures. Empty or
+    None local content is retried once with thinking disabled and twice the
+    max_tokens budget; the retry's content may still be empty or None.
+    Explicit providers do not use the automatic cloud fallback.
+
+    Requests use configured local/cloud timeouts in seconds. Errors reading or
+    decoding .env or settings.txt can propagate before request handling or
+    during cloud fallback.
     """
     global _auto_provider
     cached = False
@@ -717,6 +787,7 @@ def call_llm(messages: list[dict], max_tokens: int = 6000, temperature: float = 
     try:
         resp = _http.post(url, json=payload, timeout=600)
         resp.raise_for_status()
+        resp = http_post(url, payload, timeout=NET.local_timeout)
         content = resp.json()["choices"][0]["message"]["content"]
         # Leere Antwort (Thinking hat max_tokens aufgebraucht) → Retry ohne Thinking, doppelter Budget
         if content is None or not content.strip():
@@ -726,21 +797,23 @@ def call_llm(messages: list[dict], max_tokens: int = 6000, temperature: float = 
             _p2["max_tokens"] = max_tokens * 2
             _r2 = _http.post(url, json=_p2, timeout=600)
             _r2.raise_for_status()
+            _r2 = http_post(url, _p2, timeout=NET.local_timeout)
             content = _r2.json()["choices"][0]["message"]["content"]
         return content
-    except requests.exceptions.ConnectionError:
-        _debug_log(f"❌ Server nicht erreichbar: {url}")
+    except requests.exceptions.HTTPError as e:
+        _debug_log(f"❌ HTTP-Fehler von {url}: {e}")
         if provider == "auto":
             return _try_cloud_chain(messages, max_tokens, temperature,
-                                    reason=f"Локальный сервер {url} недоступен")
-        return "[Ошибка] Сервер недоступен."
-    except requests.exceptions.Timeout:
-        _debug_log(f"❌ Timeout: {url}")
+                                    reason=f"Локальный сервер {url}: HTTP ошибка")
+        return f"[Ошибка] HTTP {e.response.status_code if e.response is not None else ''}"
+    except NetworkError:
+        _debug_log(f"❌ Server nicht erreichbar/Timeout: {url}")
         if provider == "auto":
             return _try_cloud_chain(messages, max_tokens, temperature,
-                                    reason=f"Локальный сервер {url} не ответил (таймаут)")
-        return "[Ошибка] Таймаут запроса."
+                                    reason=f"Локальный сервер {url} недоступен (повторено {NET.max_retries} раз)")
+        return "[Ошибка] Сервер недоступен или таймаут запроса."
     except Exception as e:
+        log.exception("LLM-Fehler (%s)", url)
         _debug_log(f"❌ LLM-Fehler: {e}")
         if provider == "auto":
             return _try_cloud_chain(messages, max_tokens, temperature,
