@@ -657,11 +657,8 @@ def _try_cloud_provider(prov_name: str, messages: list[dict], max_tokens: int, t
         "max_tokens":  max_tokens,
     }
     try:
-        # 120 сек: генерация до 6000 токенов (DeepSeek/Groq/Google) занимает 30-120 сек,
-        # таймаут 10 сек гарантированно отрубал ответ → «не ответил».
-        resp = _http.post(cfg["url"], json=payload, headers=headers, timeout=120)
-        resp.raise_for_status()
-        # Сессия с переиспользованием соединений + retry/backoff (rag_net.http_post).
+        # Сессия с переиспользованием соединений + retry/backoff (rag_net.http_post);
+        # облачный таймаут берётся из NET.cloud_timeout.
         resp = http_post(cfg["url"], payload, headers=headers, timeout=NET.cloud_timeout)
         return resp.json()["choices"][0]["message"]["content"], None
     except requests.exceptions.HTTPError as e:
@@ -690,11 +687,13 @@ def _try_cloud_chain(messages: list[dict], max_tokens: int, temperature: float,
     global _auto_provider
     env = load_env()
     order = []
-    if first and first != skip and env.get(CLOUD_PROVIDERS[first]["key_var"], "").strip():
+    # Единая проверка ключей для всех кандидатов (включая legacy-алиасы,
+    # напр. agnes_API_KEY) — через has_api_key, как в _try_cloud_provider.
+    if first and first != skip and has_api_key(env, first):
         order.append(first)
     order += [p for p in CLOUD_PROVIDERS
-              if p not in (first, skip) and env.get(CLOUD_PROVIDERS[p]["key_var"], "").strip()]
-    if skip and skip not in order and env.get(CLOUD_PROVIDERS[skip]["key_var"], "").strip():
+              if p not in (first, skip) and has_api_key(env, p)]
+    if skip and skip not in order and has_api_key(env, skip):
         order.append(skip)  # в последнюю очередь
     errors = []
     for prov_name in order:
@@ -785,8 +784,6 @@ def call_llm(messages: list[dict], max_tokens: int = 6000, temperature: float = 
     if settings.get("disable_thinking"):
         payload["think"] = False
     try:
-        resp = _http.post(url, json=payload, timeout=600)
-        resp.raise_for_status()
         resp = http_post(url, payload, timeout=NET.local_timeout)
         content = resp.json()["choices"][0]["message"]["content"]
         # Leere Antwort (Thinking hat max_tokens aufgebraucht) → Retry ohne Thinking, doppelter Budget
@@ -795,8 +792,6 @@ def call_llm(messages: list[dict], max_tokens: int = 6000, temperature: float = 
             _p2 = dict(payload)
             _p2["think"] = False
             _p2["max_tokens"] = max_tokens * 2
-            _r2 = _http.post(url, json=_p2, timeout=600)
-            _r2.raise_for_status()
             _r2 = http_post(url, _p2, timeout=NET.local_timeout)
             content = _r2.json()["choices"][0]["message"]["content"]
         return content
