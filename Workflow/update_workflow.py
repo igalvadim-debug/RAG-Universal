@@ -13,7 +13,12 @@ from datetime import datetime
 SCRIPT_DIR     = Path(__file__).parent
 USED_FILE      = SCRIPT_DIR / "used.md"
 OUTPUT_JSON    = "modified_LTX_Dir.json"
-JSON_PAIRS     = [("low.json", "mod_low.json"), ("high.json", "mod_high.json")]
+JSON_PAIRS     = [
+    ("low.json", "mod_low.json"),
+    ("high.json", "mod_high.json"),
+    # LTX 2.5 Director (нода LTXDirectorCS25) — принцип CS LTX Director
+    ("LTX_2_5_Director_CStest.json", "mod_ltx25_director.json"),
+]
 IMG_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.webp'}
 
 # ------------------------------------------
@@ -452,11 +457,13 @@ def main():
 
         nodes_updated = 0
         for node in workflow.get("nodes", []):
-            if node.get("type") != "LTXDirector":
+            # LTXDirector = LTX 2.0/2.3 (whatdreamscost); LTXDirectorCS25 = LTX 2.5 Director (CS)
+            # Layout identisch: Widget 6 = timeline_data, 7 = local_prompts, 8 = segment_lengths
+            if node.get("type") not in ("LTXDirector", "LTXDirectorCS25"):
                 continue
     
             nodes_updated += 1
-            print(f"\n⚙️  LTXDirector (ID: {node.get('id')})")
+            print(f"\n⚙️  {node.get('type')} (ID: {node.get('id')})")
     
             widgets = node["widgets_values"]
     

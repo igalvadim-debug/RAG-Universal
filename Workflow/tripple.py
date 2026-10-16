@@ -67,9 +67,7 @@ DEFAULT_JSON = Path(__file__).resolve().parent / "Tripple.json"
 DEFAULT_SC   = Path(__file__).resolve().parent / "SC.json"
 DEFAULT_LTX25 = Path(__file__).resolve().parent / "LTX 2.5 First and Last Frame Video Generation .json"
 DEFAULT_T2V = Path(__file__).resolve().parent / "Text-to-Video Fast LTX2.5 Sync Audio & Video.json"
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-import config as _cfg
-COMFY_INPUT_DIR = _cfg.COMFY_INPUT_DIR  # None if not configured via setup.bat
+COMFY_INPUT_DIR = Path(r"D:\ComfyUiVid\input")
 
 
 # ══════════════════════════════════════════════════
@@ -607,11 +605,13 @@ def _cs_timeline(global_prompt, segment_prompts, frames, ref_chars, seg_images, 
     }
 
 
-def create_sc_workflow(template_path, out_path, timelines, fps=24, comfy_input_dir=COMFY_INPUT_DIR):
+def create_sc_workflow(template_path, out_path, timelines, fps=24, comfy_input_dir=COMFY_INPUT_DIR,
+                       node_type="LTXDirectorCS"):
     """
-    Берёт шаблон SC.json, обновляет ноды LTXDirectorCS по принципу
-    update_workflow.py (high.json): timeline_data (global_prompt, segments),
-    characters (@ref1-3 + VL-описания), widgets_values и properties — синхронно.
+    Берёт шаблон (SC.json для LTXDirectorCS, LTX_2_5_Director_CStest.json для LTXDirectorCS25),
+    обновляет ноды по принципу update_workflow.py (high.json): timeline_data (global_prompt, segments),
+    characters (@ref1-3 + VL-описания), widgets_values и properties — синхронно. node_type —
+    тип ноды в шаблоне ("LTXDirectorCS" или "LTXDirectorCS25").
 
     timelines: список из 1 или 2 dict (порядок = порядок таймлайнов слева
                направо на холсте, т.е. timelines[0] → первая по X-координате
@@ -638,16 +638,16 @@ def create_sc_workflow(template_path, out_path, timelines, fps=24, comfy_input_d
     with open(template_path, "r", encoding="utf-8") as f:
         workflow = json.load(f)
 
-    cs_nodes = find_nodes(workflow, "LTXDirectorCS")
+    cs_nodes = find_nodes(workflow, node_type)
     if not cs_nodes:
-        raise ValueError(f"Нода LTXDirectorCS не найдена в {template_path.name}")
+        raise ValueError(f"Нода {node_type} не найдена в {template_path.name}")
     # Сопоставляем ноды таймлайнам по X-координате на холсте (слева направо)
     cs_nodes = sorted(cs_nodes, key=lambda n: (n.get("pos") or [0, 0])[0])
 
     if len(timelines) > len(cs_nodes):
         raise ValueError(
             f"Запрошено {len(timelines)} таймлайнов, а в шаблоне {template_path.name} "
-            f"только {len(cs_nodes)} нод(ы) LTXDirectorCS"
+            f"только {len(cs_nodes)} нод(ы) {node_type}"
         )
 
     fps = int(fps) if fps else 24
@@ -724,7 +724,7 @@ def create_sc_workflow(template_path, out_path, timelines, fps=24, comfy_input_d
             props["guide_strength"] = guide_strength
 
         pos_x = (node.get("pos") or [0])[0]
-        print(f"⚙️  LTXDirectorCS id={node.get('id')} (x={pos_x:.0f}): {n_seg} сегментов, {frames} кадров @ {fps} fps")
+        print(f"⚙️  {node_type} id={node.get('id')} (x={pos_x:.0f}): {n_seg} сегментов, {frames} кадров @ {fps} fps")
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as f:
@@ -933,7 +933,7 @@ def _cli_create(argv):
     ap.add_argument("--global-negative", default=None)
     ap.add_argument("--scene-negative", default=None)
     ap.add_argument("--flux-prompt", default=None, help="промт стартового кадра для FLUX 2 Klein → flux_start_image.txt")
-    ap.add_argument("--comfy-input", default=(str(COMFY_INPUT_DIR) if COMFY_INPUT_DIR else ""))
+    ap.add_argument("--comfy-input", default=str(COMFY_INPUT_DIR))
     a = ap.parse_args(argv)
 
     if a.global_positive is None or a.scene_prompt is None:
@@ -979,7 +979,7 @@ def _cli_create_sc(argv):
     ap.add_argument("--subfolder", default="")
     ap.add_argument("--fps", type=int, default=24)
     ap.add_argument("--frames", type=int, default=None)
-    ap.add_argument("--comfy-input", default=(str(COMFY_INPUT_DIR) if COMFY_INPUT_DIR else ""))
+    ap.add_argument("--comfy-input", default=str(COMFY_INPUT_DIR))
     a = ap.parse_args(argv)
 
     global_prompt = None
@@ -1039,7 +1039,7 @@ def _cli_create_ltx25(argv):
     ap.add_argument("--duration", type=int, default=None)
     ap.add_argument("--fps", type=int, default=24)
     ap.add_argument("--sigma", default=None, help="CSV сигам, напр. '1.0,0.5,0.0'")
-    ap.add_argument("--comfy-input", default=(str(COMFY_INPUT_DIR) if COMFY_INPUT_DIR else ""))
+    ap.add_argument("--comfy-input", default=str(COMFY_INPUT_DIR))
     a = ap.parse_args(argv)
 
     p = Path(a.prompt)

@@ -1,0 +1,956 @@
+[
+  {
+    "filename": "bfs_head_swap_v1_ltx2_ic_lora_6000.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "cowgirl-ride-withfuta.safetensors",
+    "trigger_words": "cowgirl ride, futa ride",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "DaSiWa_LTX23_NSFW_Bodyphysics_Fluid_Motion_Enhancer_v01.safetensors",
+    "trigger_words": "D4S1W4_NSFWSME",
+    "strength": "0.5",
+    "source": "loras.md"
+  },
+  {
+    "filename": "epic_cumshots-V1-LTX_2_3-CUMSH0T.safetensors",
+    "trigger_words": "CUMSH0T",
+    "strength": "0.6",
+    "source": "loras.md"
+  },
+  {
+    "filename": "Fantasy_Painterly.safetensors",
+    "trigger_words": "D4rkP41nt3r",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "gemma-3-12b-it-abliterated_lora_rank64_bf16.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "id-lora-celebvhq-ltx2.3.safetensors",
+    "trigger_words": "(kein Trigger — ID-LoRA, Referenzbild-gesteuert)",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "krea2_turbo_lora_rank_64_bf16.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "lightx2v_I2V_14B_480p_cfg_step_distill_rank128_bf16.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "lightx2v_I2V_14B_480p_cfg_step_distill_rank64_bf16.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "ltx-2-19b-ic-lora-detailer.safetensors",
+    "trigger_words": "",
+    "strength": "0.4",
+    "source": "loras.md"
+  },
+  {
+    "filename": "ltx-2-2.3-i2v-nsfw-furry-multi-purpose-sex-lora.safetensors",
+    "trigger_words": "",
+    "strength": "0.7",
+    "source": "loras.md"
+  },
+  {
+    "filename": "LTX-2.3-22b-AV-LoRA-talking-head-v1_OHWXPERSON.safetensors",
+    "trigger_words": "OHWXPERSON (Vermutung, ungeprüft)",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "ltx-2.3-22b-distilled-1.1_lora-dynamic_fro09_avg_rank_111_bf16.safetensors",
+    "trigger_words": "",
+    "strength": "0.6",
+    "source": "loras.md"
+  },
+  {
+    "filename": "ltx-2.3-22b-distilled-lora-1.1_fro90_ceil36.safetensors",
+    "trigger_words": "",
+    "strength": "0.5",
+    "source": "loras.md"
+  },
+  {
+    "filename": "ltx-2.3-22b-distilled-lora-384.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "ltx-2.3-22b-ic-lora-ingredients-0.9.safetensors",
+    "trigger_words": "",
+    "strength": "0.9",
+    "source": "loras.md"
+  },
+  {
+    "filename": "ltx-2.3-22b-ic-lora-motion-track-control-ref0.5.safetensors",
+    "trigger_words": "Ultra-cinematic continuous shot with precise motion tracking, camera smoothly follows the main subject",
+    "strength": "0.5",
+    "source": "loras.md"
+  },
+  {
+    "filename": "ltx-2.3-22b-ic-lora-union-control-ref0.5.safetensors",
+    "trigger_words": "",
+    "strength": "0.5",
+    "source": "loras.md"
+  },
+  {
+    "filename": "ltx-2.3-22b_text_embedding_projection.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "LTX-2.3-danceV2.comfy.safetensors",
+    "trigger_words": "girl group dance",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "ltx-2.3-dollyforward_lora.safetensors",
+    "trigger_words": "Ultra-cinematic dolly-forward shot, camera moves smoothly forward toward the main subject",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "LTX-2.3-Henshin.safetensors",
+    "trigger_words": "Henshin transformation",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "LTX-2.3-ID-LoRA-TalkVid-3K.safetensors",
+    "trigger_words": "(kein Trigger — ID-LoRA, Referenzbild-gesteuert)",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "LTX-2.3-Latin dance.safetensors",
+    "trigger_words": "dancing latin dance",
+    "strength": "1.15",
+    "source": "loras.md"
+  },
+  {
+    "filename": "LTX-2.3-Licon-MSR-V1.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "LTX-2.3-OmniNFT-RL-Lora_bf16.safetensors",
+    "trigger_words": "",
+    "strength": "1.2",
+    "source": "loras.md"
+  },
+  {
+    "filename": "ltx-2.3-Sound_besser_foley-400-steps.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "ltx-2.3-spatial-upscaler-x2-1.1.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "ltx-2.3-temporal-upscaler-x2-1.0.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "LTX2-i2v-OralSuite.safetensors",
+    "trigger_words": "",
+    "strength": "0.5",
+    "source": "loras.md"
+  },
+  {
+    "filename": "LTX2.3-IC-LORA-Dual-Character.safetensors",
+    "trigger_words": "",
+    "strength": "0.8",
+    "source": "loras.md"
+  },
+  {
+    "filename": "ltx2.3-ic-subtitles-remove-general.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "Ltx2.3-Licon-VBVR-I2V-96000-R32.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "LTX2.3-MysticXXX.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "ltx2.3-transition_zhuanchang.safetensors",
+    "trigger_words": "zhuanchang",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "LTX2.3_Crisp_Enhance.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "LTX2.3_DMD_hybrid_v2.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "ltx2.3_fpv_motion.safetensors",
+    "trigger_words": "fpv",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "ltx2.3_upscale_ic-lora_06250.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "ltx23_inpaint_rank128_v1.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "LTX23_Obscura_Remova_v1.safetensors",
+    "trigger_words": "",
+    "strength": "1.25",
+    "source": "loras.md"
+  },
+  {
+    "filename": "ltx23_srx_scififilm_lora.safetensors",
+    "trigger_words": "srx_scififilm",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "ltx23_zoomout_z00m047.safetensors",
+    "trigger_words": "z00m047",
+    "strength": "0.85",
+    "source": "loras.md"
+  },
+  {
+    "filename": "ltxdeepthroat_v01.safetensors",
+    "trigger_words": "LTXdeepthroat",
+    "strength": "0.5",
+    "source": "loras.md"
+  },
+  {
+    "filename": "LTX_10Eros_LoRA_fro99-avgrank77.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "m4crom4sti4-huge-natural-breasts-ltx2.3-k3nk.safetensors",
+    "trigger_words": "m4crom4sti4",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "sexLoraLTX23Penile_Praxis_V4.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "loras.md"
+  },
+  {
+    "filename": "sfbehind_LTX2_3_v0_1.safetensors",
+    "trigger_words": "sfbehind",
+    "strength": "0.9",
+    "source": "loras.md"
+  },
+  {
+    "filename": "control_lora_rank128_v11f1e_sd15_tile_fp16.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "control_lora_rank128_v11f1p_sd15_depth_fp16.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "control_lora_rank128_v11p_sd15_normalbae_fp16.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "control_lora_rank128_v11p_sd15_openpose_fp16.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "control_lora_rank128_v11p_sd15_scribble_fp16.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "control_lora_rank128_v11p_sd15_seg_fp16.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "ltx-2-19b-lora-camera-control-static.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "nsfw_lora_wan_1.3b.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "pussydiffusion-f2-klein-9b_v2.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "pussydiffusion-shaved_innie-f2-klein-9b_v1.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "Sex_helper_for_NSFW_Wan_1.3b.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "krea2filterbypass.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "Krea2NSFWStaerke1.2_1.5V4.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "KREA2_D33P_V2.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "krea2_darkbrush.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "Krea2_HMNSFW_AIO.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "krea2_identity_edit_v1_1.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "krea2_turbo_2step_rank_64_lora.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "LTX-2.3-Licon-MSR-V2.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "Singularity-LTX-2.3_OmniCine_V1.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "Qwen-Image-2.1-viggle-turbo-4step-lora-r64.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "Qwen-Image-2.1-viggle-turbo-v0.2-5step-lora-r256.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "ltx-2.5-22b-ic-lora-pixel-spatial-upscaler-x2-1.0.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "animatediff_lightning_4step_diffusers.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "dmad_minimax_h3_4step_full_critic.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "eugen1024lora.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "fluxgym_06.01.26_sweta_sweta.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "ip-adapter-faceid-plusv2_sd15_lora.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "ip-adapter-faceid-plus_sd15_lora.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "ip-adapter-faceid_sd15_lora.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "Klein-consistency.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "LCM_LoRA_Weights_SDXL.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "pixel_art_style_z_image_turbo.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "portrait_lora64.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "schorthair.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "Shaiden_Rogue_Flux.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "snofs_ideogram_v1_1.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "sweta_lora.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "m_xO4abTFgPwX3njmort3_pytorch_lora_weights.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "boFLUX Steampunk Style.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "Canopus-Clothing-Flux-Dev-Florence2-LoRA.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "Clothes_onoff.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "collbdy.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "dark_fantasy_lora.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "DollCute.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "engrave.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "FLUX Female Anatomy.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "FLUX More Female Anatomy.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "flux-fashion-lora.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "FLUX.1-Turbo-Alpha.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "FluxK4Play.v1.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "FluxPussy.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "fluxRealSkin-V2.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "FLUX_Blowjob.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "fp8-lora-r640_cq1.0-fp8-flux1-fill-dev.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "Futanari_with_erect_penis_v2.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "Hyper-FLUX.1-dev-8steps-lora.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "outfit-generator.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "Penis_on_Face_p3n1sF4ce .safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "realism_lora.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "slptp-blowjob-lora.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "ThroatedV2_000002950.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "xia3.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "xlabs_flux_realism_lora_comfui.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "AWPortrait-FL-lora.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "bj_20260120_22-22-29epoch15_comfy.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "gf-next-anal.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "bfs_head_v1_flux-klein_9b_step3500_rank128.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "FLUX2_KLEIN_UNLOCKED_V2.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "klein_9b_enhancer_v2_klein_9b_enhancer_v2.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "V2_flux_klein_4_V2_flux_klein_4.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "[flux2-klein-9b] Pyro's BJ_v20260120.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "[flux2-klein-9b] Pyro's Cowgirls_v1.0.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "depth-control-lora.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "KNP_V2_copy_copy.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "Krea2-depth-control-lora.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "krea2_turbo_distill_r64.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "lenovo_krea2.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "Purple_Grainy_Kr2_AM.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "realism_engine_krea2_v2.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "Fantasy_Realism.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "ltx-2-19b-distilled-lora_resized_dynamic_fro09_avg_rank_175_fp8.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "ltx2-squish_trigger word_squish it.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "ltx25_turbo_distill_r64.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "LTX_SulphurEXP_LoRA_fro99-avgrank105.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "motion_stabilizer_ltx_lora_v2.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "PENISlora_sulfter_i2v-step00008500.comfy.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "Western-comic-a-semi_1_LTX23_v1.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "H3_Motion_BoosterV2.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "Minimax_H3_Unlocked_V2.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "TaoMate-H3-3step.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "bfs_face_v1_qwen_image_edit_2509.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "DiffSynth-StudioQwenImage2.1LayerExtract.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "DiffSynthStudioQwenImage2.1LayerRemove.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "NSFW-Qwen-by-TheseAlpacas-V2.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "p_qwen_image_2.1_5step_v0.1.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "p_qwen_image_2.1_8step_v0.1.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "Qwen-Image-2.1-Fun-Acc-4Step.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "qwen-image-edit-2511-multiple-angles-lora.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "Qwen-Image-Lightning-4steps-V1.0-bf16.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "qwen-image_nsfw_adv_v1.0.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "qwen2.1_penisV01_000004956.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "VNCCS_QIE2511_PoseStudio_ART_V5.9.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "DR34ML4Y_I2V_14B_HIGH.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "DR34ML4Y_I2V_14B_LOW.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "DR34ML4Y_LTXXX_V2.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "Wan21_I2V_14B_lightx2v_cfg_step_distill_lora_rank64.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "Wan21_PusaV1_LoRA_14B_rank512_bf16.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  },
+  {
+    "filename": "NSFW_ZI_V01_r1_Epoch31_AstroNSFW-V02-ZIG.safetensors",
+    "trigger_words": "",
+    "strength": "1.0",
+    "source": "models.md"
+  }
+]
