@@ -37,7 +37,11 @@ def make_session() -> requests.Session:
     """
     s = requests.Session()
     if Retry is not None:
-        retry = Retry(total=0)  # все повторы — во внешнем цикле http_post/http_get
+        # total=0: все повторы — во внешнем цикле http_post/http_get.
+        # allowed_methods явно ограничивает транспортные ретраи безопасными
+        # методами (GET/HEAD и т.п.): POST не повторяется после того как
+        # запрос мог достичь провайдера (идемпотентность не гарантирована).
+        retry = Retry(total=0, allowed_methods=frozenset({"GET", "HEAD", "OPTIONS"}))
         adapter = HTTPAdapter(max_retries=retry, pool_connections=8, pool_maxsize=16)
         s.mount("http://", adapter)
         s.mount("https://", adapter)
@@ -64,8 +68,14 @@ def http_post(url: str, json_payload: dict, headers: dict | None = None,
     """POST с повторными попытками (экспоненциальный backoff).
 
     Единый слой повторов: транспортный urllib3-Retry отключён в make_session(),
-    поэтому соединения, таймауты и 429/5xx повторяются только этим циклом —
+    поэтому 429/5xx и сетевые сбои ДО отправки повторяются только этим циклом —
     один общий бюджет NET.max_retries на запрос.
+
+    POST-ограничение (идемпотентность не гарантирована): повтор разрешён ТОЛЬКО
+    для сбоев, известных как произошедшие до передачи запроса провайдеру
+    (ConnectionError — отказ соединения/DNS). ReadTimeout НЕ повторяется: он
+    означает, что запрос уже мог быть получен провайдером (LLM-генерация
+    неточна и может иметь побочные эффекты/стоимость).
 
     Бросает NetworkError, если все попытки исчерпаны.
     """
@@ -85,13 +95,18 @@ def http_post(url: str, json_payload: dict, headers: dict | None = None,
                 continue
             resp.raise_for_status()
             return resp
-        except (requests.ConnectionError, requests.Timeout) as e:
+        except requests.ConnectionError as e:
+            # Сбой до отправки запроса (отказ соединения/DNS) — безопасно повторить.
             last_exc = e
             if attempt < NET.max_retries:
                 wait = NET.backoff_base * (2 ** (attempt - 1))
                 log.warning("%s при POST %s — попытка %d/%d, жду %.1f c",
                             type(e).__name__, url, attempt, NET.max_retries, wait)
                 time.sleep(wait)
+        except requests.Timeout as e:
+            # ReadTimeout: запрос уже мог достичь провайдера; без гарантии
+            # идемпотентности POST не повторяем — сразу наружу.
+            raise NetworkError(f"POST {url} прерван по таймауту (запрос мог быть получен провайдером, повтор POST запрещён): {e}") from e
         except requests.HTTPError:
             raise  # 4xx (кроме повторённых 429/5xx) — сразу наружу
     raise NetworkError(f"POST {url} не удался после {NET.max_retries} попыток: {last_exc}")
