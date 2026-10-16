@@ -1,0 +1,5 @@
+# Узнать количество кадров
+ffprobe -v quiet -select_streams v:0 -count_frames -show_entries stream=nb_read_frames input.mp4
+
+# Затем отрезать
+ffmpeg -i input.mp4 -vf "select='lt(n\,beispiel345-1)'" -vsync vfr output.mp4

@@ -1,0 +1,22 @@
+# RAG System - Requirements
+# Direkte Dependencies aus den Python-Quellfiles
+# Torch wird separat mit CUDA-Index installiert (siehe install_packages.bat)
+
+# Core RAG
+sentence-transformers==5.5.1
+chromadb==1.5.9
+transformers==4.57.6
+
+# Web UI
+gradio==5.50.0
+
+# Utilities
+requests==2.34.2
+beautifulsoup4==4.13.4
+python-dotenv==1.2.2
+huggingface_hub==0.36.2
+
+# Torch (CUDA) - wird separat installiert via Index-URL
+# torch==2.12.0
+# torchvision==0.27.0
+# torchaudio==2.11.0
