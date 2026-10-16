@@ -12,12 +12,14 @@ PROVIDERS = ["OpenAI", "Groq", "DeepSeek", "NVIDIA_NIM", "OpenRouter", "Google",
 
 
 def chat_response(content="Generated text"):
+    """Build a mocked chat-completions Response that returns the given message content."""
     response = Mock(spec=requests.Response)
     response.json.return_value = {"choices": [{"message": {"content": content}}]}
     return response
 
 
 def http_error(status):
+    """Build an HTTPError carrying a real Response with the given status code."""
     response = requests.Response()
     response.status_code = status
     return requests.HTTPError("request failed", response=response)
@@ -25,6 +27,7 @@ def http_error(status):
 
 @pytest.fixture
 def post(core, monkeypatch):
+    """Patch core.http_post with a mock transport and configure deterministic NET timeouts."""
     transport = Mock(return_value=chat_response())
     monkeypatch.setattr(core, "http_post", transport)
     monkeypatch.setattr(core, "NET", replace(core.NET, cloud_timeout=17.5, local_timeout=25.5, max_retries=2))
@@ -40,6 +43,7 @@ def post(core, monkeypatch):
     indirect=True,
 )
 def test_core_uses_shared_configuration(core, config):
+    """rag_core's module-level constants should mirror rag_config's PATHS/NET/RAG values."""
     assert core.CLOUD_PROVIDERS is config.CLOUD_PROVIDERS
     assert core.BASE_DIR == config.BASE_DIR
     for constant, field in {
@@ -59,6 +63,7 @@ def test_core_uses_shared_configuration(core, config):
 @pytest.mark.parametrize("provider", PROVIDERS)
 @pytest.mark.parametrize("value", ["", " \t", " synthetic-test-key "])
 def test_has_api_key_recognizes_nonblank_canonical_keys(core, provider, value):
+    """has_api_key should be True only when the provider's canonical key is non-blank."""
     key = core.CLOUD_PROVIDERS[provider]["key_var"]
 
     assert core.has_api_key({key: value}, provider) is bool(value.strip())
@@ -66,12 +71,14 @@ def test_has_api_key_recognizes_nonblank_canonical_keys(core, provider, value):
 
 
 def test_has_api_key_accepts_legacy_agnes_key_but_not_an_unrelated_provider_key(core):
+    """has_api_key should accept the legacy Agnes alias but not another provider's key."""
     assert core.has_api_key({"AGNES_API_KEY": " ", "agnes_API_KEY": " legacy-test-key "}, "Agnes") is True
     assert core.has_api_key({"OPENAI_API_KEY": "synthetic-test-key"}, "Agnes") is False
 
 
 @pytest.mark.parametrize("provider", PROVIDERS)
 def test_cloud_request_uses_shared_transport_and_configured_provider(core, post, provider):
+    """_try_cloud_provider should call http_post with the provider's URL, model, and Bearer key."""
     cfg = core.CLOUD_PROVIDERS[provider]
     core.ENV_FILE.write_text(f"{cfg['key_var']}=  synthetic-test-key  \n", encoding="utf-8")
 
@@ -94,6 +101,7 @@ def test_cloud_request_uses_shared_transport_and_configured_provider(core, post,
     ],
 )
 def test_agnes_key_alias_and_canonical_precedence(core, post, env_text, expected_key):
+    """The canonical AGNES_API_KEY should take precedence over the legacy alias when both are set."""
     core.ENV_FILE.write_text(env_text, encoding="utf-8")
 
     assert core._try_cloud_provider("Agnes", MESSAGES, 64, 0.0) == ("Generated text", None)
@@ -115,6 +123,7 @@ def test_agnes_key_alias_and_canonical_precedence(core, post, env_text, expected
     ],
 )
 def test_automatic_cloud_selection_accepts_both_agnes_key_spellings(core, post, monkeypatch, key_name):
+    """Auto cloud fallback should pick the Agnes provider for the canonical key, not the legacy alias."""
     core.ENV_FILE.write_text(f"{key_name}=synthetic-test-key\n", encoding="utf-8")
     monkeypatch.setattr(core, "get_backend", Mock(return_value="none"))
 
@@ -126,6 +135,7 @@ def test_automatic_cloud_selection_accepts_both_agnes_key_spellings(core, post, 
 
 @pytest.mark.parametrize("env_text", [None, "AGNES_API_KEY= \nagnes_API_KEY= \n"])
 def test_missing_or_blank_keys_do_not_send_a_request(core, post, env_text):
+    """_try_cloud_provider should fail fast with no HTTP request when no usable key is configured."""
     if env_text is not None:
         core.ENV_FILE.write_text(env_text, encoding="utf-8")
 
@@ -139,6 +149,7 @@ def test_missing_or_blank_keys_do_not_send_a_request(core, post, env_text):
 
 @pytest.mark.parametrize("status", [400, 401, 403, 429, 500, 503])
 def test_cloud_http_errors_report_real_status_even_for_falsey_responses(core, post, status):
+    """The reported HTTP status should reflect the real code even though Response is falsey on error."""
     core.ENV_FILE.write_text("OPENAI_API_KEY=synthetic-test-key\n", encoding="utf-8")
     failure = http_error(status)
     assert not failure.response  # Regression: requests.Response is false for HTTP errors.
@@ -154,6 +165,7 @@ def test_cloud_http_errors_report_real_status_even_for_falsey_responses(core, po
 
 
 def test_cloud_http_error_without_response_is_reported(core, post):
+    """An HTTPError with no attached response should be reported as HTTP status 0."""
     core.ENV_FILE.write_text("OPENAI_API_KEY=synthetic-test-key\n", encoding="utf-8")
     post.side_effect = requests.HTTPError("missing response")
 
@@ -164,6 +176,7 @@ def test_cloud_http_error_without_response_is_reported(core, post):
 
 
 def test_cloud_network_exhaustion_reports_configured_attempt_count(core, post):
+    """A NetworkError from http_post should be reported with the configured retry count."""
     core.ENV_FILE.write_text("OPENAI_API_KEY=synthetic-test-key\n", encoding="utf-8")
     post.side_effect = core.NetworkError("exhausted")
 
@@ -177,6 +190,7 @@ def test_cloud_network_exhaustion_reports_configured_attempt_count(core, post):
 
 @pytest.mark.parametrize("data", [{}, {"choices": [{}]}, {"choices": [{"message": {}}]}])
 def test_cloud_missing_response_fields_are_reported_as_format_errors(core, post, data):
+    """A chat response missing expected fields should be reported as an unexpected-format error."""
     core.ENV_FILE.write_text("OPENAI_API_KEY=synthetic-test-key\n", encoding="utf-8")
     post.return_value.json.return_value = data
 
@@ -187,6 +201,7 @@ def test_cloud_missing_response_fields_are_reported_as_format_errors(core, post,
 
 
 def test_cloud_invalid_json_is_reported_as_a_format_error(core, post):
+    """A response body that fails JSON decoding should be reported as an unexpected-format error."""
     core.ENV_FILE.write_text("OPENAI_API_KEY=synthetic-test-key\n", encoding="utf-8")
     post.return_value.json.side_effect = requests.exceptions.JSONDecodeError("invalid JSON", "<html>", 0)
 
@@ -197,6 +212,7 @@ def test_cloud_invalid_json_is_reported_as_a_format_error(core, post):
 
 
 def test_unexpected_cloud_failure_is_logged_and_returned(core, post, caplog):
+    """An unexpected exception from the transport should be logged with traceback and returned as an error."""
     core.ENV_FILE.write_text("OPENAI_API_KEY=synthetic-test-key\n", encoding="utf-8")
     post.side_effect = RuntimeError("unexpected transport failure")
 
@@ -211,6 +227,7 @@ def test_unexpected_cloud_failure_is_logged_and_returned(core, post, caplog):
 
 @pytest.mark.parametrize("alive", [True, False])
 def test_kobold_health_check_uses_configured_info_url(core, monkeypatch, alive):
+    """kobold_alive should probe the configured KoboldCpp info URL and return is_alive's result."""
     monkeypatch.setattr(core, "NET", replace(core.NET, kobold_host="kobold.internal", kobold_port=5555))
     probe = Mock(return_value=alive)
     monkeypatch.setattr(core, "is_alive", probe)
@@ -225,6 +242,7 @@ def test_kobold_health_check_uses_configured_info_url(core, monkeypatch, alive):
 def test_llama_health_selection_obeys_priority_and_unavailable_fallback(
     core, monkeypatch, first_alive, function,
 ):
+    """llama_alive/get_llama_url/get_llama_port should pick the first live endpoint in priority order."""
     outcomes = [False] * 3
     if first_alive is not None:
         outcomes[first_alive] = True
@@ -244,6 +262,7 @@ def test_llama_health_selection_obeys_priority_and_unavailable_fallback(
 
 @pytest.mark.parametrize("malformed", ["http://server/health", "http://server:invalid/health"])
 def test_llama_port_skips_malformed_live_endpoint_and_logs_warning(core, monkeypatch, caplog, malformed):
+    """get_llama_port should skip a live but unparsable endpoint, log a warning, and use the next one."""
     monkeypatch.setattr(core, "LLAMA_ENDPOINTS", [(malformed, "unused"), ("http://server:9000/health", "chat")])
     monkeypatch.setattr(core, "is_alive", Mock(return_value=True))
 
@@ -255,6 +274,7 @@ def test_llama_port_skips_malformed_live_endpoint_and_logs_warning(core, monkeyp
 
 @pytest.fixture
 def local(core, post, monkeypatch):
+    """Configure core for local (llama) call_llm tests with the cloud fallback stubbed out."""
     monkeypatch.setattr(core, "get_backend", Mock(return_value="llama"))
     monkeypatch.setattr(core, "get_llama_url", Mock(return_value="http://llama.internal:9000/v1/chat/completions"))
     monkeypatch.setattr(core, "load_settings", Mock(return_value={}))
@@ -264,6 +284,7 @@ def local(core, post, monkeypatch):
 
 @pytest.mark.parametrize("provider", ["kobold", "llama", "auto"])
 def test_local_request_uses_shared_transport_and_configured_timeout(local, post, provider):
+    """call_llm for a local backend should post to the right URL with the configured local timeout."""
     assert local.call_llm(MESSAGES, max_tokens=128, temperature=0.25, provider=provider) == "Generated text"
 
     url = local.KOBOLD_URL if provider == "kobold" else local.get_llama_url.return_value
@@ -274,6 +295,7 @@ def test_local_request_uses_shared_transport_and_configured_timeout(local, post,
 
 
 def test_shared_transport_preserves_local_sampling_and_thinking_settings(local, post):
+    """call_llm should forward sampling settings and disable thinking when settings.txt requests it."""
     sampling = {"top_p": 0.8, "top_k": 20, "min_p": 0.1, "repeat_penalty": 1.1,
                 "presence_penalty": 0.2, "frequency_penalty": 0.3, "seed": 0}
     local.load_settings.return_value = {**sampling, "disable_thinking": True, "ctx_size": 4096}
@@ -288,6 +310,7 @@ def test_shared_transport_preserves_local_sampling_and_thinking_settings(local, 
 
 @pytest.mark.parametrize("content", [None, "", " \t\n"])
 def test_empty_local_response_retries_once_without_thinking_and_doubles_budget(local, post, content):
+    """An empty/blank local response should trigger one retry with thinking off and double max_tokens."""
     post.side_effect = [chat_response(content), chat_response("Recovered text")]
 
     assert local.call_llm(MESSAGES, max_tokens=64, temperature=0.0, provider="llama") == "Recovered text"
@@ -303,6 +326,7 @@ def test_empty_local_response_retries_once_without_thinking_and_doubles_budget(l
 @pytest.mark.parametrize("provider", ["kobold", "llama", "auto"])
 @pytest.mark.parametrize("kind", ["http", "network", "unexpected"])
 def test_local_errors_fall_back_only_for_automatic_provider(local, post, provider, kind):
+    """Local request failures should fall back to the cloud chain only when provider is 'auto'."""
     failure = {"http": http_error(503), "network": local.NetworkError("exhausted"),
                "unexpected": ValueError("invalid response")}[kind]
     post.side_effect = failure
@@ -329,6 +353,7 @@ def test_local_errors_fall_back_only_for_automatic_provider(local, post, provide
 
 
 def test_retry_failure_after_empty_local_response_also_falls_back(local, post):
+    """If the empty-response retry also fails, auto mode should still fall back to the cloud chain."""
     post.side_effect = [chat_response(""), local.NetworkError("retry failed")]
 
     assert local.call_llm(MESSAGES, provider="auto") == "Cloud fallback"
@@ -338,6 +363,7 @@ def test_retry_failure_after_empty_local_response_also_falls_back(local, post):
 
 
 def test_explicit_local_http_error_without_response_does_not_crash(local, post):
+    """An HTTPError with no response should not crash call_llm for an explicit local provider."""
     post.side_effect = requests.HTTPError("no response")
 
     assert local.call_llm(MESSAGES, provider="llama").startswith("[Ошибка] HTTP")
@@ -346,6 +372,7 @@ def test_explicit_local_http_error_without_response_does_not_crash(local, post):
 
 
 def test_debug_log_writes_utf8_and_always_prints(core, monkeypatch, capsys):
+    """_debug_log should append UTF-8 timestamped lines to DEBUG_LOG and also print them."""
     monkeypatch.setattr(core.time, "strftime", Mock(return_value="2026-10-16 12:00:00"))
 
     core._debug_log("Диагностика ✓")
@@ -357,6 +384,7 @@ def test_debug_log_writes_utf8_and_always_prints(core, monkeypatch, capsys):
 
 
 def test_debug_log_failure_warns_and_still_prints(core, monkeypatch, tmp_path, caplog, capsys):
+    """If writing DEBUG_LOG fails, _debug_log should log a warning but still print the message."""
     monkeypatch.setattr(core, "DEBUG_LOG", tmp_path)  # Opening a directory as a file raises OSError.
 
     with caplog.at_level("WARNING", logger="rag.core"):
@@ -367,6 +395,7 @@ def test_debug_log_failure_warns_and_still_prints(core, monkeypatch, tmp_path, c
 
 
 def test_list_collections_logs_unavailable_database_and_continues(core, monkeypatch, tmp_path, caplog):
+    """If one database is unreachable, list_collections should log a warning and still list the other."""
     primary, books = tmp_path / "primary", tmp_path / "books"
     primary.mkdir()
     books.mkdir()
@@ -385,6 +414,7 @@ def test_list_collections_logs_unavailable_database_and_continues(core, monkeypa
 
 
 def test_list_collections_ignores_nonexistent_database_directories(core, monkeypatch, tmp_path):
+    """list_collections should return an empty list and skip Chroma entirely when both DBs are missing."""
     monkeypatch.setattr(core, "CHROMA_DIR", tmp_path / "missing-primary")
     monkeypatch.setattr(core, "BOOKRAG_DIR", tmp_path / "missing-books")
 

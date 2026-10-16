@@ -29,7 +29,9 @@ def _load_module(name, monkeypatch):
 
 @pytest.fixture(autouse=True)
 def block_network(monkeypatch):
+    """Fail any test that issues a real HTTP request instead of mocking it."""
     def unexpected_request(*args, **kwargs):
+        """Fail the test; real network calls are not allowed in unit tests."""
         pytest.fail("Unit tests must mock HTTP requests")
 
     monkeypatch.setattr(requests.sessions.Session, "request", unexpected_request)
@@ -37,7 +39,9 @@ def block_network(monkeypatch):
 
 @pytest.fixture
 def config_factory(monkeypatch):
+    """Return a loader that reloads rag_config with a clean, overridable environment."""
     def load(**overrides):
+        """Clear known config env vars, apply overrides, and (re)load rag_config."""
         for name in CONFIG_ENV_VARS:
             monkeypatch.delenv(name, raising=False)
         for name, value in overrides.items():
@@ -49,11 +53,13 @@ def config_factory(monkeypatch):
 
 @pytest.fixture
 def config(config_factory, request):
+    """Load rag_config, optionally parametrized with environment overrides."""
     return config_factory(**getattr(request, "param", {}))
 
 
 @pytest.fixture
 def net(config, monkeypatch):
+    """Load rag_net with sleep mocked out, and close any session it opens."""
     module = _load_module("rag_net", monkeypatch)
     monkeypatch.setattr(module.time, "sleep", Mock())
     yield module
@@ -63,6 +69,7 @@ def net(config, monkeypatch):
 
 @pytest.fixture
 def core(net, monkeypatch, tmp_path):
+    """Load rag_core with optional ML dependencies stubbed and paths redirected to tmp_path."""
     # These optional packages are only needed by embedding/database operations.
     # Import the complete rag_core module without loading models or opening a DB.
     chromadb = ModuleType("chromadb")
