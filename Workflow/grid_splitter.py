@@ -406,8 +406,15 @@ def sort_boxes(boxes):
 
 
 def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: int, H: int):
-    """Schneidet die Beschriftung unter dem Bild ab: Panel von unten zerlegen, die erste
-    zusammenhaengende Zeilengruppe ist das Bild, alles darunter ist Text."""
+    """Return a panel box with its bottom edge heuristically adjusted for captions.
+
+    ``box`` contains (left, top, right, bottom) pixel bounds. ``gray`` and
+    ``mask`` cover the full image; True in ``mask`` denotes background.
+    ``H`` is the image height in pixels; ``img`` and ``W`` are unused.
+    Boxes under 40 pixels wide or tall, or rejected by the height checks,
+    are returned unchanged. Captions may remain. Input images and arrays
+    are not modified.
+    """
     l, t, r, b = box
     bh, bw = b - t, r - l
     if bh < 40 or bw < 40:
@@ -493,6 +500,18 @@ def make_names(count: int) -> list[str]:
 # ----------------------------------------------------------------------------
 def process(path: Path, port: int, out_root: Path, debug: bool,
             with_captions: bool = True) -> tuple[Path, list[Path]]:
+    """Split a grid using the local vision server at ``port`` and save RGB PNGs.
+
+    Return (output folder, saved paths) in row order, left to right.
+    Use an available ``gridN`` folder under ``out_root`` and record its name
+    in ``out_root/used.md`` after saving all panels. ``with_captions=False``
+    attempts to trim captions below panels; some boxes may remain unchanged.
+    ``debug`` also saves ``grid_splitter_debug.png`` beside this module.
+
+    Raise RuntimeError if none of three model responses yields valid boxes.
+    Image, filesystem, HTTP, and response-structure errors propagate;
+    saving errors can leave partial output.
+    """
     log(f"\n=== {path} ===")
     img = Image.open(path)
     img.load()
@@ -549,9 +568,24 @@ _run_lock = threading.Lock()
 def split_image(image_path, out_root: Path = OUT_ROOT, vl: str = DEFAULT_VL,
                 ngl: int | None = None, debug: bool = False, on_log=None,
                 with_captions: bool = True) -> tuple[Path, list[Path]]:
-    """API fuer andere Programme (z.B. webui.py): schneidet ein Gitter, gibt (Ordner, [Dateien]) zurueck.
-    Startet bei Bedarf den Vision-Server selbst und beendet ihn danach wieder. Wirft RuntimeError bei Fehlern.
-    with_captions=False -> Panels ohne Beschriftung schneiden (nur das Bild)."""
+    """Split a grid for callers such as webui.py; return (folder, saved paths).
+
+    Save panels in reading order under ``out_root/gridN`` and record the
+    folder in ``out_root/used.md``. Captions are included by default;
+    ``with_captions=False`` attempts to trim them below each panel.
+    ``debug`` also writes a control image beside this module.
+
+    Serialize calls and reuse an available vision server. Otherwise start
+    one with ``vl`` (``qwen`` or ``gemma``) and ``ngl`` GPU layers (None
+    selects automatically), then stop that server on exit. These options
+    do not change a reused server. ``on_log`` receives message strings;
+    exceptions from the callback are ignored.
+
+    Raise RuntimeError for a missing input file, unavailable server assets,
+    failed server readiness, or unusable panel detections. An unknown ``vl``
+    raises KeyError when starting a server. Image, filesystem, HTTP, and
+    response-structure errors propagate without conversion to RuntimeError.
+    """
     global _log_cb
     path = Path(image_path)
     if not path.is_file():
@@ -575,6 +609,14 @@ def split_image(image_path, out_root: Path = OUT_ROOT, vl: str = DEFAULT_VL,
 
 
 def main() -> None:
+    """Split grid images from CLI arguments, prompting for a path if omitted.
+
+    Include captions unless ``--no-captions`` requests heuristic trimming.
+    Stop a server started here unless ``--keep-server`` is set. Continue
+    after per-image RuntimeError failures and exit with status 1 if any occur,
+    or 0 otherwise. Missing files and server startup RuntimeErrors become
+    SystemExit; other image, filesystem, and request errors propagate.
+    """
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     except Exception:
