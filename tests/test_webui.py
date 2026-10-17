@@ -1,10 +1,10 @@
-"""Database update orchestration and error propagation introduced in PR #3."""
+"""Database update orchestration (PR #3) and grid caption controls (PR #9)."""
 
 import importlib.util
 import sys
 from pathlib import Path
 from types import ModuleType
-from unittest.mock import ANY, Mock, call
+from unittest.mock import ANY, MagicMock, Mock, call
 
 import pytest
 
@@ -159,3 +159,131 @@ def test_each_invocation_starts_with_fresh_log_messages(webui, operations, first
     assert operations.mock_calls == [
         call.update(log_callback=ANY), call.clear_cache(), call.update(log_callback=ANY), call.clear_search_cache(),
     ]
+
+
+@pytest.mark.parametrize(("model", "expected_model"), [("Qwen3-VL-4B", "qwen"), ("Gemma-4-E2B", "gemma")])
+@pytest.mark.parametrize("with_captions", [True, False])
+def test_grid_split_forwards_model_and_caption_choices_and_preserves_gallery_order(
+    webui, model, expected_model, with_captions, tmp_path,
+):
+    folder = tmp_path / "grid1"
+    files = [folder / "1abc.png", folder / "2xyz.png"]
+    split = Mock(return_value=(folder, files))
+    webui.grid_splitter.split_image = split
+    caption_choice = "с текстом (подписями)" if with_captions else "без текста (только кадр)"
+
+    status, gallery = webui.do_grid_split("storyboard.png", model, caption_choice)
+
+    split.assert_called_once_with(
+        "storyboard.png", vl=expected_model, with_captions=with_captions, on_log=ANY,
+    )
+    assert callable(split.call_args.kwargs["on_log"])
+    assert gallery == [str(file) for file in files]
+    assert status == f"✅ 2 Bilder → {folder}  (in used.md eingetragen)"
+
+
+@pytest.mark.parametrize("caption_choice", [None, "", "без", "без текста", "unknown choice"])
+def test_grid_split_only_explicit_no_caption_choice_disables_captions(webui, caption_choice, tmp_path):
+    """Regression: a prefix match must not turn an unrecognized choice into trimming."""
+    webui.grid_splitter.split_image = Mock(return_value=(tmp_path, []))
+
+    status, gallery = webui.do_grid_split("grid.png", "Qwen3-VL-4B", caption_choice)
+
+    assert webui.grid_splitter.split_image.call_args.kwargs["with_captions"] is True
+    assert status.startswith("✅ 0 Bilder")
+    assert gallery == []
+
+
+@pytest.mark.parametrize("image_path", [None, ""])
+def test_grid_split_missing_upload_does_not_call_splitter(webui, image_path):
+    webui.grid_splitter.split_image = Mock()
+
+    assert webui.do_grid_split(image_path, "Qwen3-VL-4B", "без текста (только кадр)") == (
+        "❌ Bitte zuerst ein Gitter-Bild hochladen.", [],
+    )
+
+    webui.grid_splitter.split_image.assert_not_called()
+
+
+@pytest.mark.parametrize("error_type", [RuntimeError, OSError, ValueError])
+@pytest.mark.parametrize("message_count", [0, 12, 15])
+def test_grid_split_failure_returns_empty_gallery_and_last_twelve_log_messages(
+    webui, error_type, message_count,
+):
+    messages = [f"Сообщение {index}" for index in range(message_count)]
+
+    def split(*args, on_log, **kwargs):
+        for message in messages:
+            on_log(message)
+        raise error_type("caption split failed")
+
+    webui.grid_splitter.split_image = Mock(side_effect=split)
+
+    status, gallery = webui.do_grid_split("grid.png", "Gemma-4-E2B", "без текста (только кадр)")
+
+    assert status == "❌ caption split failed\n\n" + "\n".join(messages[-12:])
+    assert gallery == []
+
+
+def test_grid_split_logs_do_not_leak_between_requests(webui):
+    def split(*args, on_log, **kwargs):
+        on_log("old request log")
+        raise RuntimeError("first failure")
+
+    webui.grid_splitter.split_image = Mock(side_effect=split)
+    assert "old request log" in webui.do_grid_split("first.png", "Qwen3-VL-4B", "с текстом (подписями)")[0]
+    webui.grid_splitter.split_image.side_effect = ValueError("second failure")
+
+    assert webui.do_grid_split("second.png", "Qwen3-VL-4B", "без текста (только кадр)") == (
+        "❌ second failure\n\n", [],
+    )
+
+
+def test_grid_caption_dropdown_defaults_to_included_and_is_connected_to_split_handler(webui, monkeypatch, tmp_path):
+    """Build the real UI against component mocks and exercise the registered click."""
+    gradio = MagicMock()
+    components = []
+
+    def component(*args, **kwargs):
+        result = MagicMock()
+        result.__enter__.return_value = result
+        components.append((args, kwargs, result))
+        return result
+
+    for name in (
+        "Blocks", "Markdown", "Accordion", "Row", "Column", "Group", "Textbox", "Dropdown",
+        "UploadButton", "Button", "Slider", "Checkbox", "Image", "File", "Gallery",
+    ):
+        getattr(gradio, name).side_effect = component
+    monkeypatch.setattr(webui, "gr", gradio)
+    monkeypatch.setattr(webui, "backend_status", Mock(return_value="offline"))
+    monkeypatch.setattr(webui, "rag_core", Mock(
+        CLOUD_PROVIDERS={}, load_settings=Mock(return_value={}),
+        load_env=Mock(return_value={}), list_collections=Mock(return_value=[]),
+    ))
+    webui.grid_splitter.split_image = Mock(return_value=(tmp_path / "grid1", []))
+
+    demo = webui.build_ui()
+
+    assert demo is components[0][2]
+
+    dropdowns = [
+        (kwargs, widget) for _, kwargs, widget in components
+        if kwargs.get("choices") == ("с текстом (подписями)", "без текста (только кадр)")
+    ]
+    assert len(dropdowns) == 1
+    dropdown_config, dropdown = dropdowns[0]
+    assert dropdown_config["value"] == "с текстом (подписями)"
+    button = next(widget for args, _, widget in components if args == ("✂️ Gitter schneiden",))
+    button.click.assert_called_once()
+    binding = button.click.call_args.kwargs
+    assert binding["fn"] is webui.do_grid_split
+    image = next(widget for _, kwargs, widget in components if kwargs.get("label") == "🖼️ Gitter-Bild")
+    model = next(widget for _, kwargs, widget in components if kwargs.get("label") == "Vision-Modell")
+    assert binding["inputs"] == [image, model, dropdown]
+    status = next(widget for _, kwargs, widget in components if kwargs.get("label") == "Status")
+    gallery = next(widget for _, kwargs, widget in components if kwargs.get("label") == "Ergebnis")
+    assert binding["outputs"] == [status, gallery]
+    for choice, expected in [(dropdown_config["value"], True), ("без текста (только кадр)", False)]:
+        binding["fn"]("grid.png", "Qwen3-VL-4B", choice)
+        assert webui.grid_splitter.split_image.call_args.kwargs["with_captions"] is expected
