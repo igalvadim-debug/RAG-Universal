@@ -161,6 +161,7 @@ def test_exhaustion_reports_the_last_failure_and_does_not_sleep_afterwards(
 
 @pytest.mark.parametrize("error_type", [requests.ConnectionError, requests.ReadTimeout, requests.Timeout])
 def test_post_does_not_retry_failures_that_may_follow_transmission(net, session, error_type):
+    """Wrap ambiguous POST failures in NetworkError without retrying or sleeping."""
     failure = error_type("response lost after request was sent")
     session.post.side_effect = [failure, response()]
 

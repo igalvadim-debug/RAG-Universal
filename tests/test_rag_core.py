@@ -135,6 +135,7 @@ def test_automatic_cloud_selection_accepts_both_agnes_key_spellings(core, post, 
 def test_cloud_chain_includes_legacy_key_in_each_priority_position(
     core, monkeypatch, first, skip, expected_order,
 ):
+    """Include providers with legacy keys in the requested first and deferred positions."""
     core.ENV_FILE.write_text(
         "OPENAI_API_KEY=openai-test-key\nGROQ_API_KEY=groq-test-key\n"
         "AGNES_API_KEY= \nagnes_API_KEY= legacy-test-key \n",
@@ -155,6 +156,7 @@ def test_cloud_chain_includes_legacy_key_in_each_priority_position(
 @pytest.mark.parametrize(("first", "skip"), [(None, None), ("Agnes", None), (None, "Agnes"), ("Agnes", "Agnes")])
 @pytest.mark.parametrize("env_text", [None, "AGNES_API_KEY= \t\nagnes_API_KEY= \t\n"])
 def test_cloud_chain_does_not_attempt_missing_or_blank_keys(core, monkeypatch, first, skip, env_text):
+    """Return a no-credentials error without attempting providers whose keys are missing or blank."""
     if env_text is not None:
         core.ENV_FILE.write_text(env_text, encoding="utf-8")
     attempt = Mock()
@@ -178,6 +180,7 @@ def test_cloud_chain_does_not_attempt_missing_or_blank_keys(core, monkeypatch, f
     ],
 )
 def test_automatic_cloud_fallback_caches_agnes_and_reuses_it(core, post, monkeypatch, env_text):
+    """Cache Agnes after a successful fallback and reuse it for the next automatic request."""
     core.ENV_FILE.write_text(
         f"OPENAI_API_KEY=openai-test-key\n{env_text}", encoding="utf-8",
     )
@@ -195,6 +198,7 @@ def test_automatic_cloud_fallback_caches_agnes_and_reuses_it(core, post, monkeyp
 
 
 def test_failed_cached_legacy_provider_is_retried_after_other_candidates(core, post, monkeypatch):
+    """Defer a failed cached provider with a legacy key until other candidates have been tried."""
     core.ENV_FILE.write_text(
         "OPENAI_API_KEY=openai-test-key\nagnes_API_KEY=legacy-test-key\n", encoding="utf-8",
     )
@@ -473,6 +477,7 @@ def shared_session(core, net, monkeypatch):
     [("success", 1), ("connection", 2), ("connect-timeout", 2), ("rate-limit", 2), ("read-timeout", 1)],
 )
 def test_completion_uses_only_shared_session_and_its_retry_policy(core, net, shared_session, provider, outcome, attempts):
+    """Check each backend's payload, timeout, attempt count, and backoff through the shared session."""
     if outcome != "success":
         failure = {
             "connection": requests.ConnectionError("connection refused"),
@@ -507,6 +512,7 @@ def test_completion_uses_only_shared_session_and_its_retry_policy(core, net, sha
 @pytest.mark.parametrize("provider", ["OpenAI", "kobold", "llama"])
 @pytest.mark.parametrize(("status", "attempts"), [(401, 1), (429, 2), (503, 2)])
 def test_completion_preserves_http_errors_after_shared_session_attempts(core, net, shared_session, provider, status, attempts):
+    """Preserve HTTP status errors from the shared session in each backend's completion result."""
     shared_session.post.return_value = http_error(status).response
 
     result = core.call_llm(MESSAGES, provider=provider)
@@ -518,6 +524,7 @@ def test_completion_preserves_http_errors_after_shared_session_attempts(core, ne
 
 @pytest.mark.parametrize("provider", ["OpenAI", "kobold", "llama"])
 def test_completion_does_not_exceed_shared_connection_retry_budget(core, net, shared_session, provider):
+    """Check completion attempt counts and backoff against the configured connection retry budget."""
     shared_session.post.side_effect = requests.ConnectionError("connection refused")
 
     result = core.call_llm(MESSAGES, provider=provider)
@@ -530,6 +537,7 @@ def test_completion_does_not_exceed_shared_connection_retry_budget(core, net, sh
 @pytest.mark.parametrize("provider", ["kobold", "llama"])
 @pytest.mark.parametrize("retry_content", ["Recovered text", "", None])
 def test_empty_local_response_uses_shared_session_for_one_thinking_retry(core, shared_session, provider, retry_content):
+    """Retry an empty local response once through the shared session with thinking disabled."""
     core.load_settings.return_value = {"top_p": 0.8, "seed": 0}
     shared_session.post.side_effect = [chat_response(" \t\n"), chat_response(retry_content)]
 
@@ -545,6 +553,7 @@ def test_empty_local_response_uses_shared_session_for_one_thinking_retry(core, s
 
 @pytest.mark.parametrize("provider", ["kobold", "llama", "auto"])
 def test_read_timeout_during_thinking_retry_only_falls_back_in_auto_mode(core, net, shared_session, monkeypatch, provider):
+    """Fall back to cloud after a thinking-retry read timeout only in automatic provider mode."""
     monkeypatch.setattr(core, "get_backend", Mock(return_value="llama"))
     fallback = Mock(return_value="Cloud fallback")
     monkeypatch.setattr(core, "_try_cloud_chain", fallback)
