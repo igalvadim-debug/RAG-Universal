@@ -39,17 +39,35 @@ SETTINGS_PATH   = PATHS.settings_path
 # ЧТЕНИЕ .env (портативно— без системных переменных)
 # ──────────────────────────────────────────────
 
+_env_cache: tuple[float, dict] | None = None  # (mtime_ns, разобранный словарь)
+
+
 def load_env() -> dict:
-    """Читает .env из папки проекта, возвращает словарь KEY=VALUE."""
-    env = {}
+    """Читает .env из папки проекта, возвращает словарь KEY=VALUE.
+
+    Оптимизация производительности: разбор файла кэшируется по mtime —
+    повторные вызовы (каждый облачный запрос идёт через load_env) не читают
+    и не парсят файл заново, пока он не изменён на диске.
+    """
+    global _env_cache
     if not ENV_FILE.exists():
-        return env
+        _env_cache = None
+        return {}
+    try:
+        mtime_ns = ENV_FILE.stat().st_mtime_ns
+    except OSError:
+        mtime_ns = None
+    if mtime_ns is not None and _env_cache is not None and _env_cache[0] == mtime_ns:
+        return dict(_env_cache[1])
+    env = {}
     for line in ENV_FILE.read_text(encoding="utf-8").splitlines():
         line = line.strip()
         if not line or line.startswith("#") or "=" not in line:
             continue
         k, _, v = line.partition("=")
         env[k.strip()] = v.strip()
+    if mtime_ns is not None:
+        _env_cache = (mtime_ns, dict(env))
     return env
 
 
@@ -93,7 +111,7 @@ def save_env(updates: dict):
 # SETTINGS.TXT — Modell- und Sampling-Konfiguration
 # ──────────────────────────────────────────────
 
-_settings_cache = None
+_settings_cache      = None   # (mtime_ns, parsches Dict) — Cache invalidiert bei Dateiänderung
 
 
 def load_settings(refresh: bool = False) -> dict:
@@ -101,10 +119,19 @@ def load_settings(refresh: bool = False) -> dict:
     Liest settings.txt (Format: KEY<TAB>WERT) und gibt ein Dict zurück.
     Zahlen werden robust geparst (auch Bereichsangaben wie '8192–16384' → 8192),
     'true'/'false' → bool. Leere Werte bleiben leere Strings.
+
+    Оптимизация производительности: разбор кэшируется по mtime файла —
+    правки в settings.txt подхватываются автоматически (раньше кэш жил
+    до перезапуска процесса). Явный refresh=True форсирует перечитывание.
     """
     global _settings_cache
-    if _settings_cache is not None and not refresh:
-        return _settings_cache
+    try:
+        mtime_ns = SETTINGS_PATH.stat().st_mtime_ns if SETTINGS_PATH.exists() else None
+    except OSError:
+        mtime_ns = None
+    if not refresh and _settings_cache is not None \
+            and _settings_cache[0] == mtime_ns:
+        return _settings_cache[1]
     s = {}
     if SETTINGS_PATH.exists():
         for line in SETTINGS_PATH.read_text(encoding="utf-8").splitlines():
@@ -125,7 +152,7 @@ def load_settings(refresh: bool = False) -> dict:
                     s[k] = float(num_str) if "." in num_str else int(num_str)
                 else:
                     s[k] = v
-    _settings_cache = s
+    _settings_cache = (mtime_ns, s)
     return s
 
 
@@ -152,6 +179,12 @@ _NOTE_PATTERNS = [
     r"(?i)^\s*\(.*(placeholder|example|assum).*\)\s*$",
 ]
 
+# Оптимизация производительности: паттерны компилируются один раз при импорте
+# модуля — раньше на каждую строку каждого ответа выполнялся re.search() по
+# всем 11 шаблонам (внутренний кэш re частично помогал, но компиляция в цикле
+# всё равно дороже предварительной).
+_NOTE_PATTERNS_COMPILED = [re.compile(p) for p in _NOTE_PATTERNS]
+
 
 def _split_notes(text: str) -> tuple[str, str]:
     """
@@ -167,7 +200,7 @@ def _split_notes(text: str) -> tuple[str, str]:
         if not stripped:
             clean_lines.append(line)
             continue
-        if any(re.search(pat, stripped) for pat in _NOTE_PATTERNS):
+        if any(pat.search(stripped) for pat in _NOTE_PATTERNS_COMPILED):
             note_lines.append(stripped)
         else:
             clean_lines.append(line)
