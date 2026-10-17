@@ -43,11 +43,12 @@ _env_cache: tuple[float, dict] | None = None  # (mtime_ns, разобранны�
 
 
 def load_env() -> dict:
-    """Читает .env из папки проекта, возвращает словарь KEY=VALUE.
+    """Read .env KEY=VALUE pairs into a new dictionary, trimming keys and values.
 
-    Оптимизация производительности: разбор файла кэшируется по mtime —
-    повторные вызовы (каждый облачный запрос идёт через load_env) не читают
-    и не парсят файл заново, пока он не изменён на диске.
+    Blank lines, comments, and lines without '=' are ignored. Parsed values
+    are reused while the file's nanosecond modification time is unchanged;
+    failure to stat the file bypasses the cache. A missing file clears the
+    cache and returns {}. File read and UTF-8 decoding errors propagate.
     """
     global _env_cache
     if not ENV_FILE.exists():
@@ -115,14 +116,16 @@ _settings_cache      = None   # (mtime_ns, parsches Dict) — Cache invalidiert 
 
 
 def load_settings(refresh: bool = False) -> dict:
-    """
-    Liest settings.txt (Format: KEY<TAB>WERT) und gibt ein Dict zurück.
-    Zahlen werden robust geparst (auch Bereichsangaben wie '8192–16384' → 8192),
-    'true'/'false' → bool. Leere Werte bleiben leere Strings.
+    """Read tab-separated settings.txt entries into a cached dictionary.
 
-    Оптимизация производительности: разбор кэшируется по mtime файла —
-    правки в settings.txt подхватываются автоматически (раньше кэш жил
-    до перезапуска процесса). Явный refresh=True форсирует перечитывание.
+    Blank lines, comments, empty keys or values, and lines without a tab are
+    skipped. Case-insensitive 'true'/'false' become booleans; a leading number
+    becomes an int or float (for example, '8192–16384' becomes 8192). Other
+    values remain stripped strings.
+
+    Reuse the same mutable dictionary while the file's nanosecond modification
+    time is unchanged. refresh=True bypasses the cache. A missing file yields
+    an empty dictionary. File read and UTF-8 decoding errors propagate.
     """
     global _settings_cache
     try:
@@ -296,7 +299,12 @@ def get_model():
 
 
 def get_collection():
-    """Открывает Chroma-коллекцию один раз и кэширует."""
+    """Return the active Chroma collection, opening the default if none is set.
+
+    Initially, get or create COLLECTION in CHROMA_DIR using a cached client.
+    A nonempty get_collection_by_name() lookup replaces the active collection.
+    Chroma client and collection errors propagate.
+    """
     global _collection
     if _collection is None:
         _collection = _get_chroma_client(CHROMA_DIR).get_or_create_collection(COLLECTION)
@@ -325,15 +333,17 @@ def list_collections() -> list[str]:
 
 
 def get_collection_by_name(name: str):
-    """Открывает коллекцию по имени (с кэшем клиентов и коллекций).
-    Поддерживает префикс базы: 'zaebalo:name' или 'bookrag:name'.
-    Без префикса — основная база (CHROMA_DIR).
+    """Get or create a named Chroma collection and make it the active collection.
 
-    Оптимизация производительности: PersistentClient создаётся один раз на путь БД,
-    коллекция — один раз на пару (путь БД, имя). Повторные запросы к той же коллекции
-    (например, переключение UI между 'bookrag:...' не сбрасывает кэш основной базы)
-    не переоткрывают SQLite-базу. Глобальная _collection обновляется для
-    совместимости с внешним кодом."""
+    'bookrag:name' selects BOOKRAG_DIR; 'zaebalo:name', unprefixed names,
+    and unknown prefixes select CHROMA_DIR. Only the first ':' is a separator.
+    An empty name returns None without changing the active collection.
+
+    Clients are cached by database path string and collections by path and
+    name, so switching databases preserves cached objects. The result is also
+    returned by subsequent get_collection() calls. Chroma client and collection
+    errors propagate.
+    """
     global _collection
     if not name:
         return None
