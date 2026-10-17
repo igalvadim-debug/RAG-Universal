@@ -1509,6 +1509,9 @@ def update_image_slots(n_sequences: int, director_mode: str = "нет"):
 # ИНТЕРФЕЙС
 # ──────────────────────────────────────────────
 
+GRID_CAPTION_CHOICES = ("с текстом (подписями)", "без текста (только кадр)")
+
+
 def do_grid_split(image_path, vl_choice, captions_choice):
     """Split an uploaded grid and return a status message and gallery paths.
 
@@ -1525,7 +1528,7 @@ def do_grid_split(image_path, vl_choice, captions_choice):
     try:
         folder, files = grid_splitter.split_image(
             image_path, vl=("gemma" if vl_choice == "Gemma-4-E2B" else "qwen"),
-            with_captions=(not str(captions_choice).startswith("без")), on_log=logs.append
+            with_captions=(captions_choice != GRID_CAPTION_CHOICES[1]), on_log=logs.append
         )
     except Exception as e:
         return "❌ " + str(e) + "\n\n" + "\n".join(logs[-12:]), []
@@ -1940,8 +1943,8 @@ def build_ui():
                     )
                     grid_captions_dd = gr.Dropdown(
                         label="✂️ Нарезать с текстом или без (подписи под кадрами)",
-                        choices=["с текстом (подписями)", "без текста (только кадр)"],
-                        value="с текстом (подписями)",
+                        choices=GRID_CAPTION_CHOICES,
+                        value=GRID_CAPTION_CHOICES[0],
                     )
                     grid_btn = gr.Button("✂️ Gitter schneiden", variant="primary")
                     grid_status = gr.Textbox(label="Status", interactive=False, lines=3)
