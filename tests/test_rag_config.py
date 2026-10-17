@@ -8,6 +8,7 @@ import pytest
 
 @pytest.mark.parametrize("value", [None, "", " ", "\t\n", "  custom value \t"])
 def test_env_strips_values_and_falls_back_for_blank_values(config, monkeypatch, value):
+    """_env() should strip whitespace and fall back to the default for blank/unset values."""
     if value is None:
         monkeypatch.delenv("TEST_RAG_VALUE", raising=False)
     else:
@@ -18,6 +19,7 @@ def test_env_strips_values_and_falls_back_for_blank_values(config, monkeypatch, 
 
 
 def test_default_paths_are_rooted_at_the_module(config):
+    """Default Paths fields should resolve relative to the module's BASE_DIR."""
     expected = {
         "model_dir": "model", "chroma_dir": "chroma_zaebalo", "bookrag_dir": "bookrag",
         "docs_dir": "docs", "songs_dir": "Songs", "projects_dir": "projects",
@@ -31,6 +33,7 @@ def test_default_paths_are_rooted_at_the_module(config):
 
 
 def test_path_overrides_are_trimmed_and_allow_spaces_and_unicode(config_factory, tmp_path):
+    """RAG_DB and COMFY_INPUT_DIR overrides should be trimmed and support spaces/unicode."""
     db = tmp_path / "Datenbank Bücher"
     inputs = tmp_path / "Comfy input"
     config = config_factory(RAG_DB=f"  {db}  ", COMFY_INPUT_DIR=f" {inputs}\t")
@@ -41,6 +44,7 @@ def test_path_overrides_are_trimmed_and_allow_spaces_and_unicode(config_factory,
 
 @pytest.mark.parametrize("blank", ["", " \t"])
 def test_blank_environment_overrides_keep_defaults(config_factory, blank):
+    """Blank environment overrides should be ignored in favor of the built-in defaults."""
     config = config_factory(
         RAG_DB=blank, COMFY_INPUT_DIR=blank, KOBOLD_PORT=blank,
         CLOUD_TIMEOUT=blank, RAG_COLLECTION=blank,
@@ -54,6 +58,7 @@ def test_blank_environment_overrides_keep_defaults(config_factory, blank):
 
 
 def test_network_defaults(config):
+    """NetConfig's default field values should match the documented defaults."""
     assert asdict(config.NET) == {
         "kobold_host": "127.0.0.1", "kobold_port": 5001,
         "llama_host": "127.0.0.1", "llama_port": 8080, "mtp_port": 8510,
@@ -81,6 +86,7 @@ def test_network_defaults(config):
     ],
 )
 def test_network_environment_overrides(config_factory, variable, field, value, expected):
+    """Each network environment variable should override its NetConfig field with the right type."""
     config = config_factory(**{variable: value})
 
     actual = getattr(config.NET, field)
@@ -89,6 +95,7 @@ def test_network_environment_overrides(config_factory, variable, field, value, e
 
 
 def test_rag_defaults(config):
+    """RagConfig's default field values should match the documented defaults."""
     assert asdict(config.RAG) == {
         "top_k": 7, "collection": "zaebalo", "default_max_tokens": 6000,
         "default_temperature": 0.75,
@@ -96,6 +103,7 @@ def test_rag_defaults(config):
 
 
 def test_rag_environment_overrides(config_factory):
+    """RAG_* environment variables should override RagConfig fields."""
     config = config_factory(
         RAG_TOP_K=" 1 ", RAG_COLLECTION=" custom collection ",
         RAG_MAX_TOKENS="128", RAG_TEMPERATURE="0.0",
@@ -114,12 +122,14 @@ def test_rag_environment_overrides(config_factory):
      "RAG_TOP_K", "RAG_MAX_TOKENS", "RAG_TEMPERATURE"],
 )
 def test_invalid_numeric_environment_fails_explicitly(config_factory, variable):
+    """Non-numeric values for numeric environment variables should raise ValueError."""
     with pytest.raises(ValueError):
         config_factory(**{variable: "not-a-number"})
 
 
 @pytest.mark.parametrize("name", ["PATHS", "NET", "RAG"])
 def test_configuration_instances_are_frozen(config, name):
+    """PATHS, NET, and RAG should be frozen dataclass instances that reject mutation."""
     instance = getattr(config, name)
     field = next(iter(asdict(instance)))
 
@@ -128,6 +138,7 @@ def test_configuration_instances_are_frozen(config, name):
 
 
 def test_configured_urls_and_llama_endpoint_priority(config):
+    """NetConfig URLs and llama_endpoints should reflect the configured hosts and priority order."""
     net = config.NetConfig(
         kobold_host="kobold.internal", kobold_port=5002,
         llama_host="llama.internal", llama_port=8081, mtp_port=8511,
@@ -145,6 +156,7 @@ def test_configured_urls_and_llama_endpoint_priority(config):
 
 
 def test_remote_endpoint_can_be_omitted_and_endpoint_lists_are_independent(config):
+    """An empty remote_llama should drop the remote endpoint, and each call should return a fresh list."""
     net = config.NetConfig(remote_llama="")
     endpoints = net.llama_endpoints
 
@@ -154,6 +166,7 @@ def test_remote_endpoint_can_be_omitted_and_endpoint_lists_are_independent(confi
 
 
 def test_provider_order_and_legacy_agnes_alias(config):
+    """CLOUD_PROVIDERS should keep its defined order and shape, and expose the legacy Agnes key alias."""
     assert list(config.CLOUD_PROVIDERS) == [
         "OpenAI", "Groq", "DeepSeek", "NVIDIA_NIM", "OpenRouter",
         "Google", "Mistral", "Odirouter", "Agnes",
