@@ -264,10 +264,25 @@ COLLECTION  = RAG.collection
 # ГЛОБАЛЬНЫЕ ОБЪЕКТЫ (ленивая загрузка)
 # ──────────────────────────────────────────────
 _model         = None
-_client        = None
 _collection    = None
+# Кэш клиентов/коллекций Chroma: путь БД -> PersistentClient, (путь БД, имя) -> коллекция.
+# chromadb.PersistentClient при каждом вызове заново открывает SQLite-базу и SQLLiteWriter
+# (дорогая операция), а UI дёргает get_collection_by_name() на каждый запрос — без кэша
+# база переоткрывалась многократно за сессию.
+_chroma_clients: dict[str, object] = {}
+_chroma_collections: dict[tuple[str, str], object] = {}
 _llama_proc    = None   # subprocess llama-server если мы его запустили
 _auto_provider = None   # кэш провайдера для auto-режима call_llm
+
+
+def _get_chroma_client(db_path):
+    """Возвращает PersistentClient для пути БД, создавая его только при первом обращении."""
+    key = str(db_path)
+    client = _chroma_clients.get(key)
+    if client is None:
+        client = chromadb.PersistentClient(path=key)
+        _chroma_clients[key] = client
+    return client
 
 
 def get_model():
@@ -282,10 +297,9 @@ def get_model():
 
 def get_collection():
     """Открывает Chroma-коллекцию один раз и кэширует."""
-    global _client, _collection
+    global _collection
     if _collection is None:
-        _client     = chromadb.PersistentClient(path=str(CHROMA_DIR))
-        _collection = _client.get_or_create_collection(COLLECTION)
+        _collection = _get_chroma_client(CHROMA_DIR).get_or_create_collection(COLLECTION)
     return _collection
 
 
@@ -311,10 +325,16 @@ def list_collections() -> list[str]:
 
 
 def get_collection_by_name(name: str):
-    """Открывает коллекцию по имени (не кэширует — для переключения).
+    """Открывает коллекцию по имени (с кэшем клиентов и коллекций).
     Поддерживает префикс базы: 'zaebalo:name' или 'bookrag:name'.
-    Без префикса — основная база (CHROMA_DIR)."""
-    global _client, _collection
+    Без префикса — основная база (CHROMA_DIR).
+
+    Оптимизация производительности: PersistentClient создаётся один раз на путь БД,
+    коллекция — один раз на пару (путь БД, имя). Повторные запросы к той же коллекции
+    (например, переключение UI между 'bookrag:...' не сбрасывает кэш основной базы)
+    не переоткрывают SQLite-базу. Глобальная _collection обновляется для
+    совместимости с внешним кодом."""
+    global _collection
     if not name:
         return None
     if ":" in name:
@@ -323,9 +343,14 @@ def get_collection_by_name(name: str):
     else:
         db_path   = CHROMA_DIR
         coll_name = name
-    _client     = chromadb.PersistentClient(path=str(db_path))
-    _collection = _client.get_or_create_collection(coll_name)
-    return _collection
+    key = (str(db_path), coll_name)
+    collection = _chroma_collections.get(key)
+    if collection is None:
+        client     = _get_chroma_client(db_path)
+        collection = client.get_or_create_collection(coll_name)
+        _chroma_collections[key] = collection
+    _collection = collection
+    return collection
 
 
 # ──────────────────────────────────────────────
