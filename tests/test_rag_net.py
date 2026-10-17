@@ -188,12 +188,28 @@ def test_exhaustion_reports_the_last_failure_and_does_not_sleep_afterwards(
 def test_post_connection_error_exhaustion_uses_one_attempt_budget_without_sleeping(net, session, monkeypatch):
     """With a persistent connection error and max_retries=1, http_post makes one POST and never sleeps."""
     monkeypatch.setattr(net, "NET", replace(net.NET, max_retries=1))
-    session.post.side_effect = requests.ConnectionError("connection refused")
+    failure = requests.ConnectionError("connection refused")
+    session.post.side_effect = failure
 
     with pytest.raises(net.NetworkError) as caught:
         net.http_post(URL, PAYLOAD)
 
+    assert caught.value.__cause__ is failure
     assert "connection refused" in str(caught.value)
+    assert session.post.call_count == 1
+    net.time.sleep.assert_not_called()
+
+
+def test_post_handles_mixed_connection_and_http_failures_with_one_attempt_budget(net, session, monkeypatch):
+    """With a one-attempt budget, a connection error raises NetworkError after exactly one POST and no sleep."""
+    monkeypatch.setattr(net, "NET", replace(net.NET, max_retries=1))
+    failure = requests.ConnectionError("connection reset")
+    session.post.side_effect = [failure, response(503)]
+
+    with pytest.raises(net.NetworkError) as caught:
+        net.http_post(URL, PAYLOAD)
+
+    assert caught.value.__cause__ is failure
     assert session.post.call_count == 1
     net.time.sleep.assert_not_called()
 

@@ -110,7 +110,7 @@ def http_post(url: str, json_payload: dict, headers: dict | None = None,
             raise NetworkError(f"POST {url} прерван по таймауту (запрос мог быть получен провайдером, повтор POST запрещён): {e}") from e
         except requests.HTTPError:
             raise  # 4xx (кроме повторённых 429/5xx) — сразу наружу
-    raise NetworkError(f"POST {url} не удался после {NET.max_retries} попыток: {last_exc}")
+    raise NetworkError(f"POST {url} не удался после {NET.max_retries} попыток: {last_exc}") from last_exc
 
 
 def http_get(url: str, timeout: float | None = None,
