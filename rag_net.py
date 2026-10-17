@@ -72,8 +72,7 @@ def http_post(url: str, json_payload: dict, headers: dict | None = None,
 
     Retry only ConnectTimeout, which occurs before transmission, with
     exponential backoff for up to NET.max_retries session calls in total.
-    No provider-supported idempotency key is configured, so HTTP error
-    responses and ambiguous connection failures must not resend a POST.
+    HTTP error responses and ambiguous connection failures are not retried.
 
     Raise NetworkError immediately for other timeouts and ambiguous connection
     failures, or after connect-timeout attempts are exhausted (including when
