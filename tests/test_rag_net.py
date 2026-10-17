@@ -121,10 +121,25 @@ def test_explicit_zero_timeout_is_not_replaced_by_a_default(net, session, method
     assert getattr(session, method).call_args.kwargs["timeout"] == 0
 
 
-@pytest.mark.parametrize("method", ["get", "post"])
+@pytest.mark.parametrize("error_type", [requests.ConnectionError])
+def test_post_transient_failures_retry_with_exponential_backoff(net, session, monkeypatch, error_type):
+    """Connection errors on POST should be retried with exponential backoff up to max_retries."""
+    monkeypatch.setattr(net, "NET", replace(net.NET, max_retries=4, backoff_base=0.25))
+    success = response()
+    transport = session.post
+    transport.side_effect = [error_type("first"), error_type("second"), error_type("third"), success]
+
+    assert net.http_post(URL, PAYLOAD) is success
+
+    assert transport.call_count == 4
+    assert transport.call_args_list == [transport.call_args] * 4
+    assert net.time.sleep.call_args_list == [call(0.25), call(0.5), call(1.0)]
+
+
+@pytest.mark.parametrize("method", ["get"])
 @pytest.mark.parametrize("error_type", [requests.ConnectionError, requests.Timeout])
-def test_transient_failures_retry_with_exponential_backoff(net, session, monkeypatch, method, error_type):
-    """Connection errors and timeouts should be retried with exponential backoff up to max_retries."""
+def test_get_transient_failures_retry_with_exponential_backoff(net, session, monkeypatch, method, error_type):
+    """GET connection errors and timeouts should be retried with exponential backoff up to max_retries."""
     monkeypatch.setattr(net, "NET", replace(net.NET, max_retries=4, backoff_base=0.25))
     success = response()
     transport = getattr(session, method)
@@ -137,12 +152,24 @@ def test_transient_failures_retry_with_exponential_backoff(net, session, monkeyp
     assert net.time.sleep.call_args_list == [call(0.25), call(0.5), call(1.0)]
 
 
-@pytest.mark.parametrize("method", ["get", "post"])
-@pytest.mark.parametrize("error_type", [requests.ConnectionError, requests.Timeout])
+def test_post_read_timeout_raises_network_error_without_retry(net, session):
+    """A read timeout means the request may have reached the provider: raise NetworkError after one POST."""
+    session.post.side_effect = requests.Timeout("read timeout")
+
+    with pytest.raises(net.NetworkError) as caught:
+        net.http_post(URL, PAYLOAD)
+
+    assert "таймаут" in str(caught.value)
+    assert session.post.call_count == 1
+    net.time.sleep.assert_not_called()
+
+
+@pytest.mark.parametrize("method", ["get"])
+@pytest.mark.parametrize("error_type", [requests.ConnectionError])
 def test_exhaustion_reports_the_last_failure_and_does_not_sleep_afterwards(
     net, session, method, error_type,
 ):
-    """After retries are exhausted, NetworkError should report the last failure and stop sleeping."""
+    """After connection-error retries are exhausted, NetworkError should report the last failure and stop sleeping."""
     transport = getattr(session, method)
     transport.side_effect = [error_type("first"), error_type("second"), error_type("last failure")]
 
@@ -156,6 +183,19 @@ def test_exhaustion_reports_the_last_failure_and_does_not_sleep_afterwards(
     assert "last failure" in str(caught.value)
     assert transport.call_count == 3
     assert net.time.sleep.call_args_list == [call(1.0), call(2.0)]
+
+
+def test_post_connection_error_exhaustion_uses_one_attempt_budget_without_sleeping(net, session, monkeypatch):
+    """With a persistent connection error and max_retries=1, http_post makes one POST and never sleeps."""
+    monkeypatch.setattr(net, "NET", replace(net.NET, max_retries=1))
+    session.post.side_effect = requests.ConnectionError("connection refused")
+
+    with pytest.raises(net.NetworkError) as caught:
+        net.http_post(URL, PAYLOAD)
+
+    assert "connection refused" in str(caught.value)
+    assert session.post.call_count == 1
+    net.time.sleep.assert_not_called()
 
 
 @pytest.mark.parametrize("method", ["get", "post"])
@@ -188,24 +228,8 @@ def test_client_errors_preserve_the_response_and_fail_without_retry(net, session
 
 
 @pytest.mark.parametrize("status", [429, 500, 502, 503, 504])
-def test_post_manually_retries_retryable_status_when_transport_retry_is_unavailable(
-    net, session, monkeypatch, status,
-):
-    """Without urllib3's Retry, http_post should manually retry RETRY_STATUS responses itself."""
-    monkeypatch.setattr(net, "Retry", None)
-    success = response()
-    session.post.side_effect = [response(status), response(status), success]
-
-    assert net.http_post(URL, PAYLOAD) is success
-
-    assert session.post.call_count == 3
-    assert net.time.sleep.call_args_list == [call(1.0), call(2.0)]
-
-
-@pytest.mark.parametrize("status", [429, 500, 502, 503, 504])
-def test_post_preserves_terminal_http_error_after_manual_retries(net, session, monkeypatch, status):
-    """If manual status retries are exhausted, http_post should raise HTTPError for the last response."""
-    monkeypatch.setattr(net, "Retry", None)
+def test_post_does_not_retry_http_errors_after_transmission(net, session, status):
+    """An HTTP error response (already transmitted) must raise HTTPError without resending the POST."""
     failure = response(status)
     session.post.return_value = failure
 
@@ -213,25 +237,13 @@ def test_post_preserves_terminal_http_error_after_manual_retries(net, session, m
         net.http_post(URL, PAYLOAD)
 
     assert caught.value.response is failure
-    assert session.post.call_count == 3
-    assert net.time.sleep.call_args_list == [call(1.0), call(2.0)]
-
-
-def test_post_handles_mixed_connection_and_http_failures_with_one_attempt_budget(net, session, monkeypatch):
-    """A connection error followed by a retryable status should share the same overall retry budget."""
-    monkeypatch.setattr(net, "Retry", None)
-    success = response()
-    session.post.side_effect = [requests.ConnectionError("connection reset"), response(503), success]
-
-    assert net.http_post(URL, PAYLOAD) is success
-
-    assert session.post.call_count == 3
-    assert net.time.sleep.call_args_list == [call(1.0), call(2.0)]
+    assert session.post.call_count == 1
+    net.time.sleep.assert_not_called()
 
 
 @pytest.mark.parametrize("method", ["get", "post"])
 def test_http_status_retry_is_left_to_the_configured_transport(net, session, method):
-    """When the transport-level Retry is in place, a single retryable status should raise once, unretried here."""
+    """A retryable status should raise once, unretried here; transport policy owns any status retries."""
     getattr(session, method).return_value = response(503)
 
     with pytest.raises(requests.HTTPError):

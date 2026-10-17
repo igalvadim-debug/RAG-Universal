@@ -30,9 +30,9 @@ RETRY_STATUS = (429, 500, 502, 503, 504)
 def make_session() -> requests.Session:
     """Create a session with connection pooling and transport retries disabled.
 
-    Retry budgets are managed by http_post and http_get. Only http_post
-    retries RETRY_STATUS responses; http_get retries connection failures
-    and timeouts only.
+    Retry budgets are managed by http_post and http_get. http_post retries
+    connection failures only (a received response is never resent); http_get
+    retries connection failures and timeouts.
     """
     s = requests.Session()
     if Retry is not None:
@@ -71,14 +71,18 @@ def http_post(url: str, json_payload: dict, headers: dict | None = None,
     for URLs containing '://' but neither '127.0.0.1' nor 'localhost'; other
     URLs use NET.local_timeout.
 
-    Retry connection errors (including connect timeouts) and RETRY_STATUS
-    responses with exponential backoff for up to NET.max_retries session calls
-    in total. Retries can resend a POST; no idempotency guarantee is provided.
+    Retry connection errors (including connect timeouts) with exponential
+    backoff for up to NET.max_retries session calls in total. A connection
+    error happens before the request reaches the provider, so repeating it is
+    safe. Once a response has been received (the request was transmitted),
+    the POST is never resent: any HTTP error status — retryable ones like
+    429/503 included — raises HTTPError immediately, since providers do not
+    guarantee POST idempotency.
 
     Raise NetworkError immediately for other timeouts, including read timeouts,
     after connection-error attempts are exhausted, or if no attempts are
-    configured. HTTPError propagates for failing HTTP statuses,
-    including exhausted status retries. Other Requests errors also propagate.
+    configured. HTTPError propagates for failing HTTP statuses.
+    Other Requests errors also propagate.
     """
     if timeout is None:
         timeout = NET.cloud_timeout if "://" in url and "127.0.0.1" not in url and "localhost" not in url else NET.local_timeout
@@ -87,13 +91,9 @@ def http_post(url: str, json_payload: dict, headers: dict | None = None,
     for attempt in range(1, NET.max_retries + 1):
         try:
             resp = sess.post(url, json=json_payload, headers=headers, timeout=timeout)
-            # 429/5xx повторяем здесь же (общий бюджет, тот же backoff)
-            if resp.status_code in RETRY_STATUS and attempt < NET.max_retries:
-                wait = NET.backoff_base * (2 ** (attempt - 1))
-                log.warning("HTTP %s от %s — попытка %d/%d, жду %.1f c",
-                            resp.status_code, url, attempt, NET.max_retries, wait)
-                time.sleep(wait)
-                continue
+            # Ответ получен — запрос уже передан провайдеру. POST не повторяем:
+            # идемпотентность не гарантирована, любой HTTP-ошибочный статус
+            # (включая 429/5xx) уходит наружу через raise_for_status().
             resp.raise_for_status()
             return resp
         except requests.ConnectionError as e:
