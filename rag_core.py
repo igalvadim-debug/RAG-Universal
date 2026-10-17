@@ -42,16 +42,11 @@ SETTINGS_PATH   = PATHS.settings_path
 
 def load_env() -> dict:
     """Читает .env из папки проекта, возвращает словарь KEY=VALUE.
-    Кэширует по подписи файла (mtime + размер): файл меняется редко,
-    а вызывается на каждый запрос к API.
+    Кэширует разобранные значения по содержимому файла: файл меняется редко,
+    а функция вызывается на каждый запрос к API.
 
-    Размер файла включён в подпись, потому что на некоторых файловых
-    системах (Windows, Docker, старые Linux) разрешение st_mtime слишком
-    грубое: запись может произойти в пределах одного тика часов, и тогда
-    одна только mtime не заметит изменения — приложение бесконечно
-    считало бы устаревшие настройки. Если же перезапись меняет только
-    порядок строк при той же длине и том же mtime, save_env() принудительно
-    инвалидирует кэш (см. _env_cache_invalidated)."""
+    Сравнение содержимого обнаруживает внешние изменения даже при
+    неизменных mtime и размере файла."""
     global _env_cache, _env_cache_invalidated
     if not ENV_FILE.exists():
         _env_cache = None
@@ -60,20 +55,19 @@ def load_env() -> dict:
     # Принудительная инвалидация сразу после save_env(): гарантирует, что
     # следующее чтение получит свежие данные, даже если ОС не изменила mtime.
     force_reload = _env_cache_invalidated
-    stat = ENV_FILE.stat()
-    signature = (stat.st_mtime, stat.st_size)
+    contents = ENV_FILE.read_text(encoding="utf-8")
     if (not force_reload
             and _env_cache is not None
-            and _env_cache[0] == signature):
+            and _env_cache[0] == contents):
         return _env_cache[1]
     env = {}
-    for line in ENV_FILE.read_text(encoding="utf-8").splitlines():
+    for line in contents.splitlines():
         line = line.strip()
         if not line or line.startswith("#") or "=" not in line:
             continue
         k, _, v = line.partition("=")
         env[k.strip()] = v.strip()
-    _env_cache = (signature, env)
+    _env_cache = (contents, env)
     _env_cache_invalidated = False
     return env
 
@@ -92,7 +86,7 @@ def has_api_key(env: dict, prov_name: str) -> bool:
 
 def save_env(updates: dict):
     """Сохраняет обновлённые значения обратно в .env."""
-    global _env_cache
+    global _env_cache, _env_cache_invalidated
     current = load_env()
     current.update({k: v for k, v in updates.items() if v})
     lines = []
@@ -113,10 +107,7 @@ def save_env(updates: dict):
     for k, v in current.items():
         lines.append(f"{k}={v}")
     ENV_FILE.write_text("\n".join(lines), encoding="utf-8")
-    # Инвалидируем кэш ПОСЛЕ записи и принудительно сбрасываем подпись:
-    # на файловых системах с грубым st_mtime (Windows/Docker) новый файл
-    # может получить ту же метку времени, что и старый. Флаг force_reload
-    # гарантирует, что ближайшее load_env() перечитает файл с диска.
+    # Инвалидируем разобранные значения ПОСЛЕ записи.
     _env_cache = None
     _env_cache_invalidated = True
 
@@ -276,9 +267,8 @@ _client        = None
 _collection    = None
 _llama_proc    = None   # subprocess llama-server если мы его запустили
 _auto_provider = None   # кэш провайдера для auto-режима call_llm
-_env_cache     = None   # кэш load_env(): ((mtime, размер), dict) — .env читается на каждом запросе
+_env_cache     = None   # кэш load_env(): (содержимое файла, dict)
 _env_cache_invalidated = False  # True после save_env(): следующее load_env() обязан перечитать файл
-                                # (страховка от грубого st_mtime на Windows/Docker/старых Linux)
 
 # Переиспользуемая HTTP-сессия (keep-alive): экономит TCP/TLS-handshake
 # на каждом запросе к локальному серверу и облачным API.

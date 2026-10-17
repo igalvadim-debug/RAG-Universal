@@ -1,7 +1,7 @@
 """Tests for PR #1's configuration wiring and shared-network call sites."""
 
-from dataclasses import replace
 import os
+from dataclasses import replace
 from types import SimpleNamespace
 from unittest.mock import Mock, call
 
@@ -408,9 +408,7 @@ def _freeze_mtime(path, monkeypatch):
         st = real_stat(self, *args, **kwargs)
         proxy = Mock(wraps=st)
         proxy.st_mtime = frozen
-        # size=None → проксирует st_size и остальной протокол os.stat_result
-        # (индексирование, dir()), что нужно внутренностям pathlib/pytest.
-        del proxy.size
+        proxy.st_size = st.st_size
         return proxy
 
     monkeypatch.setattr(type(path), "stat", patched_stat)
@@ -418,8 +416,8 @@ def _freeze_mtime(path, monkeypatch):
 
 def test_load_env_detects_change_when_mtime_granularity_is_coarse(core, monkeypatch):
     """Регрессия (CodeRabbit): на ФС с грубым st_mtime (Windows/Docker)
-    перезапись .env может не изменить метку времени. Кэш по одной mtime
-    вечно отдавал бы устаревшие настройки — подпись должна включать размер."""
+    перезапись .env может не изменить метку времени. Сравнение содержимого
+    должно обнаружить изменение значения."""
     core.ENV_FILE.write_text("API_KEY=old\n", encoding="utf-8")
     assert core.load_env() == {"API_KEY": "old"}
 
@@ -431,17 +429,38 @@ def test_load_env_detects_change_when_mtime_granularity_is_coarse(core, monkeypa
     assert core.load_env() == {"API_KEY": "new-value-longer"}
 
 
-def test_save_env_invalidates_cache_even_if_size_and_mtime_unchanged(core, monkeypatch):
-    """save_env() обязан принудительно инвалидировать кэш: если обновление
-    меняет значение на строку той же длины при неизменной mtime, подпись
-    файла не изменится и без флага load_env() вернул бы старые данные."""
+def test_load_env_detects_external_equal_length_edit_with_unchanged_metadata(core):
     core.ENV_FILE.write_text("API_KEY=aaaa\n", encoding="utf-8")
+    original_stat = core.ENV_FILE.stat()
+    original_env = core.load_env()
+    assert original_env == {"API_KEY": "aaaa"}
+    assert core.load_env() is original_env
+
+    core.ENV_FILE.write_text("API_KEY=bbbb\n", encoding="utf-8")
+    os.utime(core.ENV_FILE, ns=(original_stat.st_atime_ns, original_stat.st_mtime_ns))
+    updated_stat = core.ENV_FILE.stat()
+    assert updated_stat.st_mtime_ns == original_stat.st_mtime_ns
+    assert updated_stat.st_size == original_stat.st_size
+
+    updated_env = core.load_env()
+    assert updated_env == {"API_KEY": "bbbb"}
+    assert core.load_env() is updated_env
+
+
+def test_save_env_invalidates_cache_even_if_size_and_mtime_unchanged(core, monkeypatch):
+    """save_env() инвалидирует кэш даже при неизменных размере и mtime."""
+    core.ENV_FILE.write_text("API_KEY=aaaa", encoding="utf-8")
     assert core.load_env() == {"API_KEY": "aaaa"}
 
     _freeze_mtime(core.ENV_FILE, monkeypatch)
+    original_stat = core.ENV_FILE.stat()
 
     # Обновление через save_env(): та же длина значения, «неизменная» mtime.
     core.save_env({"API_KEY": "bbbb"})
+    updated_stat = core.ENV_FILE.stat()
+    assert updated_stat.st_mtime == original_stat.st_mtime
+    assert updated_stat.st_size == original_stat.st_size == len("API_KEY=aaaa")
+    assert core._env_cache_invalidated is True
     assert core.load_env() == {"API_KEY": "bbbb"}
     # После принудительной перезагрузки флаг сброшен и кэш снова активен.
     assert core._env_cache_invalidated is False
