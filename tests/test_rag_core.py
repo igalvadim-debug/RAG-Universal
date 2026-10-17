@@ -401,6 +401,7 @@ def _freeze_mtime(path, monkeypatch):
     real_stat = type(path).stat
 
     def patched_stat(self, *args, **kwargs):
+        """Freeze only the target file's mtime while preserving other stat fields."""
         # Не трогаем stat() других файлов — иначе сломается раннер pytest.
         if self != path:
             return real_stat(self, *args, **kwargs)
