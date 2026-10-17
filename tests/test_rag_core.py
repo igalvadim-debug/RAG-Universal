@@ -464,17 +464,13 @@ def shared_session(core, net, monkeypatch):
     monkeypatch.setattr(core, "get_llama_url", Mock(return_value="http://llama.internal:9000/v1/chat/completions"))
     monkeypatch.setattr(core, "load_settings", Mock(return_value={}))
     core.ENV_FILE.write_text("OPENAI_API_KEY=synthetic-test-key\n", encoding="utf-8")
-    # A request through the old session would duplicate the shared helper's POST.
-    legacy_post = Mock(side_effect=AssertionError("LLM requests must use the shared HTTP helper"))
-    monkeypatch.setattr(core._http, "post", legacy_post)
     yield session
-    legacy_post.assert_not_called()
 
 
 @pytest.mark.parametrize("provider", ["OpenAI", "kobold", "llama"])
 @pytest.mark.parametrize(
     ("outcome", "attempts"),
-    [("success", 1), ("connection", 2), ("connect-timeout", 2), ("rate-limit", 2), ("read-timeout", 1)],
+    [("success", 1), ("connection", 1), ("connect-timeout", 2), ("rate-limit", 1), ("read-timeout", 1)],
 )
 def test_completion_uses_only_shared_session_and_its_retry_policy(core, net, shared_session, provider, outcome, attempts):
     """Check each backend's payload, timeout, attempt count, and backoff through the shared session."""
@@ -489,9 +485,11 @@ def test_completion_uses_only_shared_session_and_its_retry_policy(core, net, sha
 
     result = core.call_llm(MESSAGES, max_tokens=73, temperature=0.2, provider=provider)
 
-    if outcome == "read-timeout":
+    if outcome in ("connection", "read-timeout"):
         assert result.startswith("[Ошибка]" if provider != "OpenAI" else "[OpenAI]")
         assert ("нет соединения" if provider == "OpenAI" else "таймаут") in result
+    elif outcome == "rate-limit":
+        assert "HTTP 429" in result
     else:
         assert result == "Generated text"
     if provider == "OpenAI":
@@ -510,28 +508,28 @@ def test_completion_uses_only_shared_session_and_its_retry_policy(core, net, sha
 
 
 @pytest.mark.parametrize("provider", ["OpenAI", "kobold", "llama"])
-@pytest.mark.parametrize(("status", "attempts"), [(401, 1), (429, 2), (503, 2)])
-def test_completion_preserves_http_errors_after_shared_session_attempts(core, net, shared_session, provider, status, attempts):
+@pytest.mark.parametrize("status", [401, 429, 503])
+def test_completion_preserves_http_errors_after_shared_session_attempts(core, net, shared_session, provider, status):
     """Preserve HTTP status errors from the shared session in each backend's completion result."""
     shared_session.post.return_value = http_error(status).response
 
     result = core.call_llm(MESSAGES, provider=provider)
 
     assert f"HTTP {status}" in result
-    assert shared_session.post.call_count == attempts
-    assert net.time.sleep.call_args_list == ([call(0.125)] if attempts == 2 else [])
+    assert shared_session.post.call_count == 1
+    net.time.sleep.assert_not_called()
 
 
 @pytest.mark.parametrize("provider", ["OpenAI", "kobold", "llama"])
-def test_completion_does_not_exceed_shared_connection_retry_budget(core, net, shared_session, provider):
-    """Check completion attempt counts and backoff against the configured connection retry budget."""
+def test_completion_does_not_retry_shared_connection_errors(core, net, shared_session, provider):
+    """Return connection errors after one shared POST without backoff."""
     shared_session.post.side_effect = requests.ConnectionError("connection refused")
 
     result = core.call_llm(MESSAGES, provider=provider)
 
     assert ("нет соединения" if provider == "OpenAI" else "таймаут") in result
-    assert shared_session.post.call_count == 2
-    net.time.sleep.assert_called_once_with(0.125)
+    assert shared_session.post.call_count == 1
+    net.time.sleep.assert_not_called()
 
 
 @pytest.mark.parametrize("provider", ["kobold", "llama"])

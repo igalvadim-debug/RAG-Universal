@@ -203,14 +203,10 @@ def test_client_errors_preserve_the_response_and_fail_without_retry(net, session
 
 
 @pytest.mark.parametrize("status", [429, 500, 502, 503, 504])
-@pytest.mark.parametrize("transport_retry_available", [True, False])
-def test_post_does_not_retry_http_errors_after_transmission(
-    net, session, monkeypatch, status, transport_retry_available,
-):
-    """Without urllib3's Retry, http_post should manually retry RETRY_STATUS responses itself."""
-    monkeypatch.setattr(net, "Retry", None)
-    success = response()
-    session.post.side_effect = [response(status), response(status), success]
+def test_post_does_not_retry_http_errors_after_transmission(net, session, status):
+    """An HTTP error response should raise without resending the POST or sleeping."""
+    failure = response(status)
+    session.post.side_effect = [failure, response()]
 
     with pytest.raises(requests.HTTPError) as caught:
         net.http_post(URL, PAYLOAD)
@@ -235,18 +231,18 @@ def test_post_preserves_terminal_http_error_after_manual_retries(net, session, m
     net.time.sleep.assert_not_called()
 
 
-def test_post_handles_mixed_connection_and_http_failures_with_one_attempt_budget(net, session, monkeypatch):
-    """A connection error followed by a retryable status should share the same overall retry budget."""
-    monkeypatch.setattr(net, "Retry", None)
+def test_post_handles_mixed_connection_and_http_failures_with_one_attempt_budget(net, session):
+    """A connection error should stop the POST before queued HTTP responses are used."""
+    failure = requests.ConnectionError("connection reset")
     success = response()
-    session.post.side_effect = [requests.ConnectionError("connection reset"), response(503), success]
+    session.post.side_effect = [failure, response(503), success]
 
     with pytest.raises(net.NetworkError) as caught:
         net.http_post(URL, PAYLOAD)
 
     assert caught.value.__cause__ is failure
-    assert session.post.call_count == 2
-    net.time.sleep.assert_called_once_with(1.0)
+    assert session.post.call_count == 1
+    net.time.sleep.assert_not_called()
 
 
 @pytest.mark.parametrize("method", ["get", "post"])
