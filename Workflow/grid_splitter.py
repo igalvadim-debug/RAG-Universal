@@ -405,6 +405,39 @@ def sort_boxes(boxes):
     return ordered
 
 
+def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: int, H: int):
+    """Schneidet die Beschriftung unter dem Bild ab: Panel von unten zerlegen, die erste
+    zusammenhaengende Zeilengruppe ist das Bild, alles darunter ist Text."""
+    l, t, r, b = box
+    bh, bw = b - t, r - l
+    if bh < 40 or bw < 40:
+        return box
+    content = ~mask                                   # True = Pixel mit Inhalt (kein Hintergrund)
+    x0, x1 = l + int(0.05 * bw), r - int(0.05 * bw)
+    y0, y1 = t + int(0.05 * bh), b - int(0.05 * bh)   # Randzonen aussparen (Rahmenlinien)
+    if x1 - x0 < 8 or y1 - y0 < 8:
+        return box
+    row_frac = content[y0:y1, x0:x1].mean(axis=1)     # Inhaltsanteil pro Zeile
+    thr = 0.015
+    i = len(row_frac) - 1
+    while i > 0 and row_frac[i] < thr:                # erst durch die Luecke ueber dem Text
+        i -= 1
+    img_bottom = y0                                   # Notfall: nichts erkannt -> Box unveraendert
+    while i >= 0:                                     # dann die erste inhaltliche Zeilengruppe = Bild
+        if row_frac[i] >= thr:
+            img_bottom = y0 + i + 1
+            i -= 1
+        elif i > 0 and (row_frac[max(0, i - 15):i] >= thr).any():
+            i -= 1                                    # duenne Luecke innerhalb des Bildes
+        else:
+            break
+    min_h = max(40, int(0.4 * bh))
+    if img_bottom - t < min_h or b - img_bottom > 0.5 * bh:
+        return box                                    # Plausibilitaet: sonst nichts abschneiden
+    nb = _edge(gray[:, x0:x1].mean(axis=1), img_bottom, max(6, int(0.01 * bh)))
+    return (l, t, r, max(t + min_h, min(H, nb)))
+
+
 # ----------------------------------------------------------------------------
 # Ordner / used.md / Dateinamen
 # ----------------------------------------------------------------------------
@@ -458,7 +491,8 @@ def make_names(count: int) -> list[str]:
 # ----------------------------------------------------------------------------
 # Hauptablauf pro Bild
 # ----------------------------------------------------------------------------
-def process(path: Path, port: int, out_root: Path, debug: bool) -> tuple[Path, list[Path]]:
+def process(path: Path, port: int, out_root: Path, debug: bool,
+            with_captions: bool = True) -> tuple[Path, list[Path]]:
     log(f"\n=== {path} ===")
     img = Image.open(path)
     img.load()
@@ -481,6 +515,10 @@ def process(path: Path, port: int, out_root: Path, debug: bool) -> tuple[Path, l
 
     boxes = sort_boxes([snap_box(gray, mask, b, W, H) for b in boxes])
     log(f"[OK] {len(boxes)} Panels erkannt.")
+
+    if not with_captions:
+        boxes = [strip_caption(img, gray, mask, b, W, H) for b in boxes]
+        log("[INFO] Beschriftungen werden abgeschnitten (nur Bild).")
 
     if debug:
         from PIL import ImageDraw
@@ -509,9 +547,11 @@ _run_lock = threading.Lock()
 
 
 def split_image(image_path, out_root: Path = OUT_ROOT, vl: str = DEFAULT_VL,
-                ngl: int | None = None, debug: bool = False, on_log=None) -> tuple[Path, list[Path]]:
+                ngl: int | None = None, debug: bool = False, on_log=None,
+                with_captions: bool = True) -> tuple[Path, list[Path]]:
     """API fuer andere Programme (z.B. webui.py): schneidet ein Gitter, gibt (Ordner, [Dateien]) zurueck.
-    Startet bei Bedarf den Vision-Server selbst und beendet ihn danach wieder. Wirft RuntimeError bei Fehlern."""
+    Startet bei Bedarf den Vision-Server selbst und beendet ihn danach wieder. Wirft RuntimeError bei Fehlern.
+    with_captions=False -> Panels ohne Beschriftung schneiden (nur das Bild)."""
     global _log_cb
     path = Path(image_path)
     if not path.is_file():
@@ -528,7 +568,7 @@ def split_image(image_path, out_root: Path = OUT_ROOT, vl: str = DEFAULT_VL,
             else:
                 proc = start_server(ngl, vl)
                 port = VL_PORT
-            return process(path, port, out_root, debug)
+            return process(path, port, out_root, debug, with_captions)
         finally:
             stop_server(proc)
             _log_cb = None
@@ -547,6 +587,8 @@ def main() -> None:
     ap.add_argument("--keep-server", action="store_true", help="Server nach dem Lauf nicht beenden")
     ap.add_argument("--debug", action="store_true", help="Modellantwort und Kontrollbild ausgeben")
     ap.add_argument("--out-root", default=str(OUT_ROOT), help="Basisordner (Standard: workflow)")
+    ap.add_argument("--no-captions", action="store_true",
+                    help="Panels OHNE Beschriftung schneiden (nur das Bild, Text unten abschneiden)")
     args = ap.parse_args()
 
     images = [Path(p.strip('"')) for p in args.images]
@@ -577,7 +619,7 @@ def main() -> None:
     try:
         for p in images:
             try:
-                process(p, port, out_root, args.debug)
+                process(p, port, out_root, args.debug, with_captions=not args.no_captions)
             except RuntimeError as e:
                 log(f"[FEHLER] {e}")
                 ok = False
