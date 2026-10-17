@@ -1518,7 +1518,7 @@ def do_grid_split(image_path, vl_choice, captions_choice):
     try:
         folder, files = grid_splitter.split_image(
             image_path, vl=("gemma" if vl_choice == "Gemma-4-E2B" else "qwen"),
-            with_captions=(not str(captions_choice).startswith("ohne")), on_log=logs.append
+            with_captions=(not str(captions_choice).startswith("без")), on_log=logs.append
         )
     except Exception as e:
         return "❌ " + str(e) + "\n\n" + "\n".join(logs[-12:]), []
