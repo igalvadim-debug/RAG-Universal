@@ -230,8 +230,8 @@ def test_post_preserves_terminal_http_error_after_manual_retries(net, session, m
         net.http_post(URL, PAYLOAD)
 
     assert caught.value.response is failure
-    assert session.post.call_count == 2
-    net.time.sleep.assert_called_once_with(1.0)
+    assert session.post.call_count == 1
+    net.time.sleep.assert_not_called()
 
 
 def test_post_handles_mixed_connection_and_http_failures_with_one_attempt_budget(net, session, monkeypatch):
