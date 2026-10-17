@@ -421,3 +421,60 @@ def test_list_collections_ignores_nonexistent_database_directories(core, monkeyp
     assert core.list_collections() == []
 
     core.chromadb.PersistentClient.assert_not_called()
+
+
+def test_get_collection_by_name_caches_client_and_collection(core, monkeypatch, tmp_path):
+    """Repeated lookups of the same collection must not reopen the Chroma database."""
+    primary = tmp_path / "primary"
+    monkeypatch.setattr(core, "CHROMA_DIR", primary)
+    client = Mock()
+    coll = Mock()
+    client.get_or_create_collection.return_value = coll
+    core.chromadb.PersistentClient = Mock(return_value=client)
+
+    assert core.get_collection_by_name("docs") is coll
+    assert core.get_collection_by_name("zaebalo:docs") is coll
+    assert core.get_collection_by_name("docs") is coll
+
+    core.chromadb.PersistentClient.assert_called_once_with(path=str(primary))
+    client.get_or_create_collection.assert_called_once_with("docs")
+    assert core._collection is coll
+
+
+def test_get_collection_by_name_keeps_separate_cache_per_database(core, monkeypatch, tmp_path):
+    """Prefixed names resolve to their own database; switching back reuses cached clients."""
+    primary, books = tmp_path / "primary", tmp_path / "books"
+    monkeypatch.setattr(core, "CHROMA_DIR", primary)
+    monkeypatch.setattr(core, "BOOKRAG_DIR", books)
+    main_client, book_client = Mock(), Mock()
+    main_coll, book_coll = Mock(), Mock()
+    main_client.get_or_create_collection.return_value = main_coll
+    book_client.get_or_create_collection.return_value = book_coll
+    core.chromadb.PersistentClient = Mock(side_effect=[main_client, book_client])
+
+    assert core.get_collection_by_name("zaebalo:notes") is main_coll
+    assert core.get_collection_by_name("bookrag:chapters") is book_coll
+    # Повторный запрос к основной базе — клиент и коллекция берутся из кэша.
+    assert core.get_collection_by_name("notes") is main_coll
+
+    assert core.chromadb.PersistentClient.call_args_list == [
+        call(path=str(primary)),
+        call(path=str(books)),
+    ]
+    main_client.get_or_create_collection.assert_called_once_with("notes")
+    book_client.get_or_create_collection.assert_called_once_with("chapters")
+
+
+def test_get_collection_reuses_cached_chroma_client(core, monkeypatch, tmp_path):
+    """get_collection() and get_collection_by_name() share one client per database path."""
+    primary = tmp_path / "primary"
+    monkeypatch.setattr(core, "CHROMA_DIR", primary)
+    client = Mock()
+    coll = Mock()
+    client.get_or_create_collection.return_value = coll
+    core.chromadb.PersistentClient = Mock(return_value=client)
+
+    assert core.get_collection() is coll
+    assert core.get_collection_by_name(core.COLLECTION) is coll
+
+    core.chromadb.PersistentClient.assert_called_once_with(path=str(primary))

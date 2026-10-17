@@ -39,17 +39,36 @@ SETTINGS_PATH   = PATHS.settings_path
 # ЧТЕНИЕ .env (портативно— без системных переменных)
 # ──────────────────────────────────────────────
 
+_env_cache: tuple[float, dict] | None = None  # (mtime_ns, разобранный словарь)
+
+
 def load_env() -> dict:
-    """Читает .env из папки проекта, возвращает словарь KEY=VALUE."""
-    env = {}
+    """Read .env KEY=VALUE pairs into a new dictionary, trimming keys and values.
+
+    Blank lines, comments, and lines without '=' are ignored. Parsed values
+    are reused while the file's nanosecond modification time is unchanged;
+    failure to stat the file bypasses the cache. A missing file clears the
+    cache and returns {}. File read and UTF-8 decoding errors propagate.
+    """
+    global _env_cache
     if not ENV_FILE.exists():
-        return env
+        _env_cache = None
+        return {}
+    try:
+        mtime_ns = ENV_FILE.stat().st_mtime_ns
+    except OSError:
+        mtime_ns = None
+    if mtime_ns is not None and _env_cache is not None and _env_cache[0] == mtime_ns:
+        return dict(_env_cache[1])
+    env = {}
     for line in ENV_FILE.read_text(encoding="utf-8").splitlines():
         line = line.strip()
         if not line or line.startswith("#") or "=" not in line:
             continue
         k, _, v = line.partition("=")
         env[k.strip()] = v.strip()
+    if mtime_ns is not None:
+        _env_cache = (mtime_ns, dict(env))
     return env
 
 
@@ -93,18 +112,29 @@ def save_env(updates: dict):
 # SETTINGS.TXT — Modell- und Sampling-Konfiguration
 # ──────────────────────────────────────────────
 
-_settings_cache = None
+_settings_cache      = None   # (mtime_ns, parsches Dict) — Cache invalidiert bei Dateiänderung
 
 
 def load_settings(refresh: bool = False) -> dict:
-    """
-    Liest settings.txt (Format: KEY<TAB>WERT) und gibt ein Dict zurück.
-    Zahlen werden robust geparst (auch Bereichsangaben wie '8192–16384' → 8192),
-    'true'/'false' → bool. Leere Werte bleiben leere Strings.
+    """Read tab-separated settings.txt entries into a cached dictionary.
+
+    Blank lines, comments, empty keys or values, and lines without a tab are
+    skipped. Case-insensitive 'true'/'false' become booleans; a leading number
+    becomes an int or float (for example, '8192–16384' becomes 8192). Other
+    values remain stripped strings.
+
+    Reuse the same mutable dictionary while the file's nanosecond modification
+    time is unchanged. refresh=True bypasses the cache. A missing file yields
+    an empty dictionary. File read and UTF-8 decoding errors propagate.
     """
     global _settings_cache
-    if _settings_cache is not None and not refresh:
-        return _settings_cache
+    try:
+        mtime_ns = SETTINGS_PATH.stat().st_mtime_ns if SETTINGS_PATH.exists() else None
+    except OSError:
+        mtime_ns = None
+    if not refresh and _settings_cache is not None \
+            and _settings_cache[0] == mtime_ns:
+        return _settings_cache[1]
     s = {}
     if SETTINGS_PATH.exists():
         for line in SETTINGS_PATH.read_text(encoding="utf-8").splitlines():
@@ -125,7 +155,7 @@ def load_settings(refresh: bool = False) -> dict:
                     s[k] = float(num_str) if "." in num_str else int(num_str)
                 else:
                     s[k] = v
-    _settings_cache = s
+    _settings_cache = (mtime_ns, s)
     return s
 
 
@@ -152,6 +182,12 @@ _NOTE_PATTERNS = [
     r"(?i)^\s*\(.*(placeholder|example|assum).*\)\s*$",
 ]
 
+# Оптимизация производительности: паттерны компилируются один раз при импорте
+# модуля — раньше на каждую строку каждого ответа выполнялся re.search() по
+# всем 11 шаблонам (внутренний кэш re частично помогал, но компиляция в цикле
+# всё равно дороже предварительной).
+_NOTE_PATTERNS_COMPILED = [re.compile(p) for p in _NOTE_PATTERNS]
+
 
 def _split_notes(text: str) -> tuple[str, str]:
     """
@@ -167,7 +203,7 @@ def _split_notes(text: str) -> tuple[str, str]:
         if not stripped:
             clean_lines.append(line)
             continue
-        if any(re.search(pat, stripped) for pat in _NOTE_PATTERNS):
+        if any(pat.search(stripped) for pat in _NOTE_PATTERNS_COMPILED):
             note_lines.append(stripped)
         else:
             clean_lines.append(line)
@@ -231,10 +267,25 @@ COLLECTION  = RAG.collection
 # ГЛОБАЛЬНЫЕ ОБЪЕКТЫ (ленивая загрузка)
 # ──────────────────────────────────────────────
 _model         = None
-_client        = None
 _collection    = None
+# Кэш клиентов/коллекций Chroma: путь БД -> PersistentClient, (путь БД, имя) -> коллекция.
+# chromadb.PersistentClient при каждом вызове заново открывает SQLite-базу и SQLLiteWriter
+# (дорогая операция), а UI дёргает get_collection_by_name() на каждый запрос — без кэша
+# база переоткрывалась многократно за сессию.
+_chroma_clients: dict[str, object] = {}
+_chroma_collections: dict[tuple[str, str], object] = {}
 _llama_proc    = None   # subprocess llama-server если мы его запустили
 _auto_provider = None   # кэш провайдера для auto-режима call_llm
+
+
+def _get_chroma_client(db_path):
+    """Возвращает PersistentClient для пути БД, создавая его только при первом обращении."""
+    key = str(db_path)
+    client = _chroma_clients.get(key)
+    if client is None:
+        client = chromadb.PersistentClient(path=key)
+        _chroma_clients[key] = client
+    return client
 
 
 def get_model():
@@ -248,11 +299,15 @@ def get_model():
 
 
 def get_collection():
-    """Открывает Chroma-коллекцию один раз и кэширует."""
-    global _client, _collection
+    """Return the active Chroma collection, opening the default if none is set.
+
+    Initially, get or create COLLECTION in CHROMA_DIR using a cached client.
+    A nonempty get_collection_by_name() lookup replaces the active collection.
+    Chroma client and collection errors propagate.
+    """
+    global _collection
     if _collection is None:
-        _client     = chromadb.PersistentClient(path=str(CHROMA_DIR))
-        _collection = _client.get_or_create_collection(COLLECTION)
+        _collection = _get_chroma_client(CHROMA_DIR).get_or_create_collection(COLLECTION)
     return _collection
 
 
@@ -278,10 +333,18 @@ def list_collections() -> list[str]:
 
 
 def get_collection_by_name(name: str):
-    """Открывает коллекцию по имени (не кэширует — для переключения).
-    Поддерживает префикс базы: 'zaebalo:name' или 'bookrag:name'.
-    Без префикса — основная база (CHROMA_DIR)."""
-    global _client, _collection
+    """Get or create a named Chroma collection and make it the active collection.
+
+    'bookrag:name' selects BOOKRAG_DIR; 'zaebalo:name', unprefixed names,
+    and unknown prefixes select CHROMA_DIR. Only the first ':' is a separator.
+    An empty name returns None without changing the active collection.
+
+    Clients are cached by database path string and collections by path and
+    name, so switching databases preserves cached objects. The result is also
+    returned by subsequent get_collection() calls. Chroma client and collection
+    errors propagate.
+    """
+    global _collection
     if not name:
         return None
     if ":" in name:
@@ -290,9 +353,14 @@ def get_collection_by_name(name: str):
     else:
         db_path   = CHROMA_DIR
         coll_name = name
-    _client     = chromadb.PersistentClient(path=str(db_path))
-    _collection = _client.get_or_create_collection(coll_name)
-    return _collection
+    key = (str(db_path), coll_name)
+    collection = _chroma_collections.get(key)
+    if collection is None:
+        client     = _get_chroma_client(db_path)
+        collection = client.get_or_create_collection(coll_name)
+        _chroma_collections[key] = collection
+    _collection = collection
+    return collection
 
 
 # ──────────────────────────────────────────────
