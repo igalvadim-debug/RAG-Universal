@@ -405,6 +405,46 @@ def sort_boxes(boxes):
     return ordered
 
 
+def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: int, H: int):
+    """Return a panel box with its bottom edge heuristically adjusted for captions.
+
+    ``box`` contains (left, top, right, bottom) pixel bounds. ``gray`` and
+    ``mask`` cover the full image; True in ``mask`` denotes background.
+    ``H`` is the image height in pixels; ``img`` and ``W`` are unused.
+    Boxes under 40 pixels wide or tall, or rejected by the height checks,
+    are returned unchanged. Captions may remain. Input images and arrays
+    are not modified.
+    """
+    l, t, r, b = box
+    bh, bw = b - t, r - l
+    if bh < 40 or bw < 40:
+        return box
+    content = ~mask                                   # True = Pixel mit Inhalt (kein Hintergrund)
+    x0, x1 = l + int(0.05 * bw), r - int(0.05 * bw)
+    y0, y1 = t + int(0.05 * bh), b - int(0.05 * bh)   # Randzonen aussparen (Rahmenlinien)
+    if x1 - x0 < 8 or y1 - y0 < 8:
+        return box
+    row_frac = content[y0:y1, x0:x1].mean(axis=1)     # Inhaltsanteil pro Zeile
+    thr = 0.015
+    i = len(row_frac) - 1
+    while i > 0 and row_frac[i] < thr:                # erst durch die Luecke ueber dem Text
+        i -= 1
+    img_bottom = y0                                   # Notfall: nichts erkannt -> Box unveraendert
+    while i >= 0:                                     # dann die erste inhaltliche Zeilengruppe = Bild
+        if row_frac[i] >= thr:
+            img_bottom = y0 + i + 1
+            i -= 1
+        elif i > 0 and (row_frac[max(0, i - 15):i] >= thr).any():
+            i -= 1                                    # duenne Luecke innerhalb des Bildes
+        else:
+            break
+    min_h = max(40, int(0.4 * bh))
+    if img_bottom - t < min_h or b - img_bottom > 0.5 * bh:
+        return box                                    # Plausibilitaet: sonst nichts abschneiden
+    nb = _edge(gray[:, x0:x1].mean(axis=1), img_bottom, max(6, int(0.01 * bh)))
+    return (l, t, r, max(t + min_h, min(H, nb)))
+
+
 # ----------------------------------------------------------------------------
 # Ordner / used.md / Dateinamen
 # ----------------------------------------------------------------------------
@@ -458,7 +498,20 @@ def make_names(count: int) -> list[str]:
 # ----------------------------------------------------------------------------
 # Hauptablauf pro Bild
 # ----------------------------------------------------------------------------
-def process(path: Path, port: int, out_root: Path, debug: bool) -> tuple[Path, list[Path]]:
+def process(path: Path, port: int, out_root: Path, debug: bool,
+            with_captions: bool = True) -> tuple[Path, list[Path]]:
+    """Split a grid using the local vision server at ``port`` and save RGB PNGs.
+
+    Return (output folder, saved paths) in row order, left to right.
+    Use an available ``gridN`` folder under ``out_root`` and record its name
+    in ``out_root/used.md`` after saving all panels. ``with_captions=False``
+    attempts to trim captions below panels; some boxes may remain unchanged.
+    ``debug`` also saves ``grid_splitter_debug.png`` beside this module.
+
+    Raise RuntimeError if none of three model responses yields valid boxes.
+    Image, filesystem, HTTP, and response-structure errors propagate;
+    saving errors can leave partial output.
+    """
     log(f"\n=== {path} ===")
     img = Image.open(path)
     img.load()
@@ -481,6 +534,10 @@ def process(path: Path, port: int, out_root: Path, debug: bool) -> tuple[Path, l
 
     boxes = sort_boxes([snap_box(gray, mask, b, W, H) for b in boxes])
     log(f"[OK] {len(boxes)} Panels erkannt.")
+
+    if not with_captions:
+        boxes = [strip_caption(img, gray, mask, b, W, H) for b in boxes]
+        log("[INFO] Beschriftungen werden abgeschnitten (nur Bild).")
 
     if debug:
         from PIL import ImageDraw
@@ -509,9 +566,26 @@ _run_lock = threading.Lock()
 
 
 def split_image(image_path, out_root: Path = OUT_ROOT, vl: str = DEFAULT_VL,
-                ngl: int | None = None, debug: bool = False, on_log=None) -> tuple[Path, list[Path]]:
-    """API fuer andere Programme (z.B. webui.py): schneidet ein Gitter, gibt (Ordner, [Dateien]) zurueck.
-    Startet bei Bedarf den Vision-Server selbst und beendet ihn danach wieder. Wirft RuntimeError bei Fehlern."""
+                ngl: int | None = None, debug: bool = False, on_log=None,
+                with_captions: bool = True) -> tuple[Path, list[Path]]:
+    """Split a grid for callers such as webui.py; return (folder, saved paths).
+
+    Save panels in reading order under ``out_root/gridN`` and record the
+    folder in ``out_root/used.md``. Captions are included by default;
+    ``with_captions=False`` attempts to trim them below each panel.
+    ``debug`` also writes a control image beside this module.
+
+    Serialize calls and reuse an available vision server. Otherwise start
+    one with ``vl`` (``qwen`` or ``gemma``) and ``ngl`` GPU layers (None
+    selects automatically), then stop that server on exit. These options
+    do not change a reused server. ``on_log`` receives message strings;
+    exceptions from the callback are ignored.
+
+    Raise RuntimeError for a missing input file, unavailable server assets,
+    failed server readiness, or unusable panel detections. An unknown ``vl``
+    raises KeyError when starting a server. Image, filesystem, HTTP, and
+    response-structure errors propagate without conversion to RuntimeError.
+    """
     global _log_cb
     path = Path(image_path)
     if not path.is_file():
@@ -528,13 +602,21 @@ def split_image(image_path, out_root: Path = OUT_ROOT, vl: str = DEFAULT_VL,
             else:
                 proc = start_server(ngl, vl)
                 port = VL_PORT
-            return process(path, port, out_root, debug)
+            return process(path, port, out_root, debug, with_captions)
         finally:
             stop_server(proc)
             _log_cb = None
 
 
 def main() -> None:
+    """Split grid images from CLI arguments, prompting for a path if omitted.
+
+    Include captions unless ``--no-captions`` requests heuristic trimming.
+    Stop a server started here unless ``--keep-server`` is set. Continue
+    after per-image RuntimeError failures and exit with status 1 if any occur,
+    or 0 otherwise. Missing files and server startup RuntimeErrors become
+    SystemExit; other image, filesystem, and request errors propagate.
+    """
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     except Exception:
@@ -547,6 +629,8 @@ def main() -> None:
     ap.add_argument("--keep-server", action="store_true", help="Server nach dem Lauf nicht beenden")
     ap.add_argument("--debug", action="store_true", help="Modellantwort und Kontrollbild ausgeben")
     ap.add_argument("--out-root", default=str(OUT_ROOT), help="Basisordner (Standard: workflow)")
+    ap.add_argument("--no-captions", action="store_true",
+                    help="Panels OHNE Beschriftung schneiden (nur das Bild, Text unten abschneiden)")
     args = ap.parse_args()
 
     images = [Path(p.strip('"')) for p in args.images]
@@ -577,7 +661,7 @@ def main() -> None:
     try:
         for p in images:
             try:
-                process(p, port, out_root, args.debug)
+                process(p, port, out_root, args.debug, with_captions=not args.no_captions)
             except RuntimeError as e:
                 log(f"[FEHLER] {e}")
                 ok = False

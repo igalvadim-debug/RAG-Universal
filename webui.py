@@ -1509,15 +1509,26 @@ def update_image_slots(n_sequences: int, director_mode: str = "нет"):
 # ИНТЕРФЕЙС
 # ──────────────────────────────────────────────
 
-def do_grid_split(image_path, vl_choice):
-    """Schneidet ein Bildgitter (Storyboard) per Qwen3-VL in Einzelbilder.
-    Ausgabe: workflow\\gridN\\<n><3 Buchstaben>.png, Ordnername wird in workflow\\used.md eingetragen."""
+GRID_CAPTION_CHOICES = ("с текстом (подписями)", "без текста (только кадр)")
+
+
+def do_grid_split(image_path, vl_choice, captions_choice):
+    """Split an uploaded grid and return a status message and gallery paths.
+
+    Select Gemma only for ``vl_choice == "Gemma-4-E2B"``; otherwise use Qwen.
+    A ``captions_choice`` string starting with "без" requests caption trimming.
+    Save PNGs named with a number and three random letters under the splitter's
+    default ``gridN`` output folder and record it in ``used.md``.
+    Missing input or an exception from splitting returns an error status and
+    an empty gallery; splitting errors include the last 12 collected messages.
+    """
     if not image_path:
         return "❌ Bitte zuerst ein Gitter-Bild hochladen.", []
     logs = []
     try:
         folder, files = grid_splitter.split_image(
-            image_path, vl=("gemma" if vl_choice == "Gemma-4-E2B" else "qwen"), on_log=logs.append
+            image_path, vl=("gemma" if vl_choice == "Gemma-4-E2B" else "qwen"),
+            with_captions=(captions_choice != GRID_CAPTION_CHOICES[1]), on_log=logs.append
         )
     except Exception as e:
         return "❌ " + str(e) + "\n\n" + "\n".join(logs[-12:]), []
@@ -1526,6 +1537,7 @@ def do_grid_split(image_path, vl_choice):
 
 
 def build_ui():
+    """Build and return the Gradio Blocks interface with its event handlers connected."""
     with gr.Blocks(title="RAG — Генератор сценариев") as demo:
 
         gr.Markdown("# 🎬 RAG — Генератор сценариев")
@@ -1929,12 +1941,17 @@ def build_ui():
                         label="Vision-Modell", choices=["Qwen3-VL-4B", "Gemma-4-E2B"],
                         value="Qwen3-VL-4B",
                     )
+                    grid_captions_dd = gr.Dropdown(
+                        label="✂️ Нарезать с текстом или без (подписи под кадрами)",
+                        choices=GRID_CAPTION_CHOICES,
+                        value=GRID_CAPTION_CHOICES[0],
+                    )
                     grid_btn = gr.Button("✂️ Gitter schneiden", variant="primary")
                     grid_status = gr.Textbox(label="Status", interactive=False, lines=3)
             grid_gallery = gr.Gallery(label="Ergebnis", columns=4, height=420, object_fit="contain")
             grid_btn.click(
                 fn      = do_grid_split,
-                inputs  = [grid_img, grid_model_dd],
+                inputs  = [grid_img, grid_model_dd, grid_captions_dd],
                 outputs = [grid_status, grid_gallery],
             )
 

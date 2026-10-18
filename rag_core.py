@@ -43,11 +43,12 @@ _env_cache: tuple[float, dict] | None = None  # (mtime_ns, разобранны�
 
 
 def load_env() -> dict:
-    """Читает .env из папки проекта, возвращает словарь KEY=VALUE.
+    """Read .env KEY=VALUE pairs into a new dictionary, trimming keys and values.
 
-    Оптимизация производительности: разбор файла кэшируется по mtime —
-    повторные вызовы (каждый облачный запрос идёт через load_env) не читают
-    и не парсят файл заново, пока он не изменён на диске.
+    Blank lines, comments, and lines without '=' are ignored. Parsed values
+    are reused while the file's nanosecond modification time is unchanged;
+    failure to stat the file bypasses the cache. A missing file clears the
+    cache and returns {}. File read and UTF-8 decoding errors propagate.
     """
     global _env_cache
     if not ENV_FILE.exists():
@@ -115,14 +116,16 @@ _settings_cache      = None   # (mtime_ns, parsches Dict) — Cache invalidiert 
 
 
 def load_settings(refresh: bool = False) -> dict:
-    """
-    Liest settings.txt (Format: KEY<TAB>WERT) und gibt ein Dict zurück.
-    Zahlen werden robust geparst (auch Bereichsangaben wie '8192–16384' → 8192),
-    'true'/'false' → bool. Leere Werte bleiben leere Strings.
+    """Read tab-separated settings.txt entries into a cached dictionary.
 
-    Оптимизация производительности: разбор кэшируется по mtime файла —
-    правки в settings.txt подхватываются автоматически (раньше кэш жил
-    до перезапуска процесса). Явный refresh=True форсирует перечитывание.
+    Blank lines, comments, empty keys or values, and lines without a tab are
+    skipped. Case-insensitive 'true'/'false' become booleans; a leading number
+    becomes an int or float (for example, '8192–16384' becomes 8192). Other
+    values remain stripped strings.
+
+    Reuse the same mutable dictionary while the file's nanosecond modification
+    time is unchanged. refresh=True bypasses the cache. A missing file yields
+    an empty dictionary. File read and UTF-8 decoding errors propagate.
     """
     global _settings_cache
     try:
