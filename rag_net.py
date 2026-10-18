@@ -3,7 +3,7 @@ rag_net.py — сетевой слой: переиспользуемый request
 
 Все HTTP-запросы к LLM-бэкендам (локальным и облачным) идут через http_post()/http_get():
   * одно TCP/TLS-соединение переиспользуется (Session),
-  * сетевые сбои и 429/5xx повторяются с экспоненциальным backoff,
+  * GET повторяется при сетевых сбоях, POST — только при сбоях установки соединения,
   * таймауты берутся из rag_config.NET.
 """
 
@@ -14,6 +14,7 @@ import time
 
 import requests
 from requests.adapters import HTTPAdapter
+from urllib3.exceptions import ConnectTimeoutError, MaxRetryError
 
 try:  # urllib3 доступен всегда вместе с requests, но импорт держим мягким
     from urllib3.util.retry import Retry
@@ -31,7 +32,7 @@ def make_session() -> requests.Session:
     """Create a session with connection pooling and transport retries disabled.
 
     Retry budgets are managed by http_post and http_get. http_post retries
-    connection failures only (a received response is never resent); http_get
+    confirmed connection setup failures only; http_get
     retries connection failures and timeouts.
     """
     s = requests.Session()
@@ -63,6 +64,15 @@ class NetworkError(RuntimeError):
     """Сетевой запрос не удался после всех повторов."""
 
 
+def _is_pre_transmission_error(exc: requests.ConnectionError) -> bool:
+    """Recognize connect timeouts and urllib3 connection setup failures."""
+    if isinstance(exc, requests.ConnectTimeout):
+        return True
+    # NewConnectionError (including DNS failures) is a ConnectTimeoutError.
+    return bool(exc.args and isinstance(exc.args[0], MaxRetryError)
+                and isinstance(exc.args[0].reason, ConnectTimeoutError))
+
+
 def http_post(url: str, json_payload: dict, headers: dict | None = None,
               timeout: float | None = None) -> requests.Response:
     """Send JSON and return a response after checking its HTTP status.
@@ -71,17 +81,17 @@ def http_post(url: str, json_payload: dict, headers: dict | None = None,
     for URLs containing '://' but neither '127.0.0.1' nor 'localhost'; other
     URLs use NET.local_timeout.
 
-    Retry connection errors (including connect timeouts) with exponential
-    backoff for up to NET.max_retries session calls in total. A connection
-    error happens before the request reaches the provider, so repeating it is
-    safe. Once a response has been received (the request was transmitted),
-    the POST is never resent: any HTTP error status — retryable ones like
-    429/503 included — raises HTTPError immediately, since providers do not
-    guarantee POST idempotency.
+    Retry only confirmed connection setup failures (connect timeouts, DNS
+    failures, or refused connections) with exponential backoff for up to
+    NET.max_retries session calls in total. Other connection errors may occur
+    after transmission and are terminal. Redirects are disabled; 307/308
+    responses raise HTTPError without resending the POST. Any HTTP error
+    status, including 429/503, also raises HTTPError immediately, since
+    providers do not guarantee POST idempotency.
 
-    Raise NetworkError immediately for other timeouts, including read timeouts,
-    after connection-error attempts are exhausted, or if no attempts are
-    configured. HTTPError propagates for failing HTTP statuses.
+    Raise NetworkError immediately for ambiguous connection errors or other
+    timeouts (including read timeouts), after connection setup attempts are
+    exhausted, or if no attempts are configured.
     Other Requests errors also propagate.
     """
     if timeout is None:
@@ -90,14 +100,22 @@ def http_post(url: str, json_payload: dict, headers: dict | None = None,
     last_exc: Exception | None = None
     for attempt in range(1, NET.max_retries + 1):
         try:
-            resp = sess.post(url, json=json_payload, headers=headers, timeout=timeout)
+            resp = sess.post(url, json=json_payload, headers=headers, timeout=timeout, allow_redirects=False)
+            if resp.status_code in (307, 308):
+                raise requests.HTTPError(
+                    f"POST {url} returned HTTP {resp.status_code}; resending POST to a redirect is forbidden",
+                    response=resp,
+                )
             # Ответ получен — запрос уже передан провайдеру. POST не повторяем:
             # идемпотентность не гарантирована, любой HTTP-ошибочный статус
             # (включая 429/5xx) уходит наружу через raise_for_status().
             resp.raise_for_status()
             return resp
         except requests.ConnectionError as e:
-            # Сбой до отправки запроса (отказ соединения/DNS) — безопасно повторить.
+            if not _is_pre_transmission_error(e):
+                raise NetworkError(
+                    f"POST {url} прерван (запрос мог быть получен провайдером, повтор POST запрещён): {e}"
+                ) from e
             last_exc = e
             if attempt < NET.max_retries:
                 wait = NET.backoff_base * (2 ** (attempt - 1))
@@ -109,7 +127,7 @@ def http_post(url: str, json_payload: dict, headers: dict | None = None,
             # идемпотентности POST не повторяем — сразу наружу.
             raise NetworkError(f"POST {url} прерван по таймауту (запрос мог быть получен провайдером, повтор POST запрещён): {e}") from e
         except requests.HTTPError:
-            raise  # 4xx (кроме повторённых 429/5xx) — сразу наружу
+            raise  # HTTP-ошибки и 307/308 — сразу наружу
     raise NetworkError(f"POST {url} не удался после {NET.max_retries} попыток: {last_exc}") from last_exc
 
 

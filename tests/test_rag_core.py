@@ -454,6 +454,7 @@ def test_get_collection_by_name_keeps_separate_cache_per_database(core, monkeypa
 
     assert core.get_collection_by_name("zaebalo:notes") is main_coll
     assert core.get_collection_by_name("bookrag:chapters") is book_coll
+    assert core.get_collection() is book_coll
     # Повторный запрос к основной базе — клиент и коллекция берутся из кэша.
     assert core.get_collection_by_name("notes") is main_coll
 
@@ -465,16 +466,22 @@ def test_get_collection_by_name_keeps_separate_cache_per_database(core, monkeypa
     book_client.get_or_create_collection.assert_called_once_with("chapters")
 
 
-def test_get_collection_reuses_cached_chroma_client(core, monkeypatch, tmp_path):
-    """get_collection() and get_collection_by_name() share one client per database path."""
+@pytest.mark.parametrize("named_first", [False, True])
+def test_get_collection_reuses_cached_collection(core, monkeypatch, tmp_path, named_first):
+    """Default and named lookups reuse one collection object in either order."""
     primary = tmp_path / "primary"
     monkeypatch.setattr(core, "CHROMA_DIR", primary)
     client = Mock()
     coll = Mock()
-    client.get_or_create_collection.return_value = coll
+    client.get_or_create_collection.side_effect = [coll, Mock()]
     core.chromadb.PersistentClient = Mock(return_value=client)
 
+    if named_first:
+        assert core.get_collection_by_name(core.COLLECTION) is coll
     assert core.get_collection() is coll
     assert core.get_collection_by_name(core.COLLECTION) is coll
+    monkeypatch.setattr(core, "_collection", None)
+    assert core.get_collection() is coll
 
     core.chromadb.PersistentClient.assert_called_once_with(path=str(primary))
+    client.get_or_create_collection.assert_called_once_with(core.COLLECTION)

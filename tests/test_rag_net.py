@@ -1,13 +1,38 @@
 """Unit tests for shared sessions, timeout selection, retries, and health checks."""
 
+import socket
 from dataclasses import replace
+from http.client import RemoteDisconnected
 from unittest.mock import Mock, call
 
 import pytest
 import requests
+from urllib3.exceptions import (
+    ConnectTimeoutError,
+    MaxRetryError,
+    NameResolutionError,
+    NewConnectionError,
+    ProtocolError,
+    ReadTimeoutError,
+)
 
 URL = "https://provider.example/v1/chat/completions"
 PAYLOAD = {"messages": [{"role": "user", "content": "Hello"}]}
+# Retain the real implementation for tests with an in-memory transport adapter.
+SESSION_REQUEST = requests.Session.request
+
+
+def connection_setup_error(kind, message):
+    """Construct Requests' documented timeout or wrapped urllib3 setup failure."""
+    if kind == "timeout":
+        return requests.ConnectTimeout(message)
+    if kind == "dns":
+        reason = NameResolutionError("provider.example", None, socket.gaierror(message))
+    elif kind == "refused":
+        reason = NewConnectionError(None, message)
+    else:
+        reason = ConnectTimeoutError(message)
+    return requests.ConnectionError(MaxRetryError(None, URL, reason))
 
 
 def response(status=200):
@@ -36,17 +61,15 @@ def send(net, method, **kwargs):
 
 
 def test_make_session_configures_both_transports(net, monkeypatch):
-    """make_session should mount the same adapter on http:// and https://, configured from NET."""
+    """Transport retries stay disabled regardless of the outer retry budget."""
     monkeypatch.setattr(net, "NET", replace(net.NET, max_retries=4, backoff_base=0.6))
 
     with net.make_session() as session:
         adapter = session.get_adapter("https://")
         assert adapter is session.get_adapter("http://")
-        assert adapter.max_retries.total == 4
-        assert adapter.max_retries.backoff_factor == 0.3
-        assert set(adapter.max_retries.status_forcelist) == {429, 500, 502, 503, 504}
-        assert adapter.max_retries.allowed_methods == frozenset({"GET", "POST"})
-        assert adapter.max_retries.respect_retry_after_header is True
+        assert adapter.max_retries.total == 0
+        assert not adapter.max_retries.status_forcelist
+        assert "POST" not in adapter.max_retries.allowed_methods
 
 
 def test_make_session_without_urllib3_retry_still_returns_usable_session(net, monkeypatch):
@@ -81,6 +104,7 @@ def test_request_forwards_payload_headers_and_explicit_timeout(net, session, met
     expected = {"headers": headers, "timeout": 1.25}
     if method == "post":
         expected["json"] = PAYLOAD
+        expected["allow_redirects"] = False
     transport.assert_called_once_with(URL, **expected)
     assert result is transport.return_value
     net.time.sleep.assert_not_called()
@@ -121,13 +145,14 @@ def test_explicit_zero_timeout_is_not_replaced_by_a_default(net, session, method
     assert getattr(session, method).call_args.kwargs["timeout"] == 0
 
 
-@pytest.mark.parametrize("error_type", [requests.ConnectionError])
-def test_post_transient_failures_retry_with_exponential_backoff(net, session, monkeypatch, error_type):
-    """Connection errors on POST should be retried with exponential backoff up to max_retries."""
+@pytest.mark.parametrize("kind", ["timeout", "dns", "refused", "wrapped-timeout"])
+def test_post_transient_failures_retry_with_exponential_backoff(net, session, monkeypatch, kind):
+    """Confirmed connection setup failures retry within the outer attempt budget."""
     monkeypatch.setattr(net, "NET", replace(net.NET, max_retries=4, backoff_base=0.25))
     success = response()
     transport = session.post
-    transport.side_effect = [error_type("first"), error_type("second"), error_type("third"), success]
+    failures = [connection_setup_error(kind, message) for message in ("first", "second", "third")]
+    transport.side_effect = [*failures, success]
 
     assert net.http_post(URL, PAYLOAD) is success
 
@@ -152,14 +177,35 @@ def test_get_transient_failures_retry_with_exponential_backoff(net, session, mon
     assert net.time.sleep.call_args_list == [call(0.25), call(0.5), call(1.0)]
 
 
-def test_post_read_timeout_raises_network_error_without_retry(net, session):
+@pytest.mark.parametrize("error_type", [requests.Timeout, requests.ReadTimeout])
+def test_post_read_timeout_raises_network_error_without_retry(net, session, error_type):
     """A read timeout means the request may have reached the provider: raise NetworkError after one POST."""
-    session.post.side_effect = requests.Timeout("read timeout")
+    session.post.side_effect = error_type("read timeout")
 
     with pytest.raises(net.NetworkError) as caught:
         net.http_post(URL, PAYLOAD)
 
     assert "таймаут" in str(caught.value)
+    assert session.post.call_count == 1
+    net.time.sleep.assert_not_called()
+
+
+@pytest.mark.parametrize("failure", [
+    requests.ConnectionError("unknown transmission state"),
+    requests.ConnectionError(ProtocolError("connection aborted", RemoteDisconnected("no response"))),
+    requests.ConnectionError(MaxRetryError(None, URL, ProtocolError("connection reset"))),
+    requests.ConnectionError(ReadTimeoutError(None, URL, "response body timed out")),
+    requests.exceptions.SSLError("TLS connection failed"),
+    requests.exceptions.ProxyError("proxy connection failed"),
+])
+def test_post_ambiguous_connection_failure_is_terminal(net, session, failure):
+    """Disconnects and body read failures may follow transmission and must not resend."""
+    session.post.side_effect = [failure, response()]
+
+    with pytest.raises(net.NetworkError) as caught:
+        net.http_post(URL, PAYLOAD)
+
+    assert caught.value.__cause__ is failure
     assert session.post.call_count == 1
     net.time.sleep.assert_not_called()
 
@@ -185,10 +231,11 @@ def test_exhaustion_reports_the_last_failure_and_does_not_sleep_afterwards(
     assert net.time.sleep.call_args_list == [call(1.0), call(2.0)]
 
 
-def test_post_connection_error_exhaustion_uses_one_attempt_budget_without_sleeping(net, session, monkeypatch):
-    """With a persistent connection error and max_retries=1, http_post makes one POST and never sleeps."""
-    monkeypatch.setattr(net, "NET", replace(net.NET, max_retries=1))
-    failure = requests.ConnectionError("connection refused")
+@pytest.mark.parametrize("attempts", [1, 3])
+def test_post_connection_setup_error_exhaustion(net, session, monkeypatch, attempts):
+    """Persistent connection setup failures stop at the configured attempt budget."""
+    monkeypatch.setattr(net, "NET", replace(net.NET, max_retries=attempts))
+    failure = connection_setup_error("refused", "connection refused")
     session.post.side_effect = failure
 
     with pytest.raises(net.NetworkError) as caught:
@@ -196,22 +243,22 @@ def test_post_connection_error_exhaustion_uses_one_attempt_budget_without_sleepi
 
     assert caught.value.__cause__ is failure
     assert "connection refused" in str(caught.value)
-    assert session.post.call_count == 1
-    net.time.sleep.assert_not_called()
+    assert session.post.call_count == attempts
+    assert net.time.sleep.call_args_list == [call(2 ** index) for index in range(attempts - 1)]
 
 
-def test_post_handles_mixed_connection_and_http_failures_with_one_attempt_budget(net, session, monkeypatch):
-    """With a one-attempt budget, a connection error raises NetworkError after exactly one POST and no sleep."""
-    monkeypatch.setattr(net, "NET", replace(net.NET, max_retries=1))
-    failure = requests.ConnectionError("connection reset")
-    session.post.side_effect = [failure, response(503)]
+def test_post_http_error_after_connection_setup_retry_is_terminal(net, session, monkeypatch):
+    """After a safe connection retry, an HTTP error still stops further POST attempts."""
+    monkeypatch.setattr(net, "NET", replace(net.NET, max_retries=4))
+    failure = response(503)
+    session.post.side_effect = [connection_setup_error("refused", "connection refused"), failure]
 
-    with pytest.raises(net.NetworkError) as caught:
+    with pytest.raises(requests.HTTPError) as caught:
         net.http_post(URL, PAYLOAD)
 
-    assert caught.value.__cause__ is failure
-    assert session.post.call_count == 1
-    net.time.sleep.assert_not_called()
+    assert caught.value.response is failure
+    assert session.post.call_count == 2
+    net.time.sleep.assert_called_once_with(1.0)
 
 
 @pytest.mark.parametrize("method", ["get", "post"])
@@ -255,6 +302,50 @@ def test_post_does_not_retry_http_errors_after_transmission(net, session, status
     assert caught.value.response is failure
     assert session.post.call_count == 1
     net.time.sleep.assert_not_called()
+
+
+@pytest.mark.parametrize("status", [307, 308])
+@pytest.mark.parametrize("location", [None, "/redirected"])
+def test_post_redirect_is_terminal(net, session, status, location):
+    """307/308 responses are rejected even if they omit a Location header."""
+    redirect = response(status)
+    if location is not None:
+        redirect.headers["Location"] = location
+    session.post.return_value = redirect
+
+    with pytest.raises(requests.HTTPError) as caught:
+        net.http_post(URL, PAYLOAD)
+
+    assert caught.value.response is redirect
+    assert str(status) in str(caught.value)
+    assert session.post.call_count == 1
+    assert session.post.call_args.kwargs["allow_redirects"] is False
+    net.time.sleep.assert_not_called()
+
+
+@pytest.mark.parametrize("status", [307, 308])
+def test_real_session_does_not_resend_post_on_redirect(net, monkeypatch, status):
+    """Exercise Requests' redirect handling with a real Session and no network."""
+    redirect = response(status)
+    redirect.request = requests.Request("POST", URL, json=PAYLOAD).prepare()
+    redirect.headers["Location"] = "/redirected"
+    adapter = Mock(spec=requests.adapters.BaseAdapter)
+    adapter.send.side_effect = [redirect, response()]
+    with net.make_session() as real_session:
+        # Restore request only for this session; every send uses the mock adapter.
+        monkeypatch.setattr(real_session, "request", SESSION_REQUEST.__get__(real_session))
+        real_session.mount("https://", adapter)
+        monkeypatch.setattr(net, "_session", real_session)
+
+        with pytest.raises(requests.HTTPError) as caught:
+            net.http_post(URL, PAYLOAD)
+
+        assert caught.value.response is redirect
+        adapter.send.assert_called_once()
+        prepared = adapter.send.call_args.args[0]
+        assert prepared.method == "POST"
+        assert prepared.url == URL
+        net.time.sleep.assert_not_called()
 
 
 @pytest.mark.parametrize("method", ["get", "post"])

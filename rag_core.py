@@ -301,13 +301,13 @@ def get_model():
 def get_collection():
     """Return the active Chroma collection, opening the default if none is set.
 
-    Initially, get or create COLLECTION in CHROMA_DIR using a cached client.
+    Initially, get or create COLLECTION using the named collection cache.
     A nonempty get_collection_by_name() lookup replaces the active collection.
     Chroma client and collection errors propagate.
     """
     global _collection
     if _collection is None:
-        _collection = _get_chroma_client(CHROMA_DIR).get_or_create_collection(COLLECTION)
+        _collection = get_collection_by_name(COLLECTION)
     return _collection
 
 
