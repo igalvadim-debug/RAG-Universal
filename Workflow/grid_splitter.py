@@ -405,44 +405,202 @@ def sort_boxes(boxes):
     return ordered
 
 
-def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: int, H: int):
-    """Return a panel box with its bottom edge heuristically adjusted for captions.
+def _runs(flags: np.ndarray, min_len: int = 1) -> list[tuple[int, int]]:
+    """Zusammenhaengende True-Laueufe als (start, ende_exklusiv); kuerzere als min_len entfallen."""
+    runs = []
+    i, n = 0, len(flags)
+    while i < n:
+        if flags[i]:
+            j = i
+            while j + 1 < n and flags[j + 1]:
+                j += 1
+            if j + 1 - i >= min_len:
+                runs.append((i, j + 1))
+            i = j + 1
+        else:
+            i += 1
+    return runs
 
-    ``box`` contains (left, top, right, bottom) pixel bounds. ``gray`` and
-    ``mask`` cover the full image; True in ``mask`` denotes background.
-    ``H`` is the image height in pixels; ``img`` and ``W`` are unused.
-    Boxes under 40 pixels wide or tall, or rejected by the height checks,
-    are returned unchanged. Captions may remain. Input images and arrays
-    are not modified.
+
+def _merge_runs(runs: list[tuple[int, int]], gap: int) -> list[tuple[int, int]]:
+    """Laueufe verbinden, deren Abstand kleiner als gap ist."""
+    out: list[list[int]] = []
+    for s, e in runs:
+        if out and s - out[-1][1] < gap:
+            out[-1][1] = max(out[-1][1], e)
+        else:
+            out.append([s, e])
+    return [(s, e) for s, e in out]
+
+
+def _strong_edge(profile: np.ndarray, pos: int, win: int) -> int | None:
+    """Staerkste Kante (Gradient) im Fenster um pos; Rueckgabe immer in [pos-2, pos+2].
+
+    Der Ausschlag muss deutlich sein und die staerkste Kante des Fensters
+    darf hoechstens zwei Pixel von pos entfernt liegen. Die Kantenposition
+    ist der Beginn des Abfalls: d[i] = |profil[i+1] - profil[i]|, damit ein
+    Schnitt nie tiefer als noetig faellt und keine Textzeile stehen bleibt.
+    """
+    n = len(profile)
+    lo, hi = max(1, pos - win), min(n - 1, pos + win)
+    if hi - lo < 2:
+        return None
+    d = np.abs(np.diff(profile.astype(np.float32)))   # d[i] = Kante zwischen i und i+1
+    seg = d[lo - 1:hi - 1]
+    peak = float(seg.max())
+    if peak < 4.0:
+        return None
+    best = int(np.argmax(seg))                        # Kantenindex relativ zu lo-1
+    edge = lo + best                                  # absoluter Positionsanfang
+    if abs(edge - pos) > 2:
+        return None
+    idx = np.nonzero(seg >= 0.5 * peak)[0]
+    k = int(idx[np.argmin(np.abs(lo + idx - edge))])
+    return lo + k
+
+
+def _gap_start(cov: np.ndarray, pos: int, thr: float, reach: int) -> int | None:
+    """Start der ersten Hintergrund-Rinne (cov < thr) bei/nach pos, hoechstens reach weit.
+
+    Der Beginn der ersten schwachen Zeile ab pos wird zurueckgegeben, wenn
+    er innerhalb von reach Positionen liegt; die Rinne darf bis ans Ende
+    laufen. Wird keine Rinne gefunden, liefert die Funktion None.
+    """
+    n = len(cov)
+    i = max(0, min(n, pos))
+    end = min(n, i + reach)
+    while i < end:
+        if cov[i] < thr:
+            return i
+        i += 1
+    return None
+
+
+def _split_at_gaps(cov: np.ndarray, thr: float, min_len: int) -> list[tuple[int, int]]:
+    """Inhalts-Laueufe; schmale Rinne werden verschmolzen.
+
+    Ein Feld endet erst an einer durchgehenden Hintergrund-Rinne von
+    mindestens min_len Zeilen (bzw. Spalten). Duenne Trennlinien wie der
+    Rand eines Fotos oder Zeilenabstaende innerhalb einer Beschriftung
+    trennen nicht; so bleibt das Foto eine Gruppe und die Caption darunter
+    eine eigene.
+    """
+    runs = _runs(cov >= thr)
+    out: list[list[int]] = []
+    for s, e in runs:
+        if out and s - out[-1][1] < min_len:
+            out[-1][1] = max(out[-1][1], e)
+        else:
+            out.append([s, e])
+    return [(s, e) for s, e in out]
+
+
+def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: int, H: int):
+    """Return a panel box cropped to the picture only (caption text removed).
+
+    ``box`` contains (left, top, right, bottom) pixel bounds. ``gray``,
+    ``mask`` and ``bg_mask(img)``-style data may be passed for interface
+    compatibility but are not required; the decision uses fresh per-panel
+    measurements, so panels touching the image border or sitting on a
+    differently coloured page are handled like all others.
+
+    The panel's own background colour is measured from its border zone.
+    Rows with hardly any content form gaps; the first big content group
+    (the picture) ends at its gap and everything below is cut away when
+    what follows looks like text (thin lines covering little width). If
+    no plausible picture group is found (blank or fully filled panels)
+    the box is returned unchanged. A caption column on the left or right
+    side is trimmed from that side instead. Boxes under 40 pixels wide or
+    tall are returned unchanged. Input images and arrays are not modified.
     """
     l, t, r, b = box
     bh, bw = b - t, r - l
     if bh < 40 or bw < 40:
         return box
-    content = ~mask                                   # True = Pixel mit Inhalt (kein Hintergrund)
-    x0, x1 = l + int(0.05 * bw), r - int(0.05 * bw)
-    y0, y1 = t + int(0.05 * bh), b - int(0.05 * bh)   # Randzonen aussparen (Rahmenlinien)
-    if x1 - x0 < 8 or y1 - y0 < 8:
-        return box
-    row_frac = content[y0:y1, x0:x1].mean(axis=1)     # Inhaltsanteil pro Zeile
-    thr = 0.015
-    i = len(row_frac) - 1
-    while i > 0 and row_frac[i] < thr:                # erst durch die Luecke ueber dem Text
-        i -= 1
-    img_bottom = y0                                   # Notfall: nichts erkannt -> Box unveraendert
-    while i >= 0:                                     # dann die erste inhaltliche Zeilengruppe = Bild
-        if row_frac[i] >= thr:
-            img_bottom = y0 + i + 1
-            i -= 1
-        elif i > 0 and (row_frac[max(0, i - 15):i] >= thr).any():
-            i -= 1                                    # duenne Luecke innerhalb des Bildes
-        else:
-            break
-    min_h = max(40, int(0.4 * bh))
-    if img_bottom - t < min_h or b - img_bottom > 0.5 * bh:
-        return box                                    # Plausibilitaet: sonst nichts abschneiden
-    nb = _edge(gray[:, x0:x1].mean(axis=1), img_bottom, max(6, int(0.01 * bh)))
-    return (l, t, r, max(t + min_h, min(H, nb)))
+
+    # Eigene Hintergrundfarbe fuer dieses Panel: Farbe der Randzone des
+    # Panels. Die globale Bild-Hintergrundfarbe versagt, wenn das Panel den
+    # Bildrand beruehrt oder die Raender andersfarbig sind.
+    m = max(2, min(8, int(0.02 * min(bw, bh))))
+    par = np.asarray(img.convert("RGB").crop((l, t, r, b))).astype(np.int16)
+    strips = np.concatenate([
+        par[:m].reshape(-1, 3), par[-m:].reshape(-1, 3),
+        par[:, :m].reshape(-1, 3), par[:, -m:].reshape(-1, 3),
+    ])
+    bg = np.median(strips, axis=0)
+    content = (np.abs(par - bg).max(axis=2) >= 24)     # True = Pixel mit Inhalt
+    h, w = content.shape
+    row_cov = content.mean(axis=1)                     # Inhaltsanteil pro Zeile
+    col_cov = content.mean(axis=0)                     # Inhaltsanteil pro Spalte
+    thr = 0.015                                        # Zeile gilt ab 1.5 % als Inhalt
+
+    def looks_like_text(cov: np.ndarray) -> bool:
+        """Wenig Deckung und viele schmale Zeilengruppen = Beschriftungstext."""
+        groups = _split_at_gaps(cov, thr, 3)
+        if not groups:
+            return False
+        total = sum(e - s for s, e in groups)
+        thin = sum(1 for s, e in groups if e - s <= 14) / len(groups)
+        return float(cov.mean()) < 0.35 and (len(groups) >= 2 or total <= 0.3 * len(cov)) \
+            and thin >= 0.6
+
+    # --- Querschnitt: Textzeilen unter dem Bild ---------------------------
+    glist = _split_at_gaps(row_cov, thr, max(10, int(0.04 * h)))
+    pic_bottom = None
+    for s, e in glist:                                 # nur das erste grosse Feld oben ist das Bild
+        if s > 0.3 * h:
+            break                                      # erstes grosses Feld beginnt zu tief
+        if e - s >= 0.45 * h:                          # Hauptbild: hoch genug
+            pic_bottom = e
+        break
+    if pic_bottom is not None and pic_bottom < h - 2:
+        rest = row_cov[pic_bottom:]                    # alles unterhalb des Bildes
+        if looks_like_text(rest):                      # darunter sitzt Beschriftung
+            cut = _gap_start(row_cov, pic_bottom, thr, max(10, int(0.05 * h)))
+            if cut is None:
+                cut = pic_bottom
+            strong = _strong_edge(row_cov, cut, max(6, int(0.02 * h)))
+            if strong is not None:
+                cut = strong                           # an der scharfen Kante einrasten
+            cut = max(int(0.4 * h), min(h, cut))
+            if cut < h:
+                return (l, t, r, t + cut)
+        elif glist and glist[-1][1] >= h - 2:          # Fuellt bis zum Rand: Rahmenlinie pruefen
+            # Duennes gleichmaessiges Band ganz unten (untere Rahmenlinie) und
+            # oberhalb davon eine echte Hintergrund-Rinne -> Rinne als Kante.
+            last_s, last_e = glist[-1]
+            uniform = bool(np.ptp(gray[:, l:r][t + last_s:t + last_e].mean(axis=1)) < 40) \
+                if gray.shape[0] == H else True
+            if last_s >= 3 and (last_e - last_s) <= max(6, int(0.03 * h)) and uniform:
+                g = _gap_start(row_cov[max(0, last_s - max(6, int(0.02 * h))):last_s],
+                               0, thr, last_s)
+                if g is not None:
+                    g += max(0, last_s - max(6, int(0.02 * h)))
+                if g is not None and g >= int(0.4 * h) and g < last_s:
+                    return (l, t, r, t + g)
+        return box                                     # nichts abzuschneiden
+
+    # --- Laengsschnitt: Textspalte links oder rechts neben dem Bild -------
+    vg = _split_at_gaps(col_cov, thr, max(10, int(0.04 * w)))
+    if len(vg) == 2:
+        (xa, xb), (ya, yb) = vg
+        gap = ya - xb
+        if 5 <= gap <= 0.25 * w:
+            def extent(x0, x1):
+                rr = _split_at_gaps(row_cov[x0:x1], thr, max(10, int(0.05 * h)))
+                return float(max((e - s) for s, e in rr)) / h if rr else 0.0
+            def text_col(x0, x1):
+                return looks_like_text(col_cov[x0:x1])
+            le, ri = extent(xa, xb), extent(ya, yb)
+            if le >= 0.8 and ri <= 0.9 and text_col(ya, yb):   # links Bild, rechts Text
+                nr = max(int(0.4 * w), min(w, _gap_start(col_cov, xb, thr, max(10, int(0.05 * w))) or (xb + gap // 2)))
+                if nr < w:
+                    return (l, t, l + nr, b)
+            elif ri >= 0.8 and le <= 0.9 and text_col(xa, xb): # rechts Bild, links Text
+                nl = min(w - int(0.4 * w), max(0, ya - gap // 2))
+                if nl > 0:
+                    return (l + nl, t, r, b)
+    return box
 
 
 # ----------------------------------------------------------------------------
