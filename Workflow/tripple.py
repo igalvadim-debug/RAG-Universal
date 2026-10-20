@@ -8,6 +8,7 @@ tripple.py — извлечение промтов/длительности И �
     python tripple.py extract [путь\к.json]    # то же самое явно
     python tripple.py create ...               # создаёт Tripple-JSON (TripleUpscale) из шаблона Tripple.json
     python tripple.py create-sc ...            # создаёт CS-JSON (LTXDirectorCS) из шаблона SC.json
+    python tripple.py create-minimax-ref ...   # MiniMax H3 Reference-to-Video из Minimax_reference_pictures.json
 
 create — принцип update_workflow.py: берёт шаблон workflow (Tripple.json),
 вставляет промты (4 поля ноды Tripple + FLUX_START_IMAGE → flux_start_image.txt),
@@ -68,6 +69,7 @@ DEFAULT_SC   = Path(__file__).resolve().parent / "SC.json"
 DEFAULT_LTX25 = Path(__file__).resolve().parent / "LTX 2.5 First and Last Frame Video Generation .json"
 DEFAULT_T2V = Path(__file__).resolve().parent / "Text-to-Video Fast LTX2.5 Sync Audio & Video.json"
 COMFY_INPUT_DIR = Path(r"D:\ComfyUiVid\input")
+DEFAULT_MINIMAX_REF = Path(__file__).resolve().parent / "Minimax_reference_pictures.json"
 
 
 # ══════════════════════════════════════════════════
@@ -914,6 +916,195 @@ def create_t2v_workflow(template_path, out_path, prompt_text,
 
 
 # ══════════════════════════════════════════════════
+# CREATE — MiniMax H3 Reference-to-Video (Minimax_reference_pictures.json)
+# ══════════════════════════════════════════════════
+
+MINIMAX_REF_NODE_TYPE = "MiniMaxH3ReferenceToVideo"
+MINIMAX_MAX_PICTURES = 9
+
+
+def parse_minimax_answer(text):
+    """
+    Разбирает ответ LLM в формате minimaxh3SP.txt:
+        VIDEO: ... SOUND: ... MUSIC: ...
+    Возвращает (merged_prompt, parts) — merged_prompt это ОДНА строка для ноды промта
+    MiniMax H3 (видео-часть, затем звук и музыка), parts = {video, sound, music}.
+    Если заголовков нет — весь текст считается видео-частью.
+    """
+    text = (text or "").lstrip("\ufeff").strip()
+    text = re.sub(r"^```[a-zA-Z]*\s*|\s*```$", "", text).strip()
+    head = re.compile(r"(?im)^[ \t*#]*(VIDEO|SOUND|MUSIC)[ \t*]*:[ \t*]*")
+    marks = list(head.finditer(text))
+    parts = {"video": "", "sound": "", "music": ""}
+    if not marks:
+        parts["video"] = text
+    else:
+        for i, m in enumerate(marks):
+            end = marks[i + 1].start() if i + 1 < len(marks) else len(text)
+            parts[m.group(1).lower()] = text[m.end():end].strip()
+        # текст ДО первого заголовка (модель потеряла VIDEO:) — это видео-часть
+        pre = text[:marks[0].start()].strip()
+        if pre and not parts["video"]:
+            parts["video"] = pre
+    merged = parts["video"].strip()
+    if parts["sound"].strip():
+        merged += "\n\nSOUND DESIGN: " + re.sub(r"\s*\n\s*", " ", parts["sound"].strip())
+    music = parts["music"].strip()
+    if music and music.lower().strip(" .") != "none":
+        merged += "\n\nMUSIC: " + re.sub(r"\s*\n\s*", " ", music)
+    return merged.strip(), parts
+
+
+def _link_origin(workflow, link_id):
+    """(origin_node_id, origin_slot) для link_id; поддержка списочного и словарного формата links."""
+    for l in workflow.get("links", []) or []:
+        if isinstance(l, (list, tuple)):
+            if l and l[0] == link_id:
+                return l[1], l[2]
+        elif isinstance(l, dict) and l.get("id") == link_id:
+            return l.get("origin_id"), l.get("origin_slot")
+    return None, None
+
+
+def _input_origin_node(workflow, nodes_by_id, node, input_name):
+    """Нода, подключённая ко входу input_name ноды node (или None)."""
+    for inp in node.get("inputs", []) or []:
+        if inp.get("name") == input_name and inp.get("link") is not None:
+            oid, _ = _link_origin(workflow, inp["link"])
+            return nodes_by_id.get(oid)
+    return None
+
+
+def _copy_to_input(src, comfy_input_dir):
+    """Копирует файл в ComfyUI input, возвращает имя файла (или None, если файла нет)."""
+    if not src:
+        return None
+    src = Path(src)
+    if not src.exists():
+        print(f"⚠️  Файл не найден: {src}")
+        return None
+    comfy_input_dir = Path(comfy_input_dir)
+    comfy_input_dir.mkdir(parents=True, exist_ok=True)
+    dst = comfy_input_dir / src.name
+    if dst.resolve() != src.resolve():
+        shutil.copy2(src, dst)
+    return src.name
+
+
+def create_minimax_ref_workflow(template_path, out_path, prompt_text, images=None,
+                                duration=None, audio=None, video=None,
+                                aspect=None, megapixels=None,
+                                comfy_input_dir=COMFY_INPUT_DIR):
+    """
+    Берёт шаблон Minimax_reference_pictures.json и заполняет его.
+    Ноды находятся ПО СВЯЗЯМ ноды MiniMaxH3ReferenceToVideo (не по id и не по X-позиции):
+      - вход prompt           → PrimitiveStringMultiline с промтом
+      - ref_images.ref_image_N → LoadImage (слот N = <Picture N+1> в промте)
+      - length ← ComfyMathExpression ← values.a ← PrimitiveFloat «Duration» (секунды)
+      - ref_audios.ref_audio_0 → LoadAudio, ref_videos.ref_video_0 → VHS_LoadVideo
+      - width/height ← subgraph ResolutionSelector (aspect / megapixels), опционально
+    images: список путей (до 9). Заполненные слоты включаются (mode 0), остальные LoadImage
+    отключаются (bypass, mode 4). audio/video: если не переданы — ноды отключаются.
+    Возвращает Path созданного JSON.
+    """
+    template_path = Path(template_path)
+    out_path = Path(out_path)
+    with open(template_path, "r", encoding="utf-8") as f:
+        workflow = json.load(f)
+
+    # только верхний уровень: внутри subgraph есть свои PrimitiveStringMultiline/PrimitiveFloat
+    nodes_by_id = {n.get("id"): n for n in workflow.get("nodes", [])}
+    mains = [n for n in workflow.get("nodes", []) if n.get("type") == MINIMAX_REF_NODE_TYPE]
+    if not mains:
+        raise ValueError(f"Нода {MINIMAX_REF_NODE_TYPE} не найдена в {template_path.name}")
+    main = mains[0]
+
+    # ── промт ──
+    pnode = _input_origin_node(workflow, nodes_by_id, main, "prompt")
+    if pnode is None or not pnode.get("widgets_values"):
+        raise ValueError("К входу prompt ноды MiniMaxH3ReferenceToVideo не подключена нода с текстом")
+    pnode["widgets_values"][0] = as_text(prompt_text)
+
+    # ── картинки ──
+    images = [p for p in (images or []) if p][:MINIMAX_MAX_PICTURES]
+    used = 0
+    for slot in range(MINIMAX_MAX_PICTURES):
+        node = _input_origin_node(workflow, nodes_by_id, main, f"ref_images.ref_image_{slot}")
+        if node is None:
+            continue
+        name = _copy_to_input(images[slot], comfy_input_dir) if slot < len(images) else None
+        if name:
+            node["widgets_values"][0] = name
+            node["mode"] = 0
+            used += 1
+            print(f"🖼️  <Picture {slot + 1}> = {name} (LoadImage id {node.get('id')})")
+        else:
+            node["mode"] = 4
+    if images and used < len(images):
+        print(f"⚠️  Использовано {used} из {len(images)} картинок (нет файла или нет слота)")
+
+    # ── длительность (секунды) через ComfyMathExpression → length ──
+    if duration:
+        math_node = _input_origin_node(workflow, nodes_by_id, main, "length")
+        dnode = None
+        if math_node is not None:
+            dnode = _input_origin_node(workflow, nodes_by_id, math_node, "values.a")
+        if dnode is None:
+            for n in workflow.get("nodes", []):
+                if n.get("type") == "PrimitiveFloat" and "duration" in (n.get("title") or "").lower():
+                    dnode = n
+                    break
+        if dnode is not None and dnode.get("widgets_values"):
+            dnode["widgets_values"][0] = float(duration)
+            print(f"⏱️  Duration = {float(duration)} с (нода id {dnode.get('id')})")
+        else:
+            print("⚠️  Нода Duration не найдена — длительность не записана")
+
+    # ── референс-аудио ──
+    anode = _input_origin_node(workflow, nodes_by_id, main, "ref_audios.ref_audio_0")
+    if anode is not None:
+        aname = _copy_to_input(audio, comfy_input_dir)
+        if aname:
+            anode["widgets_values"][0] = aname
+            anode["mode"] = 0
+            print(f"🔊 <Audio 1> = {aname}")
+        else:
+            anode["mode"] = 4
+
+    # ── референс-видео ──
+    vnode = _input_origin_node(workflow, nodes_by_id, main, "ref_videos.ref_video_0")
+    if vnode is not None:
+        vname = _copy_to_input(video, comfy_input_dir)
+        if vname:
+            wv = vnode.get("widgets_values")
+            if isinstance(wv, dict):
+                wv["video"] = vname
+                prev = wv.get("videopreview")
+                if isinstance(prev, dict) and isinstance(prev.get("params"), dict):
+                    prev["params"]["filename"] = vname
+            vnode["mode"] = 0
+            print(f"🎞️  <Video 1> = {vname}")
+        else:
+            vnode["mode"] = 4
+
+    # ── разрешение (subgraph с ResolutionSelector) ──
+    if aspect or megapixels:
+        rnode = _input_origin_node(workflow, nodes_by_id, main, "width")
+        if rnode is not None and isinstance(rnode.get("widgets_values"), list):
+            if aspect:
+                rnode["widgets_values"][0] = aspect
+            if megapixels and len(rnode["widgets_values"]) > 1:
+                rnode["widgets_values"][1] = float(megapixels)
+            print(f"📐 Разрешение: {aspect or '—'} / {megapixels or '—'} MP")
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(workflow, f, ensure_ascii=False, indent=2)
+    print(f"💾 MiniMax-Ref-JSON: {out_path}")
+    return out_path
+
+
+# ══════════════════════════════════════════════════
 # CLI
 # ══════════════════════════════════════════════════
 
@@ -1085,6 +1276,35 @@ def _cli_create_t2v(argv):
     )
 
 
+def _cli_create_minimax_ref(argv):
+    """python tripple.py create-minimax-ref --out <path> --prompt <файл|текст>
+    [--image P]... (до 9) [--duration 10] [--audio P] [--video P]
+    [--aspect "9:16 (Portrait Widescreen)"] [--megapixels 0.1] [--template <json>]
+    Промт может быть в формате VIDEO:/SOUND:/MUSIC: (объединится в одну строку)."""
+    import argparse
+    ap = argparse.ArgumentParser(prog="tripple.py create-minimax-ref")
+    ap.add_argument("--template", default=str(DEFAULT_MINIMAX_REF))
+    ap.add_argument("--out", required=True)
+    ap.add_argument("--prompt", required=True, help="файл с промтом или строка")
+    ap.add_argument("--image", action="append", default=[], help="картинка-референс (повторять до 9 раз)")
+    ap.add_argument("--duration", type=float, default=None)
+    ap.add_argument("--audio", default=None)
+    ap.add_argument("--video", default=None)
+    ap.add_argument("--aspect", default=None)
+    ap.add_argument("--megapixels", type=float, default=None)
+    ap.add_argument("--comfy-input", default=str(COMFY_INPUT_DIR))
+    a = ap.parse_args(argv)
+
+    p = Path(a.prompt)
+    raw = p.read_text(encoding="utf-8-sig") if p.exists() else a.prompt
+    merged, _parts = parse_minimax_answer(raw)
+    create_minimax_ref_workflow(
+        template_path=a.template, out_path=a.out, prompt_text=merged,
+        images=a.image, duration=a.duration, audio=a.audio, video=a.video,
+        aspect=a.aspect, megapixels=a.megapixels, comfy_input_dir=a.comfy_input,
+    )
+
+
 def main():
     argv = sys.argv[1:]
     if not argv or argv[0] in ("extract", "extract-main"):
@@ -1097,6 +1317,8 @@ def main():
         _cli_create_ltx25(argv[1:])
     elif argv[0] == "create-t2v":
         _cli_create_t2v(argv[1:])
+    elif argv[0] == "create-minimax-ref":
+        _cli_create_minimax_ref(argv[1:])
     elif argv[0] in ("-h", "--help", "help"):
         print(__doc__)
     else:
