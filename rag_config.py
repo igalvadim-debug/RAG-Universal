@@ -74,6 +74,8 @@ class NetConfig:
     llama_host: str = _env("LLAMA_HOST", "127.0.0.1")
     llama_port: int = int(_env("LLAMA_PORT", "8080"))
     mtp_port: int = int(_env("MTP_PORT", "8510"))
+    # Дополнительные локальные порты llama-server (через запятую), напр. сервер из других лаунчеров на 8484
+    llama_extra_ports: str = _env("LLAMA_EXTRA_PORTS", "8484")
     remote_llama: str = _env("REMOTE_LLAMA", "192.168.181.93:7860")
     webui_port: int = int(_env("WEBUI_PORT", "7860"))
 
@@ -118,6 +120,10 @@ class NetConfig:
             (f"{s}://{l}:{self.mtp_port}/health",
              f"{s}://{l}:{self.mtp_port}/v1/chat/completions"),
         ]
+        for _p in (x.strip() for x in self.llama_extra_ports.split(",")):
+            if _p.isdigit() and int(_p) not in (self.llama_port, self.mtp_port):
+                pairs.append((f"{s}://{l}:{_p}/health",
+                              f"{s}://{l}:{_p}/v1/chat/completions"))
         if self.remote_llama:
             rs = _scheme(self.remote_llama)
             pairs.append((f"{rs}://{self.remote_llama}/health",

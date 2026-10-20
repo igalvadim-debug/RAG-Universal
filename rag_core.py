@@ -301,13 +301,13 @@ def get_model():
 def get_collection():
     """Return the active Chroma collection, opening the default if none is set.
 
-    Initially, get or create COLLECTION using the named collection cache.
+    Initially, get or create COLLECTION in CHROMA_DIR using a cached client.
     A nonempty get_collection_by_name() lookup replaces the active collection.
     Chroma client and collection errors propagate.
     """
     global _collection
     if _collection is None:
-        _collection = get_collection_by_name(COLLECTION)
+        _collection = _get_chroma_client(CHROMA_DIR).get_or_create_collection(COLLECTION)
     return _collection
 
 
@@ -969,6 +969,23 @@ def _timeline_sequence_count(text: str) -> int:
         except ValueError:
             pass
     return max(_nums) if _nums else 0
+
+
+# ── MiniMax H3: системные промты из файлов (редактируются без правки кода) ──
+_MM_SP_FILE      = r"D:\claudeAgent\RAG\workflow\minimaxh3SP.txt"
+_MM_SP_ANIM_FILE = r"D:\claudeAgent\RAG\workflow\minimaxh3SP_anim.txt"
+
+
+def _load_minimax_sp(anim: bool = False) -> str:
+    """Читает minimaxh3SP.txt (реализм) или minimaxh3SP_anim.txt (анимация) при каждом вызове."""
+    path = _MM_SP_ANIM_FILE if anim else _MM_SP_FILE
+    try:
+        with open(path, "r", encoding="utf-8-sig") as f:
+            return f.read().strip()
+    except Exception as e:
+        print(f"[RAG] ⚠️ Системный промт MiniMax не прочитан ({path}): {e}")
+        return ("Write ONE MiniMax H3 video prompt with exactly three sections VIDEO:, SOUND:, MUSIC: "
+                "(dense dialogue, full sound design, scored music). No preamble, no warnings.")
 
 
 def generate_rag_answer(question, context, style="реализм", language="русский", script_mode="художественный", narrator="короткий фильм", word_limit=300, sys_prompt="", timeline_techniques=None, cloud_provider="auto", director_mode="нет", n_sequences=5, image_paths=None, ref_image_paths=None, ref_image_paths_tl2=None, n_sequences_tl2=0, video_length=30, song_verses=2, singer="женщина", music_style=""):
@@ -1694,6 +1711,22 @@ def generate_rag_answer(question, context, style="реализм", language="р�
                 f"decision on how many denoise steps this shot needs: more (20-30) for fast complex action or high "
                 f"detail, fewer (8-12) for simple/static dialogue scenes. The line is stripped before rendering.\n"
             )
+        elif director_mode in ("Minimax H3", "Minimax H3 Anim"):
+            # ── MiniMax H3 Reference-to-Video: системный промт из minimaxh3SP*.txt + runtime-блок ──
+            _mm_n = len([p for p in (image_paths or []) if p])
+            if _mm_n:
+                _mm_pics = (f"{_mm_n} reference picture(s) supplied: "
+                            + ", ".join(f"<Picture {i}>" for i in range(1, _mm_n + 1)) + ".")
+            else:
+                _mm_pics = "no reference pictures supplied."
+            task = (
+                _load_minimax_sp(director_mode == "Minimax H3 Anim")
+                + "\n\nRUNTIME BLOCK (from the application, binding):\n"
+                f"- TARGET DURATION: {max(video_length, 1)} seconds — pace beats, dialogue lines and music cues to fit exactly.\n"
+                f"- REFERENCES: {_mm_pics} No reference audio, no reference video.\n"
+                f"- DIALOGUE LANGUAGE: {dialogue_lang} ({dialogue_script} script) for quoted lines only; everything else stays English.\n"
+                "- Output ONLY the three sections VIDEO:, SOUND:, MUSIC:.\n"
+            )
         elif director_mode == "LTX 2.5 T2V":
             # ── LTX 2.5 Text-to-Video: ОДИН непрерывный момент, визуальное описание ──
             # (чистые T2V-модели плохо держат сценарии с таймкодами/диалогами/сменами планов)
@@ -1780,7 +1813,7 @@ def generate_rag_answer(question, context, style="реализм", language="р�
             lines.append("For each segment, the camera direction MUST start with the specified technique.")
             timeline_block = "\n".join(lines) + "\n"
 
-        if director_mode in ("Director Mode", "CS LTX Director", "LTX 2.5 Director", "TripleUpscale", "LTX 2.5 First/Last", "LTX 2.5 T2V"):
+        if director_mode in ("Director Mode", "CS LTX Director", "LTX 2.5 Director", "TripleUpscale", "LTX 2.5 First/Last", "LTX 2.5 T2V", "Minimax H3", "Minimax H3 Anim"):
             system_prompt = (
                 f"{lang_instr}\n\n"
                 f"{sys_prompt + chr(10) if sys_prompt else ''}"
@@ -1830,7 +1863,7 @@ def generate_rag_answer(question, context, style="реализм", language="р�
 
                     # n_sequences ueberschreiben = Anzahl der Fotos
                     # (НЕ в режимах TripleUpscale / LTX 2.5 First-Last: там картинки = стартовый/конечный кадр, а не сцены)
-                    if director_mode not in ("TripleUpscale", "LTX 2.5 First/Last"):
+                    if director_mode not in ("TripleUpscale", "LTX 2.5 First/Last", "Minimax H3", "Minimax H3 Anim"):
                         n_sequences = photo_count
 
                     # Jedes Foto wird EINER Szene zugewiesen (TripleUpscale: 1 Bild = I2V-Startframe)
@@ -1840,6 +1873,11 @@ def generate_rag_answer(question, context, style="реализм", language="р�
                         for idx, (fname, cap) in enumerate(photo_scene_map, start=1):
                             lines.append(f"START FRAME {idx} ({fname}): {cap}")
                         lines.append("Der SCENE PROMPT MUSS diesen Frame fortsetzen: gleiche Person/Objekt, gleiche Umgebung, gleiche Lichtrichtung.")
+                    elif director_mode in ("Minimax H3", "Minimax H3 Anim"):
+                        lines.append("=== REFERENCE PICTURES — use the exact tags <Picture N> in the prompt ===")
+                        for idx, (fname, cap) in enumerate(photo_scene_map, start=1):
+                            lines.append(f"<Picture {idx}> ({fname}): {cap}")
+                        lines.append("Give each <Picture N> an explicit job (character face/wardrobe, location, object, style) based on its description. Refer to the pictures by tag; do not re-describe them at length.")
                     elif director_mode == "LTX 2.5 First/Last":
                         lines.append("=== FIRST FRAME (video start) / LAST FRAME (video end) ===")
                         for idx, (fname, cap) in enumerate(photo_scene_map, start=1):
@@ -1926,7 +1964,7 @@ def generate_rag_answer(question, context, style="реализм", language="р�
     # ── АНТИ-ОБРЫВ (контекст llama-server 8192): если модель остановилась, не дойдя
     # до последней SEQUENCE, повторяем с урезанным входом — без RAG-контекста и фото,
     # сценарий до 1500 символов, чтобы вывод влез в контекстное окно. ──
-    if script_mode == "сценарий" and director_mode not in ("TripleUpscale", "LTX 2.5 First/Last", "LTX 2.5 T2V") and photo_count == 0 and answer and not answer.strip().startswith("[Ошибка]"):
+    if script_mode == "сценарий" and director_mode not in ("TripleUpscale", "LTX 2.5 First/Last", "LTX 2.5 T2V", "Minimax H3", "Minimax H3 Anim") and photo_count == 0 and answer and not answer.strip().startswith("[Ошибка]"):
         _got = _timeline_sequence_count(answer)
         if _got < _n_seq:
             print(f"[RAG] ⚠️ Таймлайн оборван ({_got}/{_n_seq} SEQUENCE) — повтор с урезанным входом.")
@@ -2019,7 +2057,7 @@ def generate_rag_answer(question, context, style="реализм", language="р�
                 answer = answer[:_last_end + _m.end()].rstrip()
 
     # ── ZWEITER PASS: Selbstkontrolle (nur bei Szenario-Modus) ──────
-    if script_mode == "сценарий" and answer.strip() and director_mode not in ("TripleUpscale", "LTX 2.5 First/Last", "LTX 2.5 T2V"):
+    if script_mode == "сценарий" and answer.strip() and director_mode not in ("TripleUpscale", "LTX 2.5 First/Last", "LTX 2.5 T2V", "Minimax H3", "Minimax H3 Anim"):
         photo_check = ""
         if photo_count > 0:
             photo_check = (

@@ -319,6 +319,12 @@ def do_generate(question: str, style: str, word_limit: int, mode: str,
         ref_image_paths = None
         ref_image_paths_tl2 = None
         n_sequences_tl2 = 0
+    elif director_mode in ("Minimax H3", "Minimax H3 Anim"):
+        # до 9 референс-картинок = <Picture 1..9> (порядок слотов, пустые пропускаются)
+        image_paths = [img0, img1, img2, img3, img4, img5, img6, img7, img8]
+        ref_image_paths = None
+        ref_image_paths_tl2 = None
+        n_sequences_tl2 = 0
     elif director_mode == "LTX 2.5 T2V":
         # чистый текст — картинок нет
         image_paths = None
@@ -838,6 +844,45 @@ def export_ltx25_json(answer_text, img_first, img_last, video_length, director_m
     src = f"{len(sig)} шагов (решение LLM)" if sigma_steps else f"{len(sig)} шагов (по длительности)"
     return (f"✅ LTX-2.5-JSON: {out.name} → {folder.name} | "
             f"{duration}с, сигамы: {src} | кадры: {f1} → {f2}")
+
+
+def export_minimax_json(answer_text, video_length, director_mode, *imgs):
+    """
+    MiniMax H3 Reference-to-Video: mod_minimax_ref.json в новой папке mmref_<3> / mmanim_<3>.
+    Ответ LLM (VIDEO/SOUND/MUSIC) объединяется в одну строку промта, картинки из слотов
+    (порядок слотов = <Picture N>) копируются в ComfyUI input, Duration — из слайдера.
+    """
+    if director_mode not in ("Minimax H3", "Minimax H3 Anim"):
+        return "⚠️ Сначала выбери сценарий «Minimax H3» или «Minimax H3 Anim» и нажми «Сгенерировать»."
+
+    content = (answer_text or "").strip()
+    if not content:
+        return "⚠️ Нет промта — сгенерируй его в режиме Minimax H3."
+    merged, _parts = tripple.parse_minimax_answer(content)
+    if not merged:
+        return "⚠️ Промт пуст после разбора VIDEO/SOUND/MUSIC."
+
+    pics = [p for p in imgs[:9] if p]
+    workflow_dir = Path(r"D:\claudeAgent\RAG\workflow")
+    folder = _rand_folder(workflow_dir, "mmanim" if director_mode == "Minimax H3 Anim" else "mmref")
+    duration = int(video_length) if video_length else 10
+
+    try:
+        out = tripple.create_minimax_ref_workflow(
+            template_path   = workflow_dir / "Minimax_reference_pictures.json",
+            out_path        = folder / "mod_minimax_ref.json",
+            prompt_text     = merged,
+            images          = pics,
+            duration        = duration,
+            comfy_input_dir = _comfy_input_dir(),
+        )
+    except Exception as e:
+        return f"❌ Ошибка создания MiniMax-JSON: {e}"
+
+    (folder / "video.txt").write_text(content + "\n", encoding="utf-8")
+    note = " | ⚠️ H3 лучше держит 5–15 с" if duration > 15 else ""
+    return (f"✅ MiniMax-JSON: {out.name} → {folder.name} | {duration}с, "
+            f"картинок: {len(pics)} (<Picture 1…{len(pics)}>){note}")
 
 
 def export_t2v_json(answer_text, video_length, director_mode):
@@ -1469,6 +1514,8 @@ def update_image_slots(n_sequences: int, director_mode: str = "нет"):
         n = 1
     elif director_mode == "LTX 2.5 First/Last":
         n = 2   # первый + последний кадр
+    elif director_mode in ("Minimax H3", "Minimax H3 Anim"):
+        n = 9   # 9 референс-картинок (<Picture 1..9>)
     if n == 1:
         pcts = ["0%"]
     else:
@@ -1476,7 +1523,9 @@ def update_image_slots(n_sequences: int, director_mode: str = "нет"):
         pcts = [f"{i * step}%" for i in range(n)]
         pcts[-1] = "100%"
 
-    if director_mode == "LTX 2.5 First/Last":
+    if director_mode in ("Minimax H3", "Minimax H3 Anim"):
+        slot_labels = [f"🖼️ Picture {i+1}" for i in range(10)]
+    elif director_mode == "LTX 2.5 First/Last":
         slot_labels = (["🎞️ Первый кадр (START)", "🎞️ Последний кадр (END)"]
                        + [f"🎥 слот {i+1}" for i in range(2, 10)])
     else:
@@ -1665,7 +1714,7 @@ def build_ui():
                 )
                 director_dd = gr.Dropdown(
                     label   = "Director Mode",
-                    choices = ["нет", "Director Mode", "TripleUpscale", "CS LTX Director", "LTX 2.5 Director", "LTX 2.5 First/Last", "LTX 2.5 T2V"],
+                    choices = ["нет", "Director Mode", "TripleUpscale", "CS LTX Director", "LTX 2.5 Director", "LTX 2.5 First/Last", "LTX 2.5 T2V", "Minimax H3", "Minimax H3 Anim"],
                     value   = "Director Mode",
                     visible = True,
                 )
@@ -2022,6 +2071,7 @@ def build_ui():
             export_ltx25_dir_btn = gr.Button("📤 Export LTX 2.5 Director (CS25)", variant="secondary", scale=1)
             export_ltx25_btn   = gr.Button("📤 Export LTX 2.5 (First/Last)", variant="secondary", scale=1)
             export_t2v_btn     = gr.Button("📤 Export LTX 2.5 T2V", variant="secondary", scale=1)
+            export_minimax_btn = gr.Button("📤 Export MiniMax H3 (Reference)", variant="secondary", scale=1)
         with gr.Row():
             json_path_tb = gr.Textbox(
                 label       = "📥 Путь к JSON (загрузка обратно в UI)",
@@ -2254,6 +2304,12 @@ def build_ui():
         export_t2v_btn.click(
             fn      = export_t2v_json,
             inputs  = [answer_box, video_len_sl, director_dd],
+            outputs = [answer_export_status],
+        )
+
+        export_minimax_btn.click(
+            fn      = export_minimax_json,
+            inputs  = [answer_box, video_len_sl, director_dd] + img_slots[:9],
             outputs = [answer_export_status],
         )
 
