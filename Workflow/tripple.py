@@ -975,6 +975,82 @@ def _input_origin_node(workflow, nodes_by_id, node, input_name):
     return None
 
 
+def _prompt_widget_index(onode, widgets_values, out_slot=None):
+    """Позиция текстового виджета «Prompt» в widgets_values connected-ноды.
+
+    Ищем не «самую длинную строку», а виджет по роли значения (value) в схеме
+    ноды: имя виджета берётся из properties/widgets_values_named (или из label
+    связанного input), затем его позиционный индекс находится в widgets_values.
+    Возвращает индекс в widgets_values или None.
+    """
+    if not isinstance(widgets_values, list):
+        return None
+
+    def _norm(s):
+        return "".join(str(s or "").lower().split())
+
+    # 1) имя value-виджета из подписанной схемы свойств (widgets_values_named /
+    #    cnr_properties): сопоставляем значение с widgets_values по содержимому
+    named = {}
+    props = onode.get("properties") or {}
+    for src in (onode.get("widgets_values_named"),
+                props.get("widget_values"),
+                props.get("cnr_properties")):
+        if isinstance(src, dict):
+            named.update(src)
+    if named:
+        # candidate widget names tied to the prompt role
+        role_names = [k for k in named
+                      if _norm(k) in ("value", "prompt", "inputvalue")]
+        for name in role_names:
+            val = named[name]
+            if isinstance(val, str):
+                for i, v in enumerate(widgets_values):
+                    if v == val:
+                        return i
+
+    # 2) label связанного input со ссылкой на промтовый вывод (роль value/Prompt)
+    inputs = onode.get("inputs", []) or []
+    outputs = onode.get("outputs", []) or []
+    slot = out_slot if (out_slot is not None and 0 <= out_slot < len(outputs)) else None
+    if slot is None:
+        slot = next((k for k, e in enumerate(outputs)
+                     if isinstance(e, dict) and (_norm(e.get("label")) in ("prompt", "value")
+                                                 or _norm(e.get("name")) in ("prompt", "value"))), None)
+    want_label = None
+    if slot is not None:
+        e = outputs[slot]
+        want_label = _norm(e.get("label") or e.get("name"))
+    for inp in inputs:
+        if not isinstance(inp, dict):
+            continue
+        lbl = _norm(inp.get("label") or inp.get("name"))
+        wid = _norm((inp.get("widget") or {}).get("name")) if isinstance(inp.get("widget"), dict) else ""
+        if want_label is not None and lbl != want_label and wid != want_label:
+            continue
+        # этот input — value-роль промта; его widget-имя может быть в type/name
+        for cand in (wid, lbl, _norm(inp.get("name"))):
+            if cand in ("value", "prompt"):
+                # позиция среди string-виджетов: сколько string-входов до него
+                preceding = sum(1 for x in inputs[:inputs.index(inp)]
+                                if isinstance(x, dict) and str(x.get("type", "")).upper() == "STRING")
+                str_positions = [i for i, v in enumerate(widgets_values) if isinstance(v, str)]
+                if preceding < len(str_positions):
+                    return str_positions[preceding]
+                if str_positions:
+                    return str_positions[0]
+                return None
+
+    # 3) последний вариант: Prompt-выход с типом STRING → первый string-виджет
+    if slot is not None and str(outputs[slot].get("type", "")).upper() == "STRING":
+        preceding = sum(1 for e in outputs[:slot]
+                        if isinstance(e, dict) and str(e.get("type", "")).upper() == "STRING")
+        str_positions = [i for i, v in enumerate(widgets_values) if isinstance(v, str)]
+        if preceding < len(str_positions):
+            return str_positions[preceding]
+    return None
+
+
 def _copy_to_input(src, comfy_input_dir):
     """Копирует файл в ComfyUI input, возвращает имя файла (или None, если файла нет)."""
     if not src:
@@ -1036,13 +1112,22 @@ def create_minimax_ref_workflow(template_path, out_path, prompt_text, images=Non
             oid, _ = _link_origin(workflow, lid)
             onode = nodes_by_id.get(oid) if oid is not None else None
             if onode is not None:
+                prompt_slot = None
                 for outp in onode.get("outputs", []) or []:
                     if isinstance(outp.get("links"), list) and lid in outp["links"]:
                         outp["links"].remove(lid)
+                        # слот вывода, отдающий значение по связи (по позиции в outputs)
+                        if prompt_slot is None:
+                            try:
+                                prompt_slot = onode["outputs"].index(outp)
+                            except ValueError:
+                                pass
                 owv = onode.get("widgets_values")
                 if isinstance(owv, list):
-                    idx = next((i for i, v in enumerate(owv)
-                                if isinstance(v, str) and len(v) > 40), None)
+                    # позицию промта берём из схемы connected-ноды: виджет,
+                    # соответствующий значению «Prompt» (роль value / label Prompt),
+                    # а не самый длинный текст
+                    idx = _prompt_widget_index(onode, owv, prompt_slot)
                     if idx is not None:
                         owv[idx] = as_text(prompt_text)
                         print(f"📝 Промт записан также в connected-ноду id {onode.get('id')} (позиция {idx})")
