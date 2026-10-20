@@ -1140,6 +1140,26 @@ def create_minimax_ref_workflow(template_path, out_path, prompt_text, images=Non
 
     # ── картинки ──
     images = [p for p in (images or []) if p][:MINIMAX_MAX_PICTURES]
+
+    def _detach_input(node, input_name):
+        """Убирает входящую связь со входа input_name: link удаляется из workflow['links'],
+        из outputs.links ноды-источника и из inputs самой ноды. Возвращает True, если связь была."""
+        for inp in node.get("inputs", []) or []:
+            if inp.get("name") == input_name and inp.get("link") is not None:
+                lid = inp["link"]
+                oid, oslot = _link_origin(workflow, lid)
+                onode = nodes_by_id.get(oid) if oid is not None else None
+                if onode is not None:
+                    for outp in onode.get("outputs", []) or []:
+                        if isinstance(outp.get("links"), list) and lid in outp["links"]:
+                            outp["links"].remove(lid)
+                workflow["links"] = [l for l in workflow.get("links", []) or []
+                                     if not (isinstance(l, (list, tuple)) and l and l[0] == lid)
+                                     and not (isinstance(l, dict) and l.get("id") == lid)]
+                inp["link"] = None
+                return True
+        return False
+
     used = 0
     for slot in range(MINIMAX_MAX_PICTURES):
         node = _input_origin_node(workflow, nodes_by_id, main, f"ref_images.ref_image_{slot}")
@@ -1152,7 +1172,13 @@ def create_minimax_ref_workflow(template_path, out_path, prompt_text, images=Non
             used += 1
             print(f"🖼️  <Picture {slot + 1}> = {name} (LoadImage id {node.get('id')})")
         else:
+            # не только mode 4 (нода остаётся в очереди и показывает окно выбора),
+            # но и отвязываем вход main-ноды — тогда неиспользуемые картинкислоты
+            # полностью выключены и не участвуют в генерации
             node["mode"] = 4
+            if _detach_input(main, f"ref_images.ref_image_{slot}"):
+                print(f"🚫 Слот <Picture {slot + 1}> отключён: связь со входа "
+                      f"ref_images.ref_image_{slot} убрана (LoadImage id {node.get('id')}, mode 4)")
     if images and used < len(images):
         print(f"⚠️  Использовано {used} из {len(images)} картинок (нет файла или нет слота)")
 
