@@ -1587,7 +1587,27 @@ def do_grid_split(image_path, vl_choice, captions_choice):
 
 def build_ui():
     """Build and return the Gradio Blocks interface with its event handlers connected."""
-    with gr.Blocks(title="RAG — Генератор сценариев") as demo:
+    _LAYOUT_CSS = """
+/* Блок генерации: запрос на всю ширину, ниже — сетка из 4 колонок, центрированно */
+#gen_block { max-width: 1320px; margin: 0 auto !important; }
+#ctrl_grid > .form,
+#ctrl_grid:not(:has(> .form)) {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    align-items: start;
+}
+#ctrl_grid > .form > .block { min-width: 0 !important; }
+#ctrl_grid > .form > .block:has(input[type="range"]) { grid-column: span 2; }
+@media (max-width: 1000px) {
+    #ctrl_grid > .form, #ctrl_grid:not(:has(> .form)) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+    #ctrl_grid > .form, #ctrl_grid:not(:has(> .form)) { grid-template-columns: minmax(0, 1fr); }
+}
+"""
+
+    with gr.Blocks(title="RAG — Генератор сценариев", css=_LAYOUT_CSS) as demo:
 
         gr.Markdown("# 🎬 RAG — Генератор сценариев")
 
@@ -1647,21 +1667,23 @@ def build_ui():
 
         # ── БЛОК: Генерация ────────────────────────────────────────────
         gr.Markdown("---")
-        with gr.Row():
+        with gr.Column(elem_id="gen_block"):
             with gr.Column(scale=3):
                 question = gr.Textbox(
                     label       = "Вопрос / тема / запрос",
                     placeholder = "Напиши рассказ про усталость от работы на 200 слов",
                     lines       = 3,
                 )
-            with gr.Column(scale=1):
+            with gr.Column(scale=1, elem_id="ctrl_grid"):
                 style_dd = gr.Dropdown(
                     label   = "Стиль",
+                    info    = "Влияет только в Director/CS/LTX 2.5 Director и без сценария",
                     choices = ["реализм", "мрачный", "юмор", "поток сознания"],
                     value   = "реализм",
                 )
                 mode_dd = gr.Dropdown(
                     label   = "Режим",
+                    info    = "Только если «Формат LTX 2.3» = нет",
                     choices = ["художественный", "аналитический"],
                     value   = "художественный",
                 )
@@ -1708,6 +1730,7 @@ def build_ui():
                 music_narrators = get_music_style_choices()
                 narrator_dd = gr.Dropdown(
                     label   = "Рассказчик / Musik:Clip",
+                    info    = "Не влияет на First/Last, T2V и Minimax",
                     choices = base_narrators + music_narrators,
                     value   = "короткий фильм",
                     visible = True,
