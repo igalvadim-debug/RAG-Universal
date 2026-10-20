@@ -433,13 +433,17 @@ def _merge_runs(runs: list[tuple[int, int]], gap: int) -> list[tuple[int, int]]:
     return [(s, e) for s, e in out]
 
 
-def _strong_edge(profile: np.ndarray, pos: int, win: int) -> int | None:
+def _strong_edge(profile: np.ndarray, pos: int, win: int, thr: float = 0.015) -> int | None:
     """Staerkste Kante (Gradient) im Fenster um pos; Rueckgabe immer in [pos-2, pos+2].
 
     Der Ausschlag muss deutlich sein und die staerkste Kante des Fensters
     darf hoechstens zwei Pixel von pos entfernt liegen. Die Kantenposition
     ist der Beginn des Abfalls: d[i] = |profil[i+1] - profil[i]|, damit ein
     Schnitt nie tiefer als noetig faellt und keine Textzeile stehen bleibt.
+
+    ``profile`` sind normalisierte Deckungsgrade in [0, 1] (Anteil Inhalts-
+    pixel pro Zeile/Spalte). Der Schwellwert wird entsprechend skaliert:
+    eine halbe Inhaltsspalte (= 0.5 * thr) gilt als deutlicher Ausschlag.
     """
     n = len(profile)
     lo, hi = max(1, pos - win), min(n - 1, pos + win)
@@ -448,7 +452,7 @@ def _strong_edge(profile: np.ndarray, pos: int, win: int) -> int | None:
     d = np.abs(np.diff(profile.astype(np.float32)))   # d[i] = Kante zwischen i und i+1
     seg = d[lo - 1:hi - 1]
     peak = float(seg.max())
-    if peak < 4.0:
+    if peak < 0.5 * thr:
         return None
     best = int(np.argmax(seg))                        # Kantenindex relativ zu lo-1
     edge = lo + best                                  # absoluter Positionsanfang
@@ -505,13 +509,18 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
     differently coloured page are handled like all others.
 
     The panel's own background colour is measured from its border zone.
-    Rows with hardly any content form gaps; the first big content group
-    (the picture) ends at its gap and everything below is cut away when
-    what follows looks like text (thin lines covering little width). If
-    no plausible picture group is found (blank or fully filled panels)
-    the box is returned unchanged. A caption column on the left or right
-    side is trimmed from that side instead. Boxes under 40 pixels wide or
-    tall are returned unchanged. Input images and arrays are not modified.
+    Uniform frame/border bands at the panel edges are detected first and
+    excluded from both the background estimate and the content mask, so
+    decorative borders never count as content. Rows with hardly any content
+    form gaps; the first big content group (the picture) ends at its gap and
+    everything below is cut away when what follows looks like text (thin
+    lines covering little width). Trimming contract: the crop keeps the
+    gutter above the caption and cuts at the image bottom -- the space
+    between picture and caption stays inside the result; if no plausible
+    picture group is found (blank or fully filled panels) the box is
+    returned unchanged. A caption column on the left or right side is
+    trimmed from that side instead. Boxes under 40 pixels wide or tall are
+    returned unchanged. Input images and arrays are not modified.
     """
     l, t, r, b = box
     bh, bw = b - t, r - l
@@ -523,16 +532,87 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
     # Bildrand beruehrt oder die Raender andersfarbig sind.
     m = max(2, min(8, int(0.02 * min(bw, bh))))
     par = np.asarray(img.convert("RGB").crop((l, t, r, b))).astype(np.int16)
-    strips = np.concatenate([
-        par[:m].reshape(-1, 3), par[-m:].reshape(-1, 3),
-        par[:, :m].reshape(-1, 3), par[:, -m:].reshape(-1, 3),
-    ])
-    bg = np.median(strips, axis=0)
+    h, w = par.shape[:2]
+    thr = 0.015                                        # Zeile gilt ab 1.5 % als Inhalt
+
+    # Gleichmaessige Rahmen-/Randbander VOR der Hintergrund-Schaetzung
+    # erkennen: ein durchgehender Rand darf weder die Hintergrundfarbe
+    # verschieben noch als Inhalt zaehlen. Ein Band ist eine Folge von
+    # Linien nahe einer einzigen Farbe (Rahmenlinie oder helle/finstere
+    # Rinne), die an beiden Enden vom Panelrand und auf der Innenseite von
+    # einer vollen Hintergrundlinie begrenzt wird. Innerhalb von Text oder
+    # Bild gibt es solche Begrenzung nicht, dort wird nichts abgetrennt.
+    def line_uniform(line: np.ndarray) -> bool:
+        """True, wenn eine Zeile/Spalte fast nur aus einer einzigen Farbe besteht."""
+        med = np.median(line.reshape(-1, line.shape[-1]), axis=0)
+        near = (np.abs(line - med).max(axis=-1) < 16)
+        return bool(near.mean() >= 0.97 and float(med.max()) - float(med.min()) <= 32)
+
+    def line_gutter(line: np.ndarray) -> bool:
+        """True, wenn eine Linie vollflaechig hell oder finster ist (Rinne)."""
+        m_ = float(line.mean())
+        return m_ > 235 or m_ < 20
+
+    def is_band_line(line: np.ndarray) -> bool:
+        return line_uniform(line) or line_gutter(line)
+
+    row_full_bg = np.array([line_uniform(par[i]) for i in range(h)])
+    col_full_bg = np.array([line_uniform(par[:, j]) for j in range(w)])
+
+    def band(start: int, perp: np.ndarray, along: np.ndarray) -> list[int]:
+        """Linienindex-Folge des Randbands bei `start` (0 oder letzter Index).
+        `perp` = Linien senkrecht dazu (volle Hintergrundgrenze), `along` =
+        Uniformitaet entlang der Linien selbst. Leere Liste = kein Rahmen."""
+        n = len(along)
+        step = 1 if start == 0 else -1
+        limit = max(3, int(0.05 * min(h, w)))
+        idx = []
+        i = start
+        while 0 <= i < n and len(idx) < limit and is_band_line(along[i]):
+            idx.append(i)
+            i += step
+        if not idx:
+            return []
+        inner = i                                   # erste Linie hinter dem Band
+        if not (0 <= inner < n and perp[inner]):
+            return []                               # keine Background-Begrenzung
+        outer_ok = True
+        for j in idx:
+            o = j - step                            # aeussere Nachbarlinie
+            if not (o < 0 or o >= n or perp[o]):
+                outer_ok = False
+                break
+        return idx if outer_ok else []
+
+    frame_rows = np.zeros(h, dtype=bool)
+    frame_cols = np.zeros(w, dtype=bool)
+    frame_rows[band(0, col_full_bg, par)] = True
+    frame_rows[band(h - 1, col_full_bg, par)] = True
+    frame_cols[band(0, row_full_bg, par.T)] = True
+    frame_cols[band(w - 1, row_full_bg, par.T)] = True
+
+    # Randzonen des Panels: vom aeusseren Rand bis zu m Nicht-Rahmenlinien;
+    # ein davor liegendes Rahmenband wird uebersprungen, zaehlt aber nie mit.
+    def zone(forward: bool, flags: np.ndarray, size: int) -> list[int]:
+        lines, seen = [], 0
+        for i in (range(size) if forward else range(size - 1, -1, -1)):
+            if flags[i]:
+                continue
+            if seen >= m:
+                break
+            lines.append(i)
+            seen += 1
+        return lines
+
+    strip_rows = sorted(set(zone(True, frame_rows, h)) | set(zone(False, frame_rows, h)))
+    strip_cols = sorted(set(zone(True, frame_cols, w)) | set(zone(False, frame_cols, w)))
+    px = [par[i].reshape(-1, 3) for i in strip_rows] + \
+         [par[:, j].reshape(-1, 3) for j in strip_cols]
+    bg = np.median(np.concatenate(px), axis=0)
     content = (np.abs(par - bg).max(axis=2) >= 24)     # True = Pixel mit Inhalt
-    h, w = content.shape
+    content[frame_rows | frame_cols[:, None]] = False  # Rahmen ist kein Inhalt
     row_cov = content.mean(axis=1)                     # Inhaltsanteil pro Zeile
     col_cov = content.mean(axis=0)                     # Inhaltsanteil pro Spalte
-    thr = 0.015                                        # Zeile gilt ab 1.5 % als Inhalt
 
     def looks_like_text(cov: np.ndarray) -> bool:
         """Wenig Deckung und viele schmale Zeilengruppen = Beschriftungstext."""
@@ -545,6 +625,10 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
             and thin >= 0.6
 
     # --- Querschnitt: Textzeilen unter dem Bild ---------------------------
+    # Vertragsregel (einheitlich, auch in den Tests): der Schnitt erfolgt am
+    # Anfang der Beschriftung, wobei die Rinne zwischen Bild und Text erhalten
+    # bleibt; die scharfe Kante (z.B. untere Bildkante) wird innerhalb +/-2 px
+    # nachgeschnappt. Der Rest bis zum Panelrand faellt weg.
     glist = _split_at_gaps(row_cov, thr, max(10, int(0.04 * h)))
     pic_bottom = None
     for s, e in glist:                                 # nur das erste grosse Feld oben ist das Bild
@@ -559,25 +643,21 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
             cut = _gap_start(row_cov, pic_bottom, thr, max(10, int(0.05 * h)))
             if cut is None:
                 cut = pic_bottom
-            strong = _strong_edge(row_cov, cut, max(6, int(0.02 * h)))
+            strong = _strong_edge(row_cov, cut, max(6, int(0.02 * h)), thr)
             if strong is not None:
                 cut = strong                           # an der scharfen Kante einrasten
             cut = max(int(0.4 * h), min(h, cut))
             if cut < h:
                 return (l, t, r, t + cut)
-        elif glist and glist[-1][1] >= h - 2:          # Fuellt bis zum Rand: Rahmenlinie pruefen
-            # Duennes gleichmaessiges Band ganz unten (untere Rahmenlinie) und
-            # oberhalb davon eine echte Hintergrund-Rinne -> Rinne als Kante.
-            last_s, last_e = glist[-1]
-            uniform = bool(np.ptp(gray[:, l:r][t + last_s:t + last_e].mean(axis=1)) < 40) \
-                if gray.shape[0] == H else True
-            if last_s >= 3 and (last_e - last_s) <= max(6, int(0.03 * h)) and uniform:
-                g = _gap_start(row_cov[max(0, last_s - max(6, int(0.02 * h))):last_s],
-                               0, thr, last_s)
-                if g is not None:
-                    g += max(0, last_s - max(6, int(0.02 * h)))
-                if g is not None and g >= int(0.4 * h) and g < last_s:
-                    return (l, t, r, t + g)
+        elif frame_rows.any() and glist and glist[-1][1] >= h - 2:
+            # Unterer Rahmen wurde aus der Maske entfernt; die verbleibende
+            # letzte Gruppe endet an der Rinne ueber dem Rahmen -> dorthin
+            # schneiden (Rahmen und moglicher Text darunter entfallen).
+            last_s = glist[-1][0]
+            fr_idx = np.nonzero(frame_rows)[0]
+            if len(fr_idx) and fr_idx[0] >= h - lim and last_s >= int(0.4 * h) \
+                    and last_s < h - int(frame_rows.sum() // 2):
+                return (l, t, r, t + last_s)
         return box                                     # nichts abzuschneiden
 
     # --- Laengsschnitt: Textspalte links oder rechts neben dem Bild -------
@@ -586,11 +666,17 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
         (xa, xb), (ya, yb) = vg
         gap = ya - xb
         if 5 <= gap <= 0.25 * w:
+            def local_row_profile(x0: int, x1: int) -> np.ndarray:
+                """Zeilenprofil NUR fuer das Spaltenintervall [x0:x1]."""
+                return content[:, x0:x1].mean(axis=1)
+
             def extent(x0, x1):
-                rr = _split_at_gaps(row_cov[x0:x1], thr, max(10, int(0.05 * h)))
+                rr = _split_at_gaps(local_row_profile(x0, x1), thr, max(10, int(0.05 * h)))
                 return float(max((e - s) for s, e in rr)) / h if rr else 0.0
+
             def text_col(x0, x1):
-                return looks_like_text(col_cov[x0:x1])
+                return looks_like_text(col_cov[x0:x1]) or looks_like_text(local_row_profile(x0, x1))
+
             le, ri = extent(xa, xb), extent(ya, yb)
             if le >= 0.8 and ri <= 0.9 and text_col(ya, yb):   # links Bild, rechts Text
                 nr = max(int(0.4 * w), min(w, _gap_start(col_cov, xb, thr, max(10, int(0.05 * w))) or (xb + gap // 2)))
