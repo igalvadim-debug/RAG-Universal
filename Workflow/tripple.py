@@ -1025,6 +1025,34 @@ def create_minimax_ref_workflow(template_path, out_path, prompt_text, images=Non
         raise ValueError("К входу prompt ноды MiniMaxH3ReferenceToVideo не подключена нода с текстом")
     pnode["widgets_values"][0] = as_text(prompt_text)
 
+    # если у текстовой ноды есть СВОЙ вход value, подключённый к другой ноде
+    # (например, subgraph-обёртка «Prompt/Duration/Width/Height»), ComfyUI при загрузке
+    # перерисует виджет из связи и новый текст пропадёт. Разрываем эту связь —
+    # тогда значение виджета используется как есть. Заодно пишем новый текст
+    # в ноду-источник, чтобы старый промт нигде не остался.
+    for inp in pnode.get("inputs", []) or []:
+        if inp.get("name") == "value" and inp.get("link") is not None:
+            lid = inp["link"]
+            oid, _ = _link_origin(workflow, lid)
+            onode = nodes_by_id.get(oid) if oid is not None else None
+            if onode is not None:
+                for outp in onode.get("outputs", []) or []:
+                    if isinstance(outp.get("links"), list) and lid in outp["links"]:
+                        outp["links"].remove(lid)
+                owv = onode.get("widgets_values")
+                if isinstance(owv, list):
+                    idx = next((i for i, v in enumerate(owv)
+                                if isinstance(v, str) and len(v) > 40), None)
+                    if idx is not None:
+                        owv[idx] = as_text(prompt_text)
+                        print(f"📝 Промт записан также в connected-ноду id {onode.get('id')} (позиция {idx})")
+            workflow["links"] = [l for l in workflow.get("links", []) or []
+                                 if not (isinstance(l, (list, tuple)) and l and l[0] == lid)
+                                 and not (isinstance(l, dict) and l.get("id") == lid)]
+            inp["link"] = None
+            print(f"🔗 Убран входящий link на ноде промта (id {pnode.get('id')}) — "
+                  f"текст берётся из виджета")
+
     # ── картинки ──
     images = [p for p in (images or []) if p][:MINIMAX_MAX_PICTURES]
     used = 0
