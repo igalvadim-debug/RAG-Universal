@@ -1,0 +1,146 @@
+{
+ "krea2_turbo_2step_rank_64_lora.safetensors": {
+  "repo": "lvladikov/Krea2-Turbo-Distill-2step-LoRA",
+  "path": "_archive/checkpoints/krea2_turbo_2step_rank_64_lora_chk00031600.safetensors",
+  "url": "https://huggingface.co/lvladikov/Krea2-Turbo-Distill-2step-LoRA",
+  "triggers": []
+ },
+ "ltx-2-19b-lora-camera-control-static.safetensors": {
+  "repo": "Lightricks/LTX-2-19b-LoRA-Camera-Control-Static",
+  "path": "ltx-2-19b-lora-camera-control-static.safetensors",
+  "url": "https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Static",
+  "triggers": []
+ },
+ "LTX-2.3-Licon-MSR-V2.safetensors": null,
+ "nsfw_lora_wan_1.3b.safetensors": null,
+ "Qwen-Image-2.1-viggle-turbo-v0.2-5step-lora-r256.safetensors": {
+  "repo": "Viggle/Qwen-Image-2.1-viggle-turbo",
+  "path": "Qwen-Image-2.1-viggle-turbo-v0.2-5step-lora-r256.safetensors",
+  "url": "https://huggingface.co/Viggle/Qwen-Image-2.1-viggle-turbo",
+  "triggers": []
+ },
+ "Klein-consistency.safetensors": {
+  "repo": "dx8152/Flux2-Klein-9B-Consistency",
+  "path": "Klein-consistency.safetensors",
+  "url": "https://huggingface.co/dx8152/Flux2-Klein-9B-Consistency",
+  "triggers": []
+ },
+ "animatediff_lightning_4step_diffusers.safetensors": {
+  "repo": "ByteDance/AnimateDiff-Lightning",
+  "path": "animatediff_lightning_4step_diffusers.safetensors",
+  "url": "https://huggingface.co/ByteDance/AnimateDiff-Lightning",
+  "triggers": []
+ },
+ "m_xO4abTFgPwX3njmort3_pytorch_lora_weights.safetensors": null,
+ "dmad_minimax_h3_4step_full_critic.safetensors": null,
+ "eugen1024lora.safetensors": null,
+ "AWPortrait-FL-lora.safetensors": null,
+ "Canopus-Clothing-Flux-Dev-Florence2-LoRA.safetensors": {
+  "repo": "prithivMLmods/Canopus-Clothing-Flux-LoRA",
+  "path": "Canopus-Clothing-Flux-Dev-Florence2-LoRA.safetensors",
+  "url": "https://huggingface.co/prithivMLmods/Canopus-Clothing-Flux-LoRA",
+  "triggers": [
+   "Hoodie, Clothes, Clothing, Shirt, Pant"
+  ]
+ },
+ "flux-fashion-lora.safetensors": {
+  "repo": "aihpi/flux-fashion-lora",
+  "path": "flux-fashion-lora.safetensors",
+  "url": "https://huggingface.co/aihpi/flux-fashion-lora",
+  "triggers": [
+   "null"
+  ]
+ },
+ "outfit-generator.safetensors": {
+  "repo": "tryonlabs/FLUX.1-dev-LoRA-Outfit-Generator",
+  "path": "outfit-generator.safetensors",
+  "url": "https://huggingface.co/tryonlabs/FLUX.1-dev-LoRA-Outfit-Generator",
+  "triggers": [
+   "null"
+  ]
+ },
+ "fluxgym_06.01.26_sweta_sweta.safetensors": null,
+ "ip-adapter-faceid-plus_sd15_lora.safetensors": {
+  "repo": "h94/IP-Adapter-FaceID",
+  "path": "ip-adapter-faceid-plus_sd15_lora.safetensors",
+  "url": "https://huggingface.co/h94/IP-Adapter-FaceID",
+  "triggers": []
+ },
+ "ip-adapter-faceid_sd15_lora.safetensors": {
+  "repo": "h94/IP-Adapter-FaceID",
+  "path": "ip-adapter-faceid_sd15_lora.safetensors",
+  "url": "https://huggingface.co/h94/IP-Adapter-FaceID",
+  "triggers": []
+ },
+ "LTX-2.3-22b-AV-LoRA-talking-head-v1_OHWXPERSON.safetensors": null,
+ "LTX-2.3-ID-LoRA-TalkVid-3K.safetensors": {
+  "repo": "AviadDahan/LTX-2.3-ID-LoRA-TalkVid-3K",
+  "path": "lora_weights.safetensors",
+  "url": "https://huggingface.co/AviadDahan/LTX-2.3-ID-LoRA-TalkVid-3K",
+  "triggers": []
+ },
+ "LTX-2.3-Licon-MSR-V1.safetensors": null,
+ "LTX-2.3-OmniNFT-RL-Lora_bf16.safetensors": null,
+ "LTX_10Eros_LoRA_fro99-avgrank77.safetensors": {
+  "repo": "maximsobolev275/LTX-10Eros-LoRA-r768",
+  "path": "LTX_10Eros_LoRA_fro99-avgrank77.safetensors",
+  "url": "https://huggingface.co/maximsobolev275/LTX-10Eros-LoRA-r768",
+  "triggers": []
+ },
+ "LTX_SulphurEXP_LoRA_fro99-avgrank105.safetensors": {
+  "repo": "maximsobolev275/LTX-SulphurExperimental-LoRA-Optimized",
+  "path": "LTX_SulphurEXP_LoRA_fro99-avgrank105.safetensors",
+  "url": "https://huggingface.co/maximsobolev275/LTX-SulphurExperimental-LoRA-Optimized",
+  "triggers": []
+ },
+ "Ltx2.3-Licon-VBVR-I2V-96000-R32.safetensors": null,
+ "bfs_head_swap_v1_ltx2_ic_lora_6000.safetensors": null,
+ "id-lora-celebvhq-ltx2.3.safetensors": {
+  "repo": "AviadDahan/LTX-2.3-ID-LoRA-CelebVHQ-3K",
+  "path": "lora_weights.safetensors",
+  "url": "https://huggingface.co/AviadDahan/LTX-2.3-ID-LoRA-CelebVHQ-3K",
+  "triggers": []
+ },
+ "ltx-2-19b-distilled-lora_resized_dynamic_fro09_avg_rank_175_fp8.safetensors": null,
+ "ltx-2.3-22b-distilled-1.1_lora-dynamic_fro09_avg_rank_111_bf16.safetensors": null,
+ "ltx-2.3-22b-distilled-lora-1.1_fro90_ceil36.safetensors": null,
+ "ltx-2.3-22b-ic-lora-ingredients-0.9.safetensors": null,
+ "ltx-2.3-22b-ic-lora-motion-track-control-ref0.5.safetensors": null,
+ "ltx-2.3-22b-ic-lora-union-control-ref0.5.safetensors": null,
+ "ltx-2.3-22b_text_embedding_projection.safetensors": null,
+ "ltx-2.3-Sound_besser_foley-400-steps.safetensors": null,
+ "ltx-2.3-dollyforward_lora.safetensors": null,
+ "ltx2-squish_trigger word_squish it.safetensors": {
+  "repo": "ovi054/LTX-2-19b-Squish-LoRA",
+  "path": "ltx-2-19b-squish-lora.safetensors",
+  "url": "https://huggingface.co/ovi054/LTX-2-19b-Squish-LoRA",
+  "triggers": []
+ },
+ "ltx2.3-ic-subtitles-remove-general.safetensors": null,
+ "ltx2.3_fpv_motion.safetensors": null,
+ "ltx2.3_upscale_ic-lora_06250.safetensors": null,
+ "portrait_lora64.safetensors": {
+  "repo": "artemonlysuno/comfyui_portrait_lora64",
+  "path": "comfyui_portrait_lora64.safetensors",
+  "url": "https://huggingface.co/artemonlysuno/comfyui_portrait_lora64",
+  "triggers": []
+ },
+ "DiffSynth-StudioQwenImage2.1LayerExtract.safetensors": null,
+ "DiffSynthStudioQwenImage2.1LayerRemove.safetensors": null,
+ "Qwen-Image-2.1-Fun-Acc-4Step.safetensors": null,
+ "Qwen-Image-Lightning-4steps-V1.0-bf16.safetensors": {
+  "repo": "lightx2v/Qwen-Image-Lightning",
+  "path": "Qwen-Image-Lightning-4steps-V1.0-bf16.safetensors",
+  "url": "https://huggingface.co/lightx2v/Qwen-Image-Lightning",
+  "triggers": []
+ },
+ "VNCCS_QIE2511_PoseStudio_ART_V5.9.safetensors": null,
+ "schorthair.safetensors": null,
+ "sweta_lora.safetensors": null,
+ "Wan21_PusaV1_LoRA_14B_rank512_bf16.safetensors": {
+  "repo": "estaksi/Wan21_PusaV1_LoRA_14B_rank512_bf16.safetensors",
+  "path": "Wan21_PusaV1_LoRA_14B_rank512_bf16.safetensors",
+  "url": "https://huggingface.co/estaksi/Wan21_PusaV1_LoRA_14B_rank512_bf16.safetensors",
+  "triggers": []
+ }
+}

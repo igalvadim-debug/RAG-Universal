@@ -1,0 +1,2459 @@
+[
+ {
+  "path": "C:\\ai_diffusion\\models\\loras\\Krea2\\KREA2_D33P_V2.safetensors",
+  "file": "KREA2_D33P_V2.safetensors",
+  "size": 228587784,
+  "sha256": "1bb225d113fedfb6db6e8b1a73560f7498aba0833f3996fa8ba9ce7c66558bf4",
+  "meta": {
+   "ss_output_name": "D33P_V2_sanscaption",
+   "ss_base_model_version": "krea2",
+   "top_tags": [
+    "D33P"
+   ]
+  },
+  "civitai": {
+   "modelId": 2764854,
+   "modelName": "[KREA 2] Deepthroat",
+   "versionName": "v2.0",
+   "baseModel": "Krea 2",
+   "trainedWords": [
+    "D33P"
+   ],
+   "url": "https://civitai.com/models/2764854?modelVersionId=3127297"
+  }
+ },
+ {
+  "path": "C:\\ai_diffusion\\models\\loras\\Krea2\\Krea2NSFWStaerke1.2_1.5V4.safetensors",
+  "file": "Krea2NSFWStaerke1.2_1.5V4.safetensors",
+  "size": 457111960,
+  "sha256": "6ec564e04eed317ae24093b4907004ac59a7c528d19d025bb41b4d719c4d16ec",
+  "meta": {
+   "ss_output_name": "KNP",
+   "ss_base_model_version": "krea2"
+  },
+  "civitai": {
+   "modelId": 2725430,
+   "modelName": "Krea 2 NSFW V4",
+   "versionName": "v4.3_EXP",
+   "baseModel": "Krea 2",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2725430?modelVersionId=3147117"
+  }
+ },
+ {
+  "path": "C:\\ai_diffusion\\models\\loras\\Krea2\\Krea2_HMNSFW_AIO.safetensors",
+  "file": "Krea2_HMNSFW_AIO.safetensors",
+  "size": 228587200,
+  "sha256": "c2e4988a775e41fd50ba1cb3a68f3b38c094a819e786ab97693f05add331f922",
+  "meta": {
+   "ss_output_name": "aitk_lora",
+   "ss_base_model_version": "krea2"
+  },
+  "civitai": {
+   "modelId": 2732306,
+   "modelName": "Krea2 AIO NSFW LoRA",
+   "versionName": "v1.0",
+   "baseModel": "Krea 2",
+   "trainedWords": [
+    "HMNSFW"
+   ],
+   "url": "https://civitai.com/models/2732306?modelVersionId=3071904"
+  }
+ },
+ {
+  "path": "C:\\ai_diffusion\\models\\loras\\Krea2\\krea2_darkbrush.safetensors",
+  "file": "krea2_darkbrush.safetensors",
+  "size": 469291992,
+  "sha256": "f47c4316dd93af66e0518c93b582f459571d4925b519133770c73a52cd5db7c6",
+  "meta": {},
+  "civitai": {
+   "modelId": 2726235,
+   "modelName": "Krea 2 Official Loras",
+   "versionName": "darkbrush",
+   "baseModel": "Krea 2",
+   "trainedWords": [
+    "monochrome ink wash style"
+   ],
+   "url": "https://civitai.com/models/2726235?modelVersionId=3064381"
+  }
+ },
+ {
+  "path": "C:\\ai_diffusion\\models\\loras\\Krea2\\krea2_identity_edit_v1_1.safetensors",
+  "file": "krea2_identity_edit_v1_1.safetensors",
+  "size": 1828256432,
+  "sha256": "89fe1ebdc6e9d0399d161103f7696adfd71ce613696aeac5962aa7f20e163ff6",
+  "meta": {},
+  "civitai": {
+   "modelId": 2761113,
+   "modelName": "Krea 2 Identity Edit",
+   "versionName": "v1.1",
+   "baseModel": "Krea 2",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2761113?modelVersionId=3112922"
+  }
+ },
+ {
+  "path": "C:\\ai_diffusion\\models\\loras\\Krea2\\krea2_turbo_2step_rank_64_lora.safetensors",
+  "file": "krea2_turbo_2step_rank_64_lora.safetensors",
+  "size": 438161624,
+  "sha256": "1df55a05e4ed3cd367e3cc06c84279d9dd2430394119b81038b9ad30c3b17952",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "C:\\ai_diffusion\\models\\loras\\Krea2\\krea2_turbo_lora_rank_64_bf16.safetensors",
+  "file": "krea2_turbo_lora_rank_64_bf16.safetensors",
+  "size": 469423778,
+  "sha256": "db8c5bae0a415d448da9d842111d6e51f7d32e47143a3118eb267e5c4773de87",
+  "meta": {},
+  "civitai": {
+   "modelId": 2726698,
+   "modelName": "Krea 2 Raw Turbo Extracted Lora",
+   "versionName": "krea2_turbo_lora_rank_64",
+   "baseModel": "Krea 2",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2726698?modelVersionId=3064924"
+  }
+ },
+ {
+  "path": "C:\\ai_diffusion\\models\\loras\\Krea2\\krea2filterbypass.safetensors",
+  "file": "krea2filterbypass.safetensors",
+  "size": 160,
+  "sha256": "ac6114d7112ae2397eb26b9e6e9623aad059d346fc285ea050ffb042c7c6748e",
+  "meta": {},
+  "civitai": {
+   "modelId": 2728234,
+   "modelName": "Krea2FilterBypass",
+   "versionName": "2vector",
+   "baseModel": "Krea 2",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2728234?modelVersionId=3066812"
+  }
+ },
+ {
+  "path": "C:\\ai_diffusion\\models\\loras\\Sex_helper_for_NSFW_Wan_1.3b.safetensors",
+  "file": "Sex_helper_for_NSFW_Wan_1.3b.safetensors",
+  "size": 175086848,
+  "sha256": "06188fcc942d7e1b2bd2da0dba3c5b5e1507c6112c9b9ab85f1831e43558de69",
+  "meta": {
+   "ss_output_name": "Porn",
+   "modelspec.title": "Porn",
+   "ss_base_model_version": "wan"
+  },
+  "civitai": {
+   "modelId": 1709745,
+   "modelName": "Sex helper for NSFW Wan 1.3b",
+   "versionName": "v0.4",
+   "baseModel": "Wan Video 1.3B t2v",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/1709745?modelVersionId=1934819"
+  }
+ },
+ {
+  "path": "C:\\ai_diffusion\\models\\loras\\gemma-3-12b-it-abliterated_lora_rank64_bf16.safetensors",
+  "file": "gemma-3-12b-it-abliterated_lora_rank64_bf16.safetensors",
+  "size": 628203616,
+  "sha256": "87bcabeac9bec9f374232b5122d6511c2b2112d479e50176149e944b3712eb4a",
+  "meta": {},
+  "civitai": {
+   "modelId": 2780365,
+   "modelName": "GEMMA-3-12b-it-abliterated_lora_rank64_bf16",
+   "versionName": "v1.0",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2780365?modelVersionId=3131293"
+  }
+ },
+ {
+  "path": "C:\\ai_diffusion\\models\\loras\\ltx-2-19b-lora-camera-control-static.safetensors",
+  "file": "ltx-2-19b-lora-camera-control-static.safetensors",
+  "size": 2214978664,
+  "sha256": "6b79aad7ecdd60aef07f39177d1ac225a6608806086af94848436fec432e2d0d",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "C:\\ai_diffusion\\models\\loras\\ltx2.3\\LTX-2.3-Licon-MSR-V2.safetensors",
+  "file": "LTX-2.3-Licon-MSR-V2.safetensors",
+  "size": 654443392,
+  "sha256": "6f61d3b5c61b160c409b45ebaa72fd7ab9bb38bf3bf7f09edaddc87762d5fa98",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "C:\\ai_diffusion\\models\\loras\\ltx2.3\\Singularity-LTX-2.3_OmniCine_V1.safetensors",
+  "file": "Singularity-LTX-2.3_OmniCine_V1.safetensors",
+  "size": 2695584680,
+  "sha256": "b204721bb9aff75ce29b19721fbbe87cd6f66185bc24889bcf47887ae990017c",
+  "meta": {
+   "ss_output_name": "mygood_copy_copy_copy_copy_copy_copy_copy_copy_copy",
+   "ss_base_model_version": "ltx2"
+  },
+  "civitai": {
+   "modelId": 2610733,
+   "modelName": "Singularity-LTX-2.3_OmniCine_V1",
+   "versionName": "V1 official version",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [
+    "无字幕"
+   ],
+   "url": "https://civitai.com/models/2610733?modelVersionId=3001143"
+  }
+ },
+ {
+  "path": "C:\\ai_diffusion\\models\\loras\\nsfw_lora_wan_1.3b.safetensors",
+  "file": "nsfw_lora_wan_1.3b.safetensors",
+  "size": 350065648,
+  "sha256": "5995f8b41903d56f4bb44c7ae87cba7850672ff90980e64e88c7aa5f69b44883",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "C:\\ai_diffusion\\models\\loras\\pussydiffusion-f2-klein-9b_v2.safetensors",
+  "file": "pussydiffusion-f2-klein-9b_v2.safetensors",
+  "size": 331379576,
+  "sha256": "4b7327aa1efb450c7fe959443f1692b63e03cb621f4b0677e3121e6435c2cb5e",
+  "meta": {
+   "ss_output_name": "pussydiffusion-f2-klein-9b_v2",
+   "ss_base_model_version": "flux2_klein_9b"
+  },
+  "civitai": {
+   "modelId": 2636990,
+   "modelName": "PussyDiffusion General - Flux2.Klein [9B]",
+   "versionName": "v2.0",
+   "baseModel": "Flux.2 Klein 9B",
+   "trainedWords": [
+    "pussy",
+    "vagina"
+   ],
+   "url": "https://civitai.com/models/2636990?modelVersionId=2960754"
+  }
+ },
+ {
+  "path": "C:\\ai_diffusion\\models\\loras\\pussydiffusion-shaved_innie-f2-klein-9b_v1.safetensors",
+  "file": "pussydiffusion-shaved_innie-f2-klein-9b_v1.safetensors",
+  "size": 165704400,
+  "sha256": "a5222aa00afc38a09bd240f4fa154022f6d662da9309209f05b26078134a6812",
+  "meta": {
+   "ss_output_name": "pussydiffusion-shaved",
+   "ss_base_model_version": "flux2_klein_9b"
+  },
+  "civitai": {
+   "modelId": 2637012,
+   "modelName": "PussyDiffusion Innie - Flux2.Klein [9B]",
+   "versionName": "v1.0",
+   "baseModel": "Flux.2 Klein 9B",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2637012?modelVersionId=2960776"
+  }
+ },
+ {
+  "path": "C:\\ai_diffusion\\models\\loras\\qwen2.1\\Qwen-Image-2.1-viggle-turbo-4step-lora-r64.safetensors",
+  "file": "Qwen-Image-2.1-viggle-turbo-4step-lora-r64.safetensors",
+  "size": 339832808,
+  "sha256": "5c494dce662a95898d0988831af733b203ceced9116a82aa099c997f96ea1a3a",
+  "meta": {},
+  "civitai": {
+   "modelId": 1063735,
+   "modelName": "[ Accelerator LoRAs ] Applicable to QW21 | Minimax H3 | HYVideo TURBO/LIGHTNING/DMD/FAST",
+   "versionName": "TURBO(Viggle)QW21 v0.2.1",
+   "baseModel": "Qwen 2.1",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/1063735?modelVersionId=3351025"
+  }
+ },
+ {
+  "path": "C:\\ai_diffusion\\models\\loras\\qwen2.1\\Qwen-Image-2.1-viggle-turbo-v0.2-5step-lora-r256.safetensors",
+  "file": "Qwen-Image-2.1-viggle-turbo-v0.2-5step-lora-r256.safetensors",
+  "size": 1359147904,
+  "sha256": "7fd196e14629160c9d1470a698fbb65ccb95f725b72397ef554648ce468ad825",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\Klein-consistency.safetensors",
+  "file": "Klein-consistency.safetensors",
+  "size": 331379600,
+  "sha256": "90a874e6931d7e38c680e7e22c04052eecf6c718753270735706d7630fdf9d65",
+  "meta": {
+   "ss_output_name": "white-build",
+   "ss_base_model_version": "flux2_klein_9b",
+   "top_tags": [
+    "realistic"
+   ]
+  },
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\Krea2\\KNP_V2_copy_copy.safetensors",
+  "file": "KNP_V2_copy_copy.safetensors",
+  "size": 228587776,
+  "sha256": "796b4bda17ecd6311b02ab97bd9a1e82390fc11d2e70f0fd8ff2bf3905149026",
+  "meta": {
+   "ss_output_name": "KNP_V2_copy_copy",
+   "ss_base_model_version": "krea2",
+   "top_tags": [
+    "KNP"
+   ]
+  },
+  "civitai": {
+   "modelId": 2725430,
+   "modelName": "Krea 2 NSFW V4",
+   "versionName": "V2",
+   "baseModel": "Krea 2",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2725430?modelVersionId=3065362"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\Krea2\\Krea2-depth-control-lora.safetensors",
+  "file": "Krea2-depth-control-lora.safetensors",
+  "size": 861995928,
+  "sha256": "fb80547ed79b47c1e3fea7bb9d36297e3917b2115fab6700ca1501350f9f483c",
+  "meta": {},
+  "civitai": {
+   "modelId": 2752799,
+   "modelName": "Krea 2 Depth ControlNet LoRA",
+   "versionName": "v1.0",
+   "baseModel": "Krea 2",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2752799?modelVersionId=3097135"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\Krea2\\Purple_Grainy_Kr2_AM.safetensors",
+  "file": "Purple_Grainy_Kr2_AM.safetensors",
+  "size": 228588856,
+  "sha256": "ce0672fe6e44c2aecb1acedd89150d8490e27ba279b9392257bdf4a6853952e4",
+  "meta": {
+   "ss_output_name": "training_191944-20260708054915529",
+   "modelspec.title": "",
+   "ss_base_model_version": "krea2",
+   "top_tags": [
+    ""
+   ]
+  },
+  "civitai": {
+   "modelId": 2329053,
+   "modelName": "Purple Grainy || Photography lora",
+   "versionName": "v1.0 Krea 2",
+   "baseModel": "Krea 2",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2329053?modelVersionId=3110766"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\Krea2\\depth-control-lora.safetensors",
+  "file": "depth-control-lora.safetensors",
+  "size": 861995928,
+  "sha256": "fb80547ed79b47c1e3fea7bb9d36297e3917b2115fab6700ca1501350f9f483c",
+  "meta": {},
+  "civitai": {
+   "modelId": 2752799,
+   "modelName": "Krea 2 Depth ControlNet LoRA",
+   "versionName": "v1.0",
+   "baseModel": "Krea 2",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2752799?modelVersionId=3097135"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\Krea2\\krea2_turbo_distill_r64.safetensors",
+  "file": "krea2_turbo_distill_r64.safetensors",
+  "size": 469312122,
+  "sha256": "8f8a1d084a20363269a907413ab627dfbfdfbb0add831a7ce87a89ad1a333931",
+  "meta": {
+   "ss_base_model_version": "krea2"
+  },
+  "civitai": {
+   "modelId": 2746698,
+   "modelName": "Krea-2 Turbo 8-Step Distillation LoRA (SVD Extract)",
+   "versionName": "V2026.1",
+   "baseModel": "Krea 2",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2746698?modelVersionId=3089600"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\Krea2\\lenovo_krea2.safetensors",
+  "file": "lenovo_krea2.safetensors",
+  "size": 114324736,
+  "sha256": "6967840059e54d0ca6771ae00acdc5979266f761175a8c9380f23f1a3723e9a2",
+  "meta": {
+   "ss_output_name": "krea2_raw_lora_v1",
+   "ss_base_model_version": "krea2"
+  },
+  "civitai": {
+   "modelId": 1662740,
+   "modelName": "Lenovo UltraReal",
+   "versionName": "v1.0 Krea2",
+   "baseModel": "Krea 2",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/1662740?modelVersionId=3075606"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\Krea2\\realism_engine_krea2_v2.safetensors",
+  "file": "realism_engine_krea2_v2.safetensors",
+  "size": 1562410296,
+  "sha256": "1815c6ac01216ad62f8dd17edab7c1fd31edf16c1b11434317123bae60e33257",
+  "meta": {
+   "ss_output_name": "realism_engine_krea2_v2",
+   "ss_base_model_version": "krea2"
+  },
+  "civitai": {
+   "modelId": 2688234,
+   "modelName": "Realism Engine Ideogram 4 + Krea 2",
+   "versionName": "Krea2 v2.0",
+   "baseModel": "Krea 2",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2688234?modelVersionId=3070702"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\LCM_LoRA_Weights_SDXL.safetensors",
+  "file": "LCM_LoRA_Weights_SDXL.safetensors",
+  "size": 393855224,
+  "sha256": "a764e6859b6e04047cd761c08ff0cee96413a8e004c9f07707530cd776b19141",
+  "meta": {
+   "modelspec.title": "sdxl_LCM_lora_rank1",
+   "ss_base_model_version": "sdxl_base_v1-0"
+  },
+  "civitai": {
+   "modelId": 195519,
+   "modelName": "LCM-LoRA Weights - Stable Diffusion Acceleration Module",
+   "versionName": "LCM for SDXL (Latest)",
+   "baseModel": "SDXL 1.0",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/195519?modelVersionId=424720"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\Shaiden_Rogue_Flux.safetensors",
+  "file": "Shaiden_Rogue_Flux.safetensors",
+  "size": 19302136,
+  "sha256": "ce638de2308beb302aa80fb190fb90663b5eb4903cfde93001c64d848b466be6",
+  "meta": {
+   "ss_output_name": "Shaiden_Rogue_Flux",
+   "modelspec.title": "Shaiden_Rogue_Flux",
+   "ss_base_model_version": "flux1",
+   "top_tags": [
+    "straight",
+    "well-groomed eyebrows",
+    "long",
+    "and full",
+    "the image is a high-resolution photograph of a young woman with a fair complexion and long",
+    "wavy"
+   ]
+  },
+  "civitai": {
+   "modelId": 1142459,
+   "modelName": "Shaiden Rogue (Flux) - Adult Film Actress",
+   "versionName": "V1",
+   "baseModel": "Flux.1 D",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/1142459?modelVersionId=1284811"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\animatediff_lightning_4step_diffusers.safetensors",
+  "file": "animatediff_lightning_4step_diffusers.safetensors",
+  "size": 907702248,
+  "sha256": "8f3330914edd8fc2ee5659e6944323858feb0ec21cc913789202d043f69b5e17",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\anna\\m_xO4abTFgPwX3njmort3_pytorch_lora_weights.safetensors",
+  "file": "m_xO4abTFgPwX3njmort3_pytorch_lora_weights.safetensors",
+  "size": 130958064,
+  "sha256": "b78171b9be71d2d0b6af8a32cd9c6572872c24daea809c62a9c912c1e2e990aa",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\dmad_minimax_h3_4step_full_critic.safetensors",
+  "file": "dmad_minimax_h3_4step_full_critic.safetensors",
+  "size": 1383674320,
+  "sha256": "ac23eaef3a359666610769e4ef5f8af9530262c265f25ac211b0b54e51efc91e",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\eugen1024lora.safetensors",
+  "file": "eugen1024lora.safetensors",
+  "size": 89745224,
+  "sha256": "cede440ab39f48581969bb1262dca5f1f62254f0d951d81145168ce48c35ae86",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux2\\bj_20260120_22-22-29epoch15_comfy.safetensors",
+  "file": "bj_20260120_22-22-29epoch15_comfy.safetensors",
+  "size": 99644032,
+  "sha256": "6cb0f5363ed04d6d6c369f9a2753c1398f7175ab4c543422bdefc89c7be9efe1",
+  "meta": {},
+  "civitai": {
+   "modelId": 2326122,
+   "modelName": "[flux2-klein-9b] Pyro's BJ",
+   "versionName": "v20260120",
+   "baseModel": "Flux.2 Klein 9B",
+   "trainedWords": [
+    "pov",
+    "licking",
+    "cheeking",
+    "swallowing",
+    "sucking"
+   ],
+   "url": "https://civitai.com/models/2326122?modelVersionId=2616688"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux2\\gf-next-anal.safetensors",
+  "file": "gf-next-anal.safetensors",
+  "size": 165704384,
+  "sha256": "e73d2476ee06b160e242c5da25a4f204d2c6e84a08d95c604d9be9120a4fb683",
+  "meta": {
+   "ss_output_name": "gf-next-anal",
+   "ss_base_model_version": "flux2_klein_9b"
+  },
+  "civitai": {
+   "modelId": 2622161,
+   "modelName": "[FLUX.2] Real-Anatomy - Ultimate Intimacy LoRA",
+   "versionName": "v1.0-alpha1",
+   "baseModel": "Flux.2 Klein 9B",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2622161?modelVersionId=2943995"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux2_klein_9b\\FLUX2_KLEIN_UNLOCKED_V2.safetensors",
+  "file": "FLUX2_KLEIN_UNLOCKED_V2.safetensors",
+  "size": 331378000,
+  "sha256": "9a38cb177bdd829ebfe6953916f29ed7d9db249c967b7542d8f03050c9cf7592",
+  "meta": {},
+  "civitai": {
+   "modelId": 2063193,
+   "modelName": "NSFW UNLOCKED [LORA] FLUX / FLUX2 KLEIN / Z_IMAGE / KREA2",
+   "versionName": "FLUX2_KLEIN_V2",
+   "baseModel": "Flux.2 Klein 9B",
+   "trainedWords": [
+    "nude",
+    "naked",
+    "blow job",
+    "cum",
+    "ass",
+    "pussy"
+   ],
+   "url": "https://civitai.com/models/2063193?modelVersionId=3030169"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux2_klein_9b\\V2_flux_klein_4_V2_flux_klein_4.safetensors",
+  "file": "V2_flux_klein_4_V2_flux_klein_4.safetensors",
+  "size": 165704432,
+  "sha256": "01b1fa46d15d7fe174cfbba69e4811bb7ea6288279b32044dea6229e79672726",
+  "meta": {
+   "ss_output_name": "fluxtrait",
+   "ss_base_model_version": "flux2_klein_9b",
+   "top_tags": [
+    "fluxtrait"
+   ]
+  },
+  "civitai": {
+   "modelId": 2067704,
+   "modelName": "Portrait Engine FLUX / FLUX 2 KLEIN / Z-Image, Detailed Skin - [LORA]",
+   "versionName": "V 2.0_Flux_klein",
+   "baseModel": "Flux.2 Klein 9B",
+   "trainedWords": [
+    "fluxtrait"
+   ],
+   "url": "https://civitai.com/models/2067704?modelVersionId=2777010"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux2_klein_9b\\[flux2-klein-9b] Pyro's BJ_v20260120.safetensors",
+  "file": "[flux2-klein-9b] Pyro's BJ_v20260120.safetensors",
+  "size": 99644032,
+  "sha256": "6cb0f5363ed04d6d6c369f9a2753c1398f7175ab4c543422bdefc89c7be9efe1",
+  "meta": {},
+  "civitai": {
+   "modelId": 2326122,
+   "modelName": "[flux2-klein-9b] Pyro's BJ",
+   "versionName": "v20260120",
+   "baseModel": "Flux.2 Klein 9B",
+   "trainedWords": [
+    "pov",
+    "licking",
+    "cheeking",
+    "swallowing",
+    "sucking"
+   ],
+   "url": "https://civitai.com/models/2326122?modelVersionId=2616688"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux2_klein_9b\\[flux2-klein-9b] Pyro's Cowgirls_v1.0.safetensors",
+  "file": "[flux2-klein-9b] Pyro's Cowgirls_v1.0.safetensors",
+  "size": 99644032,
+  "sha256": "a5584497b41927859851cebfea13e26abe7aff961b1d622a1ee610a546f6f014",
+  "meta": {},
+  "civitai": {
+   "modelId": 2332978,
+   "modelName": "[flux2-klein-9b] Pyro's Cowgirls",
+   "versionName": "v1.0",
+   "baseModel": "Flux.2 Klein 9B",
+   "trainedWords": [
+    "a woman sitting on a man"
+   ],
+   "url": "https://civitai.com/models/2332978?modelVersionId=2624304"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux2_klein_9b\\bfs_head_v1_flux-klein_9b_step3500_rank128.safetensors",
+  "file": "bfs_head_v1_flux-klein_9b_step3500_rank128.safetensors",
+  "size": 662729912,
+  "sha256": "70d8aaf332d710b905d5085afaa87c3ef577edffd54ffcfadeb8c47a854f9044",
+  "meta": {
+   "ss_output_name": "head_swap_flux-klein_9b",
+   "ss_base_model_version": "flux2_klein_9b"
+  },
+  "civitai": {
+   "modelId": 2027766,
+   "modelName": "BFS - Best Face Swap",
+   "versionName": "F.K. 9b - V1 Focus Head",
+   "baseModel": "Flux.2 Klein 9B-base",
+   "trainedWords": [
+    "head_swap: start with Picture 1 as the base image, keeping its lighting, environment, and background. remove the head from Picture 1 completely and replace it with the head from Picture 2, strictly preserving the hair, eye color, nose structure of Picture 2. copy the direction of the eye, head rotation, micro expressions from Picture 1, high quality, sharp details, 4k.  Describe the expression in Picture 1 and copy it to the new image.",
+    "head_swap: start with Picture 1 as the base image, keeping its lighting, environment, and background. remove the head from Picture 1 completely and replace it with the head from Picture 2, strictly preserving the hair, eye color, nose structure of Picture 2. copy the direction of the eye, head rotation, micro expressions from Picture 1, high quality, sharp details, 4k."
+   ],
+   "url": "https://civitai.com/models/2027766?modelVersionId=2610018"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux2_klein_9b\\klein_9b_enhancer_v2_klein_9b_enhancer_v2.safetensors",
+  "file": "klein_9b_enhancer_v2_klein_9b_enhancer_v2.safetensors",
+  "size": 662729984,
+  "sha256": "520832b426ef976ba81aeb7ad235ac920642c189b55120c51e540541d27f9072",
+  "meta": {
+   "ss_output_name": "klein_9b_enhancer_v2",
+   "ss_base_model_version": "flux2_klein_9b",
+   "top_tags": [
+    "enhance this image"
+   ]
+  },
+  "civitai": {
+   "modelId": 2442399,
+   "modelName": "Elusarca's Detail Enhancer | Flux Klein 9B",
+   "versionName": "v1.0",
+   "baseModel": "Flux.2 Klein 9B",
+   "trainedWords": [
+    "Enhance this image"
+   ],
+   "url": "https://civitai.com/models/2442399?modelVersionId=2746136"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\AWPortraitFL\\AWPortrait-FL-lora.safetensors",
+  "file": "AWPortrait-FL-lora.safetensors",
+  "size": 613081384,
+  "sha256": "0082083866fcef9f2b67d3d3de2917dd3d36fe3eac1eb7ec4a086c1b4b24d448",
+  "meta": {
+   "ss_output_name": "flux-lora",
+   "modelspec.title": "flux-lora",
+   "ss_base_model_version": "flux1",
+   "top_tags": [
+    "realistic photo",
+    "photo",
+    "photography",
+    "east asia",
+    "caucasian",
+    "the image features an asian woman with light skin"
+   ]
+  },
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\Canopus-Clothing-Flux-Dev-Florence2-LoRA.safetensors",
+  "file": "Canopus-Clothing-Flux-Dev-Florence2-LoRA.safetensors",
+  "size": 612746712,
+  "sha256": "d8148914b70ee659ffefcdecf213e46e2ecf124cb451f224d14d94f2909b70a9",
+  "meta": {
+   "ss_output_name": "lora",
+   "modelspec.title": "lora",
+   "ss_base_model_version": "flux1",
+   "top_tags": [
+    "hoodie",
+    "clothes",
+    "clothing",
+    "a medium shot of a light blue hooded sweatshirt with a red and yellow superman logo on the front. the hoodie has a black zipper with a yellow stripe on the top. the backdrop is a light gray color.",
+    "a vibrant pink sweater is draped over a pair of blue jeans. the sweater is adorned with small white dots",
+    "adding a pop of color to the otherwise monochromatic attire. the shirt is hung on a wooden hanger"
+   ]
+  },
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\Clothes_onoff.safetensors",
+  "file": "Clothes_onoff.safetensors",
+  "size": 19262576,
+  "sha256": "fe84041c603568b8a9d673c9cec3653d9f55c54880c76aca730135454af7678f",
+  "meta": {
+   "ss_output_name": "Clothes_onoff",
+   "modelspec.title": "Clothes_onoff",
+   "ss_base_model_version": "flux1",
+   "top_tags": [
+    "0n00f",
+    "nude",
+    "nipples",
+    "1girl",
+    "breasts",
+    "clothes onoff"
+   ]
+  },
+  "civitai": {
+   "modelId": 972173,
+   "modelName": "FLUX Clothes onoff (on/off)",
+   "versionName": "v2.0",
+   "baseModel": "Flux.1 D",
+   "trainedWords": [
+    "Clothes onoff"
+   ],
+   "url": "https://civitai.com/models/972173?modelVersionId=1160192"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\DollCute.safetensors",
+  "file": "DollCute.safetensors",
+  "size": 19260152,
+  "sha256": "47889d14f20aa85fb22f7c235f9c70cc8fa28b8aa72b91d6afc0e40e373e16af",
+  "meta": {
+   "ss_output_name": "DollCute",
+   "modelspec.title": "DollCute",
+   "ss_base_model_version": "flux1",
+   "top_tags": [
+    "doll",
+    "solo",
+    "closed eyes",
+    "1girl",
+    "blush",
+    "standing"
+   ]
+  },
+  "civitai": {
+   "modelId": 792432,
+   "modelName": "DollCute",
+   "versionName": "V1",
+   "baseModel": "Flux.1 D",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/792432?modelVersionId=886096"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\FLUX Female Anatomy.safetensors",
+  "file": "FLUX Female Anatomy.safetensors",
+  "size": 19258992,
+  "sha256": "05080a865af3d3a7d527a41e28125bcf24eb141695f582a7ccc7906449b90d58",
+  "meta": {
+   "ss_output_name": "female_anatomy",
+   "modelspec.title": "female_anatomy",
+   "ss_base_model_version": "flux1",
+   "top_tags": [
+    "nude",
+    "nipples",
+    "breasts",
+    "ass",
+    "pussy"
+   ]
+  },
+  "civitai": {
+   "modelId": 678412,
+   "modelName": "FLUX - Female Anatomy",
+   "versionName": "0.2",
+   "baseModel": "Flux.1 D",
+   "trainedWords": [
+    "nude",
+    "breasts",
+    "ass",
+    "nipples",
+    "pussy"
+   ],
+   "url": "https://civitai.com/models/678412?modelVersionId=847761"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\FLUX More Female Anatomy.safetensors",
+  "file": "FLUX More Female Anatomy.safetensors",
+  "size": 19361712,
+  "sha256": "1e84acd17838dc0bd8a6b6a1196b952986cb2790a9ce2bd46f1b6bd237d489a9",
+  "meta": {
+   "ss_output_name": "Playboy",
+   "modelspec.title": "Playboy",
+   "ss_base_model_version": "flux1",
+   "top_tags": [
+    "high quality",
+    "detailed",
+    "a photograph of a naked woman laying on a bed",
+    "a photograph of a naked woman sitting on a bed",
+    "a photograph of a nude woman laying on a bed",
+    "a photograph of a nude woman sitting on a bed"
+   ]
+  },
+  "civitai": {
+   "modelId": 903238,
+   "modelName": "FLUX - More Female Anatomy",
+   "versionName": "v0.1",
+   "baseModel": "Flux.1 D",
+   "trainedWords": [
+    "high quality",
+    "detailed",
+    "nude",
+    "naked",
+    "tits"
+   ],
+   "url": "https://civitai.com/models/903238?modelVersionId=1010755"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\FLUX.1-Turbo-Alpha.safetensors",
+  "file": "FLUX.1-Turbo-Alpha.safetensors",
+  "size": 694082424,
+  "sha256": "77f7523a5e9c3da6cfc730c6b07461129fa52997ea06168e9ed5312228aa0bff",
+  "meta": {},
+  "civitai": {
+   "modelId": 876388,
+   "modelName": "FLUX.1-Turbo-Alpha",
+   "versionName": "FLUX.1-Turbo-Alpha",
+   "baseModel": "Flux.1 D",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/876388?modelVersionId=981081"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\FLUX_Blowjob.safetensors",
+  "file": "FLUX_Blowjob.safetensors",
+  "size": 153271616,
+  "sha256": "2ac14aa0621825d75b58275843f8de87e9526d77083d325239b793746bbc86df",
+  "meta": {
+   "ss_output_name": "csl4sqde878c739um7s0",
+   "modelspec.title": "csl4sqde878c739um7s0",
+   "ss_base_model_version": "flux1",
+   "top_tags": [
+    "csl4sqde878c739um7s0"
+   ]
+  },
+  "civitai": {
+   "modelId": 921338,
+   "modelName": "FLUX Blowjob",
+   "versionName": "v1.0",
+   "baseModel": "Flux.1 D",
+   "trainedWords": [
+    "Blowjob"
+   ],
+   "url": "https://civitai.com/models/921338?modelVersionId=1031271"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\FluxK4Play.v1.safetensors",
+  "file": "FluxK4Play.v1.safetensors",
+  "size": 331379152,
+  "sha256": "379441e9255922e6603db361a8b7e1a524de3f31dcf87ed8b077b9a78243ebb7",
+  "meta": {},
+  "civitai": {
+   "modelId": 2403747,
+   "modelName": "FLUX 4 PLAY - AIO NSFW FLUX Klein LoRA by DR34MSC4PE",
+   "versionName": "Flux4Play_Klein9B_v1",
+   "baseModel": "Flux.2 Klein 9B-base",
+   "trainedWords": [
+    "r3v3rs3_c0wg1rl",
+    "c0wg1rl",
+    "pov",
+    "m15510n4ry",
+    "d0gg13",
+    "an4l",
+    "d0ubl3_bj"
+   ],
+   "url": "https://civitai.com/models/2403747?modelVersionId=2702716"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\FluxPussy.safetensors",
+  "file": "FluxPussy.safetensors",
+  "size": 612748648,
+  "sha256": "e14192a466daeacfa413ee714030b45774cbc3f44a4bf6fdc1948bea6d680bf1",
+  "meta": {
+   "ss_output_name": "lora",
+   "modelspec.title": "lora",
+   "ss_base_model_version": "flux1",
+   "top_tags": [
+    "from behind",
+    "double package",
+    "1girl",
+    "anus",
+    "pussy",
+    "detailed"
+   ]
+  },
+  "civitai": {
+   "modelId": 802444,
+   "modelName": "Flux Pussy & Anus HD (From Behind)",
+   "versionName": "v1.0",
+   "baseModel": "Flux.1 D",
+   "trainedWords": [
+    "double package",
+    "close up",
+    "detailed",
+    "pussy",
+    "anus",
+    "high res",
+    "from behind",
+    "1girl"
+   ],
+   "url": "https://civitai.com/models/802444?modelVersionId=897263"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\Futanari_with_erect_penis_v2.safetensors",
+  "file": "Futanari_with_erect_penis_v2.safetensors",
+  "size": 38431408,
+  "sha256": "a686a0f54ac737058fc1e11d563719eb7cac3cee8c76817e782d30cfd609fa5e",
+  "meta": {
+   "ss_output_name": "Futanari_with_erect_penis_v2",
+   "modelspec.title": "Futanari_with_erect_penis_v2",
+   "ss_base_model_version": "flux1",
+   "top_tags": [
+    "the image is a high-resolution",
+    "this photograph captures a close-up",
+    "this is a high-resolution",
+    "erect penis",
+    "the image is a photograph of a nude person with a light skin tone",
+    "seated on a beige bed. it has long"
+   ]
+  },
+  "civitai": {
+   "modelId": 1173025,
+   "modelName": "Futanari with naked erect penis for FLUX",
+   "versionName": "V1",
+   "baseModel": "Flux.1 D",
+   "trainedWords": [
+    "person revealing their naked genitals",
+    "nipples aren’t visible"
+   ],
+   "url": "https://civitai.com/models/1173025?modelVersionId=1319847"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\Hyper-FLUX.1-dev-8steps-lora.safetensors",
+  "file": "Hyper-FLUX.1-dev-8steps-lora.safetensors",
+  "size": 1388026440,
+  "sha256": "e0ab0fdf569cd01a382f19bd87681f628879dea7ad51fe5a3799b6c18c7b2d03",
+  "meta": {},
+  "civitai": {
+   "modelId": 691446,
+   "modelName": "ByteDance Hyper-FLUX Acceleration LoRA",
+   "versionName": "Hyper-FLUX.1-dev-8steps",
+   "baseModel": "Flux.1 D",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/691446?modelVersionId=774008"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\Penis_on_Face_p3n1sF4ce .safetensors",
+  "file": "Penis_on_Face_p3n1sF4ce .safetensors",
+  "size": 38426504,
+  "sha256": "9ff4650caa51e4b07338555c4b2941eac41c6fec84d8afa642bdb8df13556293",
+  "meta": {
+   "ss_output_name": "Penis_on_Face",
+   "modelspec.title": "Penis_on_Face",
+   "ss_base_model_version": "flux1",
+   "top_tags": [
+    "p3n1sf4ce",
+    "only his lower torso and genitals visible",
+    "male pov",
+    "explicit scene. a young woman with fair skin and straight",
+    "straight brown hair",
+    "the image is a photograph capturing an intimate"
+   ]
+  },
+  "civitai": {
+   "modelId": 1034394,
+   "modelName": "Penis On Face Flux",
+   "versionName": "Penis on face Flux v1.0",
+   "baseModel": "Flux.1 D",
+   "trainedWords": [
+    "p3n1sF4ce"
+   ],
+   "url": "https://civitai.com/models/1034394?modelVersionId=1160160"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\ThroatedV2_000002950.safetensors",
+  "file": "ThroatedV2_000002950.safetensors",
+  "size": 687476614,
+  "sha256": "0c1975edb1cc4ef1e4a41bf97056bcb6367d13eb34066e4c2938bfa7de97f488",
+  "meta": {
+   "ss_output_name": "ThroatedV2",
+   "ss_base_model_version": "sd_1.5",
+   "top_tags": [
+    ""
+   ]
+  },
+  "civitai": {
+   "modelId": 717574,
+   "modelName": "throated (flux lora testing)",
+   "versionName": "v1.0",
+   "baseModel": "Flux.1 D",
+   "trainedWords": [
+    "Throating a penis"
+   ],
+   "url": "https://civitai.com/models/717574?modelVersionId=802434"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\boFLUX Steampunk Style.safetensors",
+  "file": "boFLUX Steampunk Style.safetensors",
+  "size": 19268120,
+  "sha256": "550d70abfac7c44da4cdeabb6dfb64b623a1ce358d03c4ae4bc652d404ec484c",
+  "meta": {
+   "ss_output_name": "Vikings_Style",
+   "modelspec.title": "Vikings_Style",
+   "ss_base_model_version": "flux1",
+   "top_tags": [
+    "steampunk",
+    "bo-steampunk",
+    "steampunk style",
+    "steampunk art",
+    "solo",
+    "1girl"
+   ]
+  },
+  "civitai": {
+   "modelId": 734196,
+   "modelName": "FLUX Steampunk Magic",
+   "versionName": "FLUX v1.0",
+   "baseModel": "Flux.1 D",
+   "trainedWords": [
+    "bo-steampunk",
+    "steampunk style"
+   ],
+   "url": "https://civitai.com/models/734196?modelVersionId=821032"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\collbdy.safetensors",
+  "file": "collbdy.safetensors",
+  "size": 306482040,
+  "sha256": "cde024ab6938a7fbaaf862ae74cf74f95d83a4a829e0987e3abc85f6f3b70db3",
+  "meta": {
+   "ss_output_name": "collbdy",
+   "modelspec.title": "collbdy",
+   "ss_base_model_version": "flux1",
+   "top_tags": [
+    "straight",
+    "the image is a high-resolution photograph of a nude woman",
+    "this is a high-resolution",
+    "the image is a high-resolution",
+    "buttocks",
+    "showing a natural"
+   ]
+  },
+  "civitai": {
+   "modelId": 776651,
+   "modelName": "Flux Bodies - Female",
+   "versionName": "Colleen Body - v1",
+   "baseModel": "Flux.1 D",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/776651?modelVersionId=1557697"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\dark_fantasy_lora.safetensors",
+  "file": "dark_fantasy_lora.safetensors",
+  "size": 171969360,
+  "sha256": "052b74822dd09d7e8335b4366151b682524513fa9aa04d3cd5048f72223b5a4f",
+  "meta": {
+   "ss_output_name": "dark_fantasy_lora",
+   "ss_base_model_version": "sd_1.5"
+  },
+  "civitai": {
+   "modelId": 671094,
+   "modelName": "Flux LoRA - Dark Fantasy 80s aesthetics (popular on Tiktok)",
+   "versionName": "v1.0",
+   "baseModel": "Flux.1 D",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/671094?modelVersionId=751285"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\engrave.safetensors",
+  "file": "engrave.safetensors",
+  "size": 89745224,
+  "sha256": "a611eac5fe95d57328136a753f737a4edae752c6f50d3a7f6e2f4736f2e3bfa0",
+  "meta": {},
+  "civitai": {
+   "modelId": 1048150,
+   "modelName": "Flux Engrave LoRA",
+   "versionName": "v1.0",
+   "baseModel": "Flux.1 D",
+   "trainedWords": [
+    "NGRVNG"
+   ],
+   "url": "https://civitai.com/models/1048150?modelVersionId=1176040"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\flux-fashion-lora.safetensors",
+  "file": "flux-fashion-lora.safetensors",
+  "size": 171969352,
+  "sha256": "1048e9eb7cf917a3d6a16c1fba96dfaa82d8abf2870ecee580f531fcb9962e1b",
+  "meta": {
+   "ss_output_name": "flux_lora_v3",
+   "ss_base_model_version": "sd_1.5"
+  },
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\fluxRealSkin-V2.safetensors",
+  "file": "fluxRealSkin-V2.safetensors",
+  "size": 171969499,
+  "sha256": "c9fab54482cd63a1996788730d91c96dd832c5165b8e0c365920eef60cde715e",
+  "meta": {
+   "ss_output_name": "flux_train_replicate",
+   "ss_base_model_version": "sd_1.5",
+   "top_tags": [
+    "realskin"
+   ]
+  },
+  "civitai": {
+   "modelId": 651043,
+   "modelName": "Flux Skin Texture",
+   "versionName": "FluxRealSkin-v2.0",
+   "baseModel": "Flux.1 D",
+   "trainedWords": [
+    "realskin"
+   ],
+   "url": "https://civitai.com/models/651043?modelVersionId=827325"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\fp8-lora-r640_cq1.0-fp8-flux1-fill-dev.safetensors",
+  "file": "fp8-lora-r640_cq1.0-fp8-flux1-fill-dev.safetensors",
+  "size": 3063264712,
+  "sha256": "11283f2890f6ce8bd2321c0545fd19dd0914230f4bb228f277123ecb126ce9e4",
+  "meta": {},
+  "civitai": {
+   "modelId": 981615,
+   "modelName": "Flux.Fill - Inpaint LoRA",
+   "versionName": "v1.0",
+   "baseModel": "Flux.1 D",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/981615?modelVersionId=1099498"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\outfit-generator.safetensors",
+  "file": "outfit-generator.safetensors",
+  "size": 171969384,
+  "sha256": "91c60e9ff53dff24d5a28a73e8091615993a4f571837445fb4338bc023e3d75a",
+  "meta": {
+   "ss_output_name": "fashion-generation-h-and-m-V1.0",
+   "ss_base_model_version": "sd_1.5"
+  },
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\realism_lora.safetensors",
+  "file": "realism_lora.safetensors",
+  "size": 22431400,
+  "sha256": "0a83a924b822b70b5e458d27935ebfa7713edaee04ff9f194209525354031eca",
+  "meta": {},
+  "civitai": {
+   "modelId": 631986,
+   "modelName": "XLabs Flux Realism LoRA",
+   "versionName": "v1.0",
+   "baseModel": "Flux.1 D",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/631986?modelVersionId=706529"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\slptp-blowjob-lora.safetensors",
+  "file": "slptp-blowjob-lora.safetensors",
+  "size": 171969416,
+  "sha256": "7beb4ab869ee7a4f4f6bba9d9b3ab62ceb2e842ebb52be09bd860598969d5db4",
+  "meta": {
+   "ss_output_name": "slptp-blowjob-lora",
+   "ss_base_model_version": "sd_1.5",
+   "top_tags": [
+    "slptp"
+   ]
+  },
+  "civitai": {
+   "modelId": 1123250,
+   "modelName": "[FLUX LoRA] 'Sloppy Toppy' [Messy/Sloppy/Nasty Deepthroat Blowjob LoRA] [ADD: 'slptp' TO PROMPT]",
+   "versionName": "v1.0",
+   "baseModel": "Flux.1 D",
+   "trainedWords": [
+    "slptp"
+   ],
+   "url": "https://civitai.com/models/1123250?modelVersionId=1264100"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\xia3.safetensors",
+  "file": "xia3.safetensors",
+  "size": 612748720,
+  "sha256": "b863d26a6e7dbf6fd29653b9d37c94df0742b3eca95f905c16045205726bb2f8",
+  "meta": {
+   "ss_output_name": "flux-lora",
+   "modelspec.title": "flux-lora",
+   "ss_base_model_version": "flux1",
+   "top_tags": [
+    "xia",
+    "a warrior in traditional armor",
+    "elegant geisha in traditional attire",
+    "artistic portrait with japanese text",
+    "a warrior in a dynamic pose",
+    "wielding her sword with determination and grace."
+   ]
+  },
+  "civitai": {
+   "modelId": 711525,
+   "modelName": "Flux Wuxia",
+   "versionName": "v1.0",
+   "baseModel": "Flux.1 D",
+   "trainedWords": [
+    "xia"
+   ],
+   "url": "https://civitai.com/models/711525?modelVersionId=795834"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\flux\\xlabs_flux_realism_lora_comfui.safetensors",
+  "file": "xlabs_flux_realism_lora_comfui.safetensors",
+  "size": 22433528,
+  "sha256": "379e73dccfb57822ee3b12f374e141ce1c79a13b7ff19da4219ef2a2a610038e",
+  "meta": {},
+  "civitai": {
+   "modelId": 631986,
+   "modelName": "XLabs Flux Realism LoRA",
+   "versionName": "Converted for Comfyui",
+   "baseModel": "Flux.1 D",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/631986?modelVersionId=706528"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\fluxgym_06.01.26_sweta_sweta.safetensors",
+  "file": "fluxgym_06.01.26_sweta_sweta.safetensors",
+  "size": 39767032,
+  "sha256": "51c445abbaedaa6b1ec5f122d7137651b577319cd7303592abd10f59a9e64f6c",
+  "meta": {
+   "ss_output_name": "sweta",
+   "modelspec.title": "sweta",
+   "ss_base_model_version": "flux1",
+   "top_tags": [
+    "and a clear blue sky.",
+    "trees",
+    "buildings",
+    "surrounded by vehicles",
+    "people",
+    "surrounded by trees covered in a blanket of snow."
+   ]
+  },
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ip-adapter-faceid-plus_sd15_lora.safetensors",
+  "file": "ip-adapter-faceid-plus_sd15_lora.safetensors",
+  "size": 51059544,
+  "sha256": "3f00341d11e5e7b5aadf63cbdead09ef82eb28669156161cf1bfc2105d4ff1cd",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ip-adapter-faceid-plusv2_sd15_lora.safetensors",
+  "file": "ip-adapter-faceid-plusv2_sd15_lora.safetensors",
+  "size": 51059544,
+  "sha256": "8abff87a15a049f3e0186c2e82c1c8e77783baf2cfb63f34c412656052eb57b0",
+  "meta": {},
+  "civitai": {
+   "modelId": 301797,
+   "modelName": "ip-adapter-faceid-plusv2",
+   "versionName": "faceid-plusv2_sd1.5",
+   "baseModel": "SD 1.5",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/301797?modelVersionId=338909"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ip-adapter-faceid_sd15_lora.safetensors",
+  "file": "ip-adapter-faceid_sd15_lora.safetensors",
+  "size": 51059544,
+  "sha256": "70699f0dbfadd47de1f81d263cf4c86bd4b7271d841304af9b340b3a7f38e86a",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\DaSiWa_LTX23_NSFW_Bodyphysics_Fluid_Motion_Enhancer_v01.safetensors",
+  "file": "DaSiWa_LTX23_NSFW_Bodyphysics_Fluid_Motion_Enhancer_v01.safetensors",
+  "size": 805412928,
+  "sha256": "a741c30110cfda9f13f0cbcaf97649f18a53adc05e31ec745f215994956f4e0f",
+  "meta": {},
+  "civitai": {
+   "modelId": 2668916,
+   "modelName": "NSFW Body Physics Fluid Motion Enhancer | Lora | LTX2.3",
+   "versionName": "LTX2.3 - v1.0",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [
+    "D4S1W4_NSFWSME"
+   ],
+   "url": "https://civitai.com/models/2668916?modelVersionId=2996907"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\Fantasy_Painterly.safetensors",
+  "file": "Fantasy_Painterly.safetensors",
+  "size": 352679888,
+  "sha256": "4a12d30f8277e9d7be8431b4d35214af7c62bc188807a5c53dc47e9a8ff562c4",
+  "meta": {
+   "ss_output_name": "darkpaintery",
+   "modelspec.title": "darkpaintery",
+   "ss_base_model_version": "ltx2_v1"
+  },
+  "civitai": {
+   "modelId": 2528481,
+   "modelName": "LTX 2.3 - Fantasy Painterly",
+   "versionName": "v1.0",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2528481?modelVersionId=2841716"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\Fantasy_Realism.safetensors",
+  "file": "Fantasy_Realism.safetensors",
+  "size": 352679888,
+  "sha256": "36938985decb400a47ae3a03ff1c8bb491dcadd3172d9e4a04e8cc9f964861ab",
+  "meta": {
+   "ss_output_name": "fantasy_realism",
+   "modelspec.title": "fantasy_realism",
+   "ss_base_model_version": "ltx2_v1"
+  },
+  "civitai": {
+   "modelId": 2540961,
+   "modelName": "LTX 2.3 - Fantasy Realism",
+   "versionName": "FantasyRealism_v1",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2540961?modelVersionId=2855640"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\LTX-2.3-22b-AV-LoRA-talking-head-v1_OHWXPERSON.safetensors",
+  "file": "LTX-2.3-22b-AV-LoRA-talking-head-v1_OHWXPERSON.safetensors",
+  "size": 428150680,
+  "sha256": "83b603a3880dd2ca90a09b9a462a2473311ec00ce938743b3b70e05bc94a28dc",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\LTX-2.3-Henshin.safetensors",
+  "file": "LTX-2.3-Henshin.safetensors",
+  "size": 855972592,
+  "sha256": "3a61532889f6f0c2d6a19485c462c31b916697ed28ee5e7bd655b23e58043084",
+  "meta": {
+   "ss_output_name": "LTX-2.3-Henshin",
+   "modelspec.title": "LTX-2.3-Henshin",
+   "ss_base_model_version": "ltx2_v1"
+  },
+  "civitai": {
+   "modelId": 2487612,
+   "modelName": "LTX-2.3-transformation",
+   "versionName": "Henshin transformation",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2487612?modelVersionId=2813668"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\LTX-2.3-ID-LoRA-TalkVid-3K.safetensors",
+  "file": "LTX-2.3-ID-LoRA-TalkVid-3K.safetensors",
+  "size": 1157884304,
+  "sha256": "e5af73441743b4852f228b03e444888dff3da80d2666033af2367ab7bda6d8b9",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\LTX-2.3-Latin dance.safetensors",
+  "file": "LTX-2.3-Latin dance.safetensors",
+  "size": 214242296,
+  "sha256": "09e613280ff1e7922e4ec82846dc01f571891be4a83b15a60deb04e91f9b6987",
+  "meta": {
+   "ss_output_name": "LTX-2.3-Latin dance",
+   "modelspec.title": "LTX-2.3-Latin dance",
+   "ss_base_model_version": "ltx2_v1"
+  },
+  "civitai": {
+   "modelId": 2649352,
+   "modelName": "LTX-2.3-Latin dance",
+   "versionName": "v1.0",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2649352?modelVersionId=2974873"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\LTX-2.3-Licon-MSR-V1.safetensors",
+  "file": "LTX-2.3-Licon-MSR-V1.safetensors",
+  "size": 654443424,
+  "sha256": "4008d341c58791659a9b3840ac8d76f08d8941f82670dc2d3dad0f71876bbae5",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\LTX-2.3-OmniNFT-RL-Lora_bf16.safetensors",
+  "file": "LTX-2.3-OmniNFT-RL-Lora_bf16.safetensors",
+  "size": 616948520,
+  "sha256": "204b491f76da5c7ef0998dee636b4db695a00d28729ebccfda8dfdc3c37df63c",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\LTX-2.3-danceV2.comfy.safetensors",
+  "file": "LTX-2.3-danceV2.comfy.safetensors",
+  "size": 402760952,
+  "sha256": "e1bd4db2c1055cbfe17739008a61f2f36806cd4dbb13d26de1c7f8089ff757e2",
+  "meta": {
+   "ss_output_name": "LTX-2.3-dance",
+   "modelspec.title": "LTX-2.3-dance",
+   "ss_base_model_version": "ltx2_v1"
+  },
+  "civitai": {
+   "modelId": 2487939,
+   "modelName": "LTX-2.3-dance",
+   "versionName": "v2.0",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2487939?modelVersionId=2799941"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\LTX2-i2v-OralSuite.safetensors",
+  "file": "LTX2-i2v-OralSuite.safetensors",
+  "size": 1233513152,
+  "sha256": "5f854085b53d4aa5732e68be57f7a4624c8a333bd9c25a2e617411598630d7db",
+  "meta": {
+   "ss_output_name": "LTX2-i2v-OralSuite",
+   "ss_base_model_version": "ltx2"
+  },
+  "civitai": {
+   "modelId": 2340297,
+   "modelName": "LTX2 - Oral Suite",
+   "versionName": "i2v",
+   "baseModel": "LTXV2",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2340297?modelVersionId=2632394"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\LTX2.3-IC-LORA-Dual-Character.safetensors",
+  "file": "LTX2.3-IC-LORA-Dual-Character.safetensors",
+  "size": 327287347,
+  "sha256": "b6c3199e2c95eb0aad0cea4f3e8dfa33e8f6966d85bc79e3994faf5a57406103",
+  "meta": {},
+  "civitai": {
+   "modelId": 2500098,
+   "modelName": "LTX2.3-IC-LORA-Dual-Character",
+   "versionName": "v0.1",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2500098?modelVersionId=2810376"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\LTX2.3-MysticXXX.safetensors",
+  "file": "LTX2.3-MysticXXX.safetensors",
+  "size": 278212080,
+  "sha256": "2f4d285ec9f9095ad2577e00b7c322565abcffc6d31fb4f0c42e215fcb9b96a4",
+  "meta": {},
+  "civitai": {
+   "modelId": 2616134,
+   "modelName": "[LTX 2.3] Mystic XXX",
+   "versionName": "v1.0",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2616134?modelVersionId=2937390"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\LTX2.3_Crisp_Enhance.safetensors",
+  "file": "LTX2.3_Crisp_Enhance.safetensors",
+  "size": 705198392,
+  "sha256": "020529377ce07b1235d8050505dd38adc3bc9dc49a191f318a7ccf3921354053",
+  "meta": {
+   "ss_output_name": "BeautyShots",
+   "modelspec.title": "BeautyShots",
+   "ss_base_model_version": "ltx2_v1"
+  },
+  "civitai": {
+   "modelId": 2535622,
+   "modelName": "LTX 2.3 - Enhancers",
+   "versionName": "Crisp Enhance",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2535622?modelVersionId=2849716"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\LTX2.3_DMD_hybrid_v2.safetensors",
+  "file": "LTX2.3_DMD_hybrid_v2.safetensors",
+  "size": 5095398920,
+  "sha256": "db418249c95eba25ed7d7d24f74a17e7cdc82c03b0ef34a477abdccb1d7a2915",
+  "meta": {},
+  "civitai": {
+   "modelId": 2839639,
+   "modelName": "LTX2.3_DMD_hybrid_v2.safetensors",
+   "versionName": "v1.0",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2839639?modelVersionId=3205277"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\LTX23_Obscura_Remova_v1.safetensors",
+  "file": "LTX23_Obscura_Remova_v1.safetensors",
+  "size": 327344864,
+  "sha256": "e58ff6e1076caf40707b9b890aeae1d1c0bd26f285f7666aafc052a06d35f22a",
+  "meta": {},
+  "civitai": {
+   "modelId": 2590144,
+   "modelName": "Obscura Remova",
+   "versionName": "LTX23 V2V v1",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [
+    "Remove the object from the foreground."
+   ],
+   "url": "https://civitai.com/models/2590144?modelVersionId=2909707"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\LTX_10Eros_LoRA_fro99-avgrank77.safetensors",
+  "file": "LTX_10Eros_LoRA_fro99-avgrank77.safetensors",
+  "size": 2798435816,
+  "sha256": "1015323789dc7bbc1db456a664850519d005dd28b19e372087c985698b3bd301",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\LTX_SulphurEXP_LoRA_fro99-avgrank105.safetensors",
+  "file": "LTX_SulphurEXP_LoRA_fro99-avgrank105.safetensors",
+  "size": 2351753928,
+  "sha256": "1babeeb245b3284246a668eaef5782a86e0b3fd1d15b089d21545442db710449",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\Ltx2.3-Licon-VBVR-I2V-96000-R32.safetensors",
+  "file": "Ltx2.3-Licon-VBVR-I2V-96000-R32.safetensors",
+  "size": 554006432,
+  "sha256": "ec5ff61d3e2959babf01112a8d7f00776273415573aa29a82f2af00070fd1408",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\PENISlora_sulfter_i2v-step00008500.comfy.safetensors",
+  "file": "PENISlora_sulfter_i2v-step00008500.comfy.safetensors",
+  "size": 705200160,
+  "sha256": "07cae561591e976f73933444e3f7ee43e3a11063e4ef45087926d27b1e1b0335",
+  "meta": {
+   "ss_output_name": "plora_sulfter_i2v",
+   "modelspec.title": "plora_sulfter_i2v",
+   "ss_base_model_version": "ltx2_v1"
+  },
+  "civitai": {
+   "modelId": 2598050,
+   "modelName": "Penis Lora - LTX 2.3 SULPHUR LORA",
+   "versionName": "I2V v1",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [
+    "PENISLORA"
+   ],
+   "url": "https://civitai.com/models/2598050?modelVersionId=3086880"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\Singularity-LTX-2.3_OmniCine_V1.safetensors",
+  "file": "Singularity-LTX-2.3_OmniCine_V1.safetensors",
+  "size": 2695584680,
+  "sha256": "b204721bb9aff75ce29b19721fbbe87cd6f66185bc24889bcf47887ae990017c",
+  "meta": {
+   "ss_output_name": "mygood_copy_copy_copy_copy_copy_copy_copy_copy_copy",
+   "ss_base_model_version": "ltx2"
+  },
+  "civitai": {
+   "modelId": 2610733,
+   "modelName": "Singularity-LTX-2.3_OmniCine_V1",
+   "versionName": "V1 official version",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [
+    "无字幕"
+   ],
+   "url": "https://civitai.com/models/2610733?modelVersionId=3001143"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\Western-comic-a-semi_1_LTX23_v1.safetensors",
+  "file": "Western-comic-a-semi_1_LTX23_v1.safetensors",
+  "size": 674249648,
+  "sha256": "8688c73cbd183783c72a4d4448e408e138d795536b546e686175389f77e6f0f8",
+  "meta": {
+   "ss_output_name": "Western-comic-semi_LTX23_v1",
+   "ss_base_model_version": "ltx2",
+   "top_tags": [
+    "a-semi"
+   ]
+  },
+  "civitai": {
+   "modelId": 2567931,
+   "modelName": "Western comic semirrealistic 2.5D style LTX 2.3 edition",
+   "versionName": "v1.0",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [
+    "a-semi"
+   ],
+   "url": "https://civitai.com/models/2567931?modelVersionId=2885397"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\bfs_head_swap_v1_ltx2_ic_lora_6000.safetensors",
+  "file": "bfs_head_swap_v1_ltx2_ic_lora_6000.safetensors",
+  "size": 1308756368,
+  "sha256": "4021b4143bd935e565aeaaf5bf8ef43e8f3aa3faf7a9ae0a73f1879342f32d12",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\cowgirl-ride-withfuta.safetensors",
+  "file": "cowgirl-ride-withfuta.safetensors",
+  "size": 201434600,
+  "sha256": "cc67d8ddb4a13ca829c4b64ec39bbe67f0e1a527a3f491704d0a0e6b41373bfe",
+  "meta": {
+   "ss_output_name": "futa-ride",
+   "modelspec.title": "futa-ride",
+   "ss_base_model_version": "ltx2_v1"
+  },
+  "civitai": {
+   "modelId": 2483655,
+   "modelName": "LTXV 2.3 - I2V Cowgirl ride + Futa ride",
+   "versionName": "v1.0",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2483655?modelVersionId=2792344"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\epic_cumshots-V1-LTX_2_3-CUMSH0T.safetensors",
+  "file": "epic_cumshots-V1-LTX_2_3-CUMSH0T.safetensors",
+  "size": 428150680,
+  "sha256": "199004eea54ca230ed2c9f563f015e358e0e52bb5122868c1c882c8357a2d108",
+  "meta": {},
+  "civitai": {
+   "modelId": 2621242,
+   "modelName": "Epic Cumshots",
+   "versionName": "LTX V1",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2621242?modelVersionId=2946870"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\id-lora-celebvhq-ltx2.3.safetensors",
+  "file": "id-lora-celebvhq-ltx2.3.safetensors",
+  "size": 1157884304,
+  "sha256": "12e6be9c52c83047cb71470c1c63b64ebc8b13dc0dfa34400f6576ba2cd88ecf",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\lightx2v_I2V_14B_480p_cfg_step_distill_rank128_bf16.safetensors",
+  "file": "lightx2v_I2V_14B_480p_cfg_step_distill_rank128_bf16.safetensors",
+  "size": 1466506280,
+  "sha256": "5c324ada09cfa447844f5d9a57240463a515de38270ef40c7513d74be3e64e72",
+  "meta": {},
+  "civitai": {
+   "modelId": 1585622,
+   "modelName": "Lightning Lora, massive speed up for Wan2.1 / Wan2.2 made by Lightx2v / Kijai",
+   "versionName": "Self-Forcing 14B I2V R128",
+   "baseModel": "Wan Video 14B i2v 480p",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/1585622?modelVersionId=2016546"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\lightx2v_I2V_14B_480p_cfg_step_distill_rank64_bf16.safetensors",
+  "file": "lightx2v_I2V_14B_480p_cfg_step_distill_rank64_bf16.safetensors",
+  "size": 738005744,
+  "sha256": "85c4a61c30e0497aa44b91d93a893b624708461a56fe5485183b28fa07e2dfb3",
+  "meta": {},
+  "civitai": {
+   "modelId": 1854888,
+   "modelName": "lightlora wan",
+   "versionName": "lightlora wan",
+   "baseModel": "Wan Video 14B i2v 720p",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/1854888?modelVersionId=2099213"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\ltx-2-19b-distilled-lora_resized_dynamic_fro09_avg_rank_175_fp8.safetensors",
+  "file": "ltx-2-19b-distilled-lora_resized_dynamic_fro09_avg_rank_175_fp8.safetensors",
+  "size": 1788025121,
+  "sha256": "09b68d1df06cde806b59dadbc6241d3f1d02dc00458d08cf7c9d59e82d89b8c8",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\ltx-2-19b-ic-lora-detailer.safetensors",
+  "file": "ltx-2-19b-ic-lora-detailer.safetensors",
+  "size": 2617401920,
+  "sha256": "05efdae9e472e06d168e122f5ebb890e7ef348cc047cf9876da6504c36d7d0e2",
+  "meta": {},
+  "civitai": {
+   "modelId": 2293339,
+   "modelName": "LTX2 - IC LORA DETAILER",
+   "versionName": "LTX2 - IC LORA DETAILER",
+   "baseModel": "LTXV",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2293339?modelVersionId=2580702"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\ltx-2-2.3-i2v-nsfw-furry-multi-purpose-sex-lora.safetensors",
+  "file": "ltx-2-2.3-i2v-nsfw-furry-multi-purpose-sex-lora.safetensors",
+  "size": 2466643200,
+  "sha256": "5e5eb50396860082038584fdaa7018b1fc9191e0d30f5eb93e0bb82593d8ad84",
+  "meta": {},
+  "civitai": {
+   "modelId": 2310920,
+   "modelName": "LTX 2/2.3 [I2V] NSFW (+furry) - Multi purpose sex lora",
+   "versionName": "Merge v1 x0.5, v2 x0.7",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2310920?modelVersionId=2783583"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\ltx-2.3-22b-distilled-1.1_lora-dynamic_fro09_avg_rank_111_bf16.safetensors",
+  "file": "ltx-2.3-22b-distilled-1.1_lora-dynamic_fro09_avg_rank_111_bf16.safetensors",
+  "size": 2741024390,
+  "sha256": "31e0c0195fb841bf31af78e8b60858f489e87ddcea4a5239abc80943da65e3ac",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\ltx-2.3-22b-distilled-lora-1.1_fro90_ceil36.safetensors",
+  "file": "ltx-2.3-22b-distilled-lora-1.1_fro90_ceil36.safetensors",
+  "size": 739388264,
+  "sha256": "e383540ea8aa5b03dddc45023b87a4466278b6ba89f0a511dc3d93b6464cb0b9",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\ltx-2.3-22b-distilled-lora-384.safetensors",
+  "file": "ltx-2.3-22b-distilled-lora-384.safetensors",
+  "size": 7605507256,
+  "sha256": "2943ab994f3c9d88052e5a2a34cca14e4a2dfc36b1d8c407931d52d5c25dd72b",
+  "meta": {},
+  "civitai": {
+   "modelId": 2448150,
+   "modelName": "LTX-2.3",
+   "versionName": "ltx2.3-22b-distilled-lora",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2448150?modelVersionId=2753250"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\ltx-2.3-22b-ic-lora-ingredients-0.9.safetensors",
+  "file": "ltx-2.3-22b-ic-lora-ingredients-0.9.safetensors",
+  "size": 1308778338,
+  "sha256": "515e4e139001ac6282357a5b35372e42e98b3affd5fcc886a52242abeed19559",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\ltx-2.3-22b-ic-lora-motion-track-control-ref0.5.safetensors",
+  "file": "ltx-2.3-22b-ic-lora-motion-track-control-ref0.5.safetensors",
+  "size": 327309314,
+  "sha256": "e279807ee3aa3db1ce60188d665ff83342860367dcd6bac19f8bd5a99a9e1dca",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\ltx-2.3-22b-ic-lora-union-control-ref0.5.safetensors",
+  "file": "ltx-2.3-22b-ic-lora-union-control-ref0.5.safetensors",
+  "size": 654465352,
+  "sha256": "a1b888a87f661d27f08b394ae559e8e1050be33900bcc36a5cdf659e48f88d18",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\ltx-2.3-22b_text_embedding_projection.safetensors",
+  "file": "ltx-2.3-22b_text_embedding_projection.safetensors",
+  "size": 2312151888,
+  "sha256": "985bba2295af346ac74b627afc8d27f4b5f277fb20c87968d569b4bb5d7fd28f",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\ltx-2.3-Sound_besser_foley-400-steps.safetensors",
+  "file": "ltx-2.3-Sound_besser_foley-400-steps.safetensors",
+  "size": 226687352,
+  "sha256": "12b37ffff8444ac1348a8c9fb24843a6bd70e77cf4202ac39b1d056b81fa41c9",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\ltx-2.3-dollyforward_lora.safetensors",
+  "file": "ltx-2.3-dollyforward_lora.safetensors",
+  "size": 428150680,
+  "sha256": "d2629bf69dbf5f5307d4b922dc37bf13123ff730d68ac77089bb36e5500f8c1c",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\ltx2-squish_trigger word_squish it.safetensors",
+  "file": "ltx2-squish_trigger word_squish it.safetensors",
+  "size": 428150664,
+  "sha256": "5ea13df1478ccc8cf6022a1e4671c7da4d3f503fd1dc25d887f827d6de527208",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\ltx2.3-ic-subtitles-remove-general.safetensors",
+  "file": "ltx2.3-ic-subtitles-remove-general.safetensors",
+  "size": 327287384,
+  "sha256": "b3d73d7bf737dcfeba6bfa310105532f8f34aa23a3f9e01cb9f873341b8ef88f",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\ltx2.3-transition_zhuanchang.safetensors",
+  "file": "ltx2.3-transition_zhuanchang.safetensors",
+  "size": 390229424,
+  "sha256": "ba420d6fefafced8e317e2d6ff951b312b52f534377d016b491877a00b830d33",
+  "meta": {},
+  "civitai": {
+   "modelId": 2641811,
+   "modelName": "valiantcat LTX-2.3 Transition LORA",
+   "versionName": "v1.0",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [
+    "zhuanchang"
+   ],
+   "url": "https://civitai.com/models/2641811?modelVersionId=2966333"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\ltx2.3_fpv_motion.safetensors",
+  "file": "ltx2.3_fpv_motion.safetensors",
+  "size": 308645088,
+  "sha256": "028ca127828db70ac3665e6c81fd9dde5e3e749b94890a3897b73767da8d0967",
+  "meta": {
+   "trigger_word": "fpv"
+  },
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\ltx2.3_upscale_ic-lora_06250.safetensors",
+  "file": "ltx2.3_upscale_ic-lora_06250.safetensors",
+  "size": 327287384,
+  "sha256": "fee4d951fcd3e047d6ad3fbdce6bf6406c810e493e1794ff428751c45ed70500",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\ltx23_inpaint_rank128_v1.safetensors",
+  "file": "ltx23_inpaint_rank128_v1.safetensors",
+  "size": 1308756416,
+  "sha256": "1f2089f5cd3cac56f93d3641c90695a7296514aa1292ec8c6f3a6ad369eda728",
+  "meta": {},
+  "civitai": {
+   "modelId": 2484952,
+   "modelName": "LTX LoRAs",
+   "versionName": "LTX-2.3 INP (T2V)",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2484952?modelVersionId=2793809"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\ltx23_srx_scififilm_lora.safetensors",
+  "file": "ltx23_srx_scififilm_lora.safetensors",
+  "size": 337360760,
+  "sha256": "75b397649e7fe70f9a486f017db8138e7bc748d339f56ac341445fe834ece9d7",
+  "meta": {
+   "ss_output_name": "Sci-Fi New",
+   "ss_base_model_version": "ltx2",
+   "top_tags": [
+    "srx_scififilm,"
+   ]
+  },
+  "civitai": {
+   "modelId": 2692151,
+   "modelName": "LTX-2.3 Sci-Fi Cinema",
+   "versionName": "v1.0",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [
+    "srx_scififilm"
+   ],
+   "url": "https://civitai.com/models/2692151?modelVersionId=3022812"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\ltx23_zoomout_z00m047.safetensors",
+  "file": "ltx23_zoomout_z00m047.safetensors",
+  "size": 402761384,
+  "sha256": "91e6f4e67ec2e4954f7582a0d7cd031e1597347f46ec8ea4de04773f1c25f10c",
+  "meta": {
+   "ss_output_name": "ltx23_zoomout_V2_z00m04t",
+   "modelspec.title": "ltx23_zoomout_V2_z00m04t",
+   "ss_base_model_version": "ltx2_v1"
+  },
+  "civitai": {
+   "modelId": 2490345,
+   "modelName": "(LTX-2.3 Lora) - Camera Zoom Out (I2V)",
+   "versionName": "v2.3",
+   "baseModel": "LTXV2",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2490345?modelVersionId=2799690"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\ltx25_turbo_distill_r64.safetensors",
+  "file": "ltx25_turbo_distill_r64.safetensors",
+  "size": 1317885216,
+  "sha256": "f6f3308aff23a222e5fb61018314efdcd4b8e66f2abd76fb8f2a9e9eeae49746",
+  "meta": {
+   "ss_base_model_version": "ltx-2.5"
+  },
+  "civitai": {
+   "modelId": 2854200,
+   "modelName": "LTX-2.5 Turbo 8-Step Distill LoRA",
+   "versionName": "v1.0",
+   "baseModel": "LTXV 2.5",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2854200?modelVersionId=3223485"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\ltxdeepthroat_v01.safetensors",
+  "file": "ltxdeepthroat_v01.safetensors",
+  "size": 1159259832,
+  "sha256": "99ef82279896f09973f841c554d2fec058f382df5e02680de41c30061cbbad07",
+  "meta": {
+   "ss_output_name": "deepthroat_LTX23_v01_2a_audio",
+   "modelspec.title": "deepthroat_LTX23_v01_2a_audio",
+   "ss_base_model_version": "ltx2_v1"
+  },
+  "civitai": {
+   "modelId": 2476698,
+   "modelName": "Daring's Deepthroat H3/LTX2.3",
+   "versionName": "LTXV 2.3 T2V/I2V v0.1",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [
+    "LTXdeepthroat"
+   ],
+   "url": "https://civitai.com/models/2476698?modelVersionId=2784573"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\m4crom4sti4-huge-natural-breasts-ltx2.3-k3nk.safetensors",
+  "file": "m4crom4sti4-huge-natural-breasts-ltx2.3-k3nk.safetensors",
+  "size": 201434256,
+  "sha256": "56c26a2ba8b8557f1b2d25b4270221345de13d76061b5da73014e3164d60cfa7",
+  "meta": {
+   "ss_output_name": "ltx2_lora",
+   "modelspec.title": "ltx2_lora",
+   "ss_base_model_version": "ltx2_v1"
+  },
+  "civitai": {
+   "modelId": 2495841,
+   "modelName": "M4CROM4STI4 - Huge Natural Breasts - LTX2.3 - K3NK",
+   "versionName": "v1.0",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [
+    "m4crom4sti4",
+    "large pendulous breasts"
+   ],
+   "url": "https://civitai.com/models/2495841?modelVersionId=2805667"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\motion_stabilizer_ltx_lora_v2.safetensors",
+  "file": "motion_stabilizer_ltx_lora_v2.safetensors",
+  "size": 674249616,
+  "sha256": "3cd5aeeff4e079510527650af4c45c1ec8a51495996de34c8d155fe35b6ed6a5",
+  "meta": {
+   "ss_output_name": "mvmt_lora_v2",
+   "ss_base_model_version": "ltx2",
+   "top_tags": [
+    "mvmt"
+   ]
+  },
+  "civitai": {
+   "modelId": 2734359,
+   "modelName": "Better Human Motion Minimax H3",
+   "versionName": "v2.0-LTX23",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2734359?modelVersionId=3087364"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\sexLoraLTX23Penile_Praxis_V4.safetensors",
+  "file": "sexLoraLTX23Penile_Praxis_V4.safetensors",
+  "size": 1308756384,
+  "sha256": "9e301d35a97dc8188a2287290e08283c7bccd29bc4deaf0f37f65ce98fc9a789",
+  "meta": {},
+  "civitai": {
+   "modelId": 2332473,
+   "modelName": "Penile Praxis (General NSFW) (LTX-2) (T2V + I2V)",
+   "versionName": "v4.0 (LTX2.3)",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2332473?modelVersionId=2772932"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\ltx2\\sfbehind_LTX2_3_v0_1.safetensors",
+  "file": "sfbehind_LTX2_3_v0_1.safetensors",
+  "size": 428154872,
+  "sha256": "ddfc832e4fd73e057dd1b9210a8dc384d23dd842cf77d00b681b91ddc0a6cdb0",
+  "meta": {
+   "ss_output_name": "sfbehind_LTX23_v03_audio",
+   "modelspec.title": "sfbehind_LTX23_v03_audio",
+   "ss_base_model_version": "ltx2_v1"
+  },
+  "civitai": {
+   "modelId": 2298764,
+   "modelName": "Sex from behind (Facing Cam)",
+   "versionName": "LTX-2.3 v1",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2298764?modelVersionId=2770256"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\minimax\\H3_Motion_BoosterV2.safetensors",
+  "file": "H3_Motion_BoosterV2.safetensors",
+  "size": 155110272,
+  "sha256": "f6a6897162b921d2b74abe1fdebcd80c8189147e70e0e0738200756c250336c3",
+  "meta": {
+   "ss_output_name": "doV2",
+   "ss_base_model_version": "minimax_h3"
+  },
+  "civitai": {
+   "modelId": 2840146,
+   "modelName": "Faster! Harder! Shake Harder! | H3 Motion Booster(ANIME Edition Update)",
+   "versionName": "V0.2",
+   "baseModel": "MiniMax H3",
+   "trainedWords": [
+    "dynv2"
+   ],
+   "url": "https://civitai.com/models/2840146?modelVersionId=3228867"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\minimax\\Minimax_H3_Unlocked_V2.safetensors",
+  "file": "Minimax_H3_Unlocked_V2.safetensors",
+  "size": 298257967,
+  "sha256": "b05686a14b96bf84102274b1c355558a2f41369753b472ddc0724c6f5147503b",
+  "meta": {
+   "ss_output_name": "Mid_M3_UN"
+  },
+  "civitai": {
+   "modelId": 2925727,
+   "modelName": "MiniMax H3 NSFW Unlocked",
+   "versionName": "Minimax_H3_V2",
+   "baseModel": "MiniMax H3",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2925727?modelVersionId=3354822"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\minimax\\TaoMate-H3-3step.safetensors",
+  "file": "TaoMate-H3-3step.safetensors",
+  "size": 1240539224,
+  "sha256": "908d6c9a8d4cb7311b9b48aece606a1d29033f07e2ef23676f8404acc07d5173",
+  "meta": {},
+  "civitai": {
+   "modelId": 2934947,
+   "modelName": "TaoMate-H3-3step",
+   "versionName": "v1.0",
+   "baseModel": "MiniMax H3",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2934947?modelVersionId=3322134"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\pixel_art_style_z_image_turbo.safetensors",
+  "file": "pixel_art_style_z_image_turbo.safetensors",
+  "size": 170128328,
+  "sha256": "09b1b45ceed0202929bca528e51b50208d0160f4e9d2ba0f42cb7e739a43577f",
+  "meta": {
+   "ss_output_name": "pixel_art_style_z_image_turbo",
+   "ss_base_model_version": "zimage",
+   "top_tags": [
+    "Pixel art style."
+   ]
+  },
+  "civitai": {
+   "modelId": 1770073,
+   "modelName": "Pixel Art Style Lora",
+   "versionName": "v1.0 - Z Image Turbo",
+   "baseModel": "ZImageTurbo",
+   "trainedWords": [
+    "Pixel Art style."
+   ],
+   "url": "https://civitai.com/models/1770073?modelVersionId=2454660"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\portrait_lora64.safetensors",
+  "file": "portrait_lora64.safetensors",
+  "size": 612742344,
+  "sha256": "125c5d8474b4f2a9808767ca467d8622807b47762533fb483db1b1a6295465b2",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\qwen\\DiffSynth-StudioQwenImage2.1LayerExtract.safetensors",
+  "file": "DiffSynth-StudioQwenImage2.1LayerExtract.safetensors",
+  "size": 167830056,
+  "sha256": "fe3693ce0fbd0f8fc38b806ed1ad8be1c5866ef5c19e926546243157fb436d94",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\qwen\\DiffSynthStudioQwenImage2.1LayerRemove.safetensors",
+  "file": "DiffSynthStudioQwenImage2.1LayerRemove.safetensors",
+  "size": 167830056,
+  "sha256": "952be906f0eca58b5cd0e044c94c82fef05ddd5fc814eace1774309c90a4f432",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\qwen\\NSFW-Qwen-by-TheseAlpacas-V2.safetensors",
+  "file": "NSFW-Qwen-by-TheseAlpacas-V2.safetensors",
+  "size": 79744352,
+  "sha256": "83aba822ad8ee10a1e836828f5088259d93bce7b5f3419b46dbc0258c2be46a9",
+  "meta": {
+   "ss_output_name": "NSFW Qwen Lora V2_copy",
+   "ss_base_model_version": "qwen_image_2",
+   "top_tags": [
+    "nsfw_qwen_lora"
+   ]
+  },
+  "civitai": {
+   "modelId": 2958918,
+   "modelName": "NSFW LORA | Qwen Image 2.1",
+   "versionName": "v2.0",
+   "baseModel": "Qwen 2.1",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2958918?modelVersionId=3357315"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\qwen\\Qwen-Image-2.1-Fun-Acc-4Step.safetensors",
+  "file": "Qwen-Image-2.1-Fun-Acc-4Step.safetensors",
+  "size": 345632504,
+  "sha256": "764c56ae94f330b6d06ccc322f95e1b8ce46424ddde5899a15432f95f720d558",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\qwen\\Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors",
+  "file": "Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors",
+  "size": 849608296,
+  "sha256": "22226e8d05d354bb356627d428809f5afd7819399b077238a2b70a82883a904f",
+  "meta": {},
+  "civitai": {
+   "modelId": 2047657,
+   "modelName": "Qwen Image Edit Lightning",
+   "versionName": "4steps bf16 (2511)",
+   "baseModel": "Qwen",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2047657?modelVersionId=2552889"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\qwen\\Qwen-Image-Lightning-4steps-V1.0-bf16.safetensors",
+  "file": "Qwen-Image-Lightning-4steps-V1.0-bf16.safetensors",
+  "size": 849608296,
+  "sha256": "3ac242b4ff22f62f3bf195b927ba6d23ce23f08f320b24ccca94fb90ecdf8c84",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\qwen\\VNCCS\\VNCCS_QIE2511_PoseStudio_ART_V5.9.safetensors",
+  "file": "VNCCS_QIE2511_PoseStudio_ART_V5.9.safetensors",
+  "size": 590058864,
+  "sha256": "a7903e66ac807890c6a256b9a9b0feb5fc2612b7cfd5c580e701d5746913e38e",
+  "meta": {
+   "ss_output_name": "VNCCS_QIE2511_PoseStudio_ART_V5",
+   "ss_base_model_version": "qwen_image"
+  },
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\qwen\\bfs_face_v1_qwen_image_edit_2509.safetensors",
+  "file": "bfs_face_v1_qwen_image_edit_2509.safetensors",
+  "size": 590058816,
+  "sha256": "c9f18ba062d0c8aa3c98169005b616bc95866fe9956c2608dcfd29b1e9b20359",
+  "meta": {
+   "ss_output_name": "face_swap",
+   "ss_base_model_version": "qwen_image"
+  },
+  "civitai": {
+   "modelId": 2027766,
+   "modelName": "BFS - Best Face Swap",
+   "versionName": "QIE 2509 - V1 Focus Face",
+   "baseModel": "Qwen",
+   "trainedWords": [
+    "face swap face from Image 1 to Image 2. swap only the face and not the hair, the same skin tone from Image 2, same pose that Image 3",
+    "face swap face from Image 1 to Image 2."
+   ],
+   "url": "https://civitai.com/models/2027766?modelVersionId=2294927"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\qwen\\p_qwen_image_2.1_5step_v0.1.safetensors",
+  "file": "p_qwen_image_2.1_5step_v0.1.safetensors",
+  "size": 335606144,
+  "sha256": "021a6228a0fcd217275190b89072416a2f28548e8e18fe049531dc9b77ef89bd",
+  "meta": {},
+  "civitai": {
+   "modelId": 2962344,
+   "modelName": "Turbo - Few-step LoRA adapters - Pruna Qwen Image 2.1",
+   "versionName": "pruna 5 steps",
+   "baseModel": "Qwen 2.1",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2962344?modelVersionId=3356146"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\qwen\\p_qwen_image_2.1_8step_v0.1.safetensors",
+  "file": "p_qwen_image_2.1_8step_v0.1.safetensors",
+  "size": 335606104,
+  "sha256": "f0865d68b02511a3a0ed232d9d1aa99cac3a94166f574b38bcbab1a7a297bb15",
+  "meta": {},
+  "civitai": {
+   "modelId": 2962344,
+   "modelName": "Turbo - Few-step LoRA adapters - Pruna Qwen Image 2.1",
+   "versionName": "pruna 8 steps",
+   "baseModel": "Qwen 2.1",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2962344?modelVersionId=3356151"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\qwen\\qwen-image-edit-2511-multiple-angles-lora.safetensors",
+  "file": "qwen-image-edit-2511-multiple-angles-lora.safetensors",
+  "size": 295140688,
+  "sha256": "42426ded4e25fd22879d9e198b857556445ef4ca56e8da3246d0345155bb6765",
+  "meta": {},
+  "civitai": {
+   "modelId": 2300308,
+   "modelName": "Qwen-Image-Edit-2511-Multiple-Angles-LoRA",
+   "versionName": "v1.0",
+   "baseModel": "Qwen",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2300308?modelVersionId=2588352"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\qwen\\qwen-image_nsfw_adv_v1.0.safetensors",
+  "file": "qwen-image_nsfw_adv_v1.0.safetensors",
+  "size": 881117472,
+  "sha256": "210e840d99f8152d503665c7ad43724edddd4ce3fdf11fa15839e8146c96f018",
+  "meta": {
+   "ss_output_name": "qi_nsfw_a10",
+   "ss_base_model_version": "qwen_image"
+  },
+  "civitai": {
+   "modelId": 2058077,
+   "modelName": "Qwen-image_NSFW_Adv.1",
+   "versionName": "v1.0",
+   "baseModel": "Qwen",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2058077?modelVersionId=2328988"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\qwen\\qwen2.1_penisV01_000004956.safetensors",
+  "file": "qwen2.1_penisV01_000004956.safetensors",
+  "size": 318820208,
+  "sha256": "6089c36527afdc22cf521c41233010458a7a85babcae7609c71224da80520988",
+  "meta": {
+   "ss_output_name": "qwen2.1_penisV01",
+   "ss_base_model_version": "qwen_image_2"
+  },
+  "civitai": {
+   "modelId": 2955779,
+   "modelName": "Qwen image 2.1 Perfect erect penis",
+   "versionName": "v1.0",
+   "baseModel": "Qwen 2.1",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2955779?modelVersionId=3348119"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\schorthair.safetensors",
+  "file": "schorthair.safetensors",
+  "size": 130958064,
+  "sha256": "98aec1a57fc5ac9f2610f7c390da9a649fdc146729b7569351641f72d55aa78b",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\snofs_ideogram_v1_1.safetensors",
+  "file": "snofs_ideogram_v1_1.safetensors",
+  "size": 1123104936,
+  "sha256": "2731911508040a25267fc6e145562406ccbd66aa5e22f6d7e9eb04ceff3a7113",
+  "meta": {
+   "ss_base_model_version": "ideogram4"
+  },
+  "civitai": {
+   "modelId": 2781404,
+   "modelName": "Sex, Nudes, Other Fun Stuff Ideogram (SNOFS)",
+   "versionName": "v1.1",
+   "baseModel": "Other",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2781404?modelVersionId=3132574"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\sweta_lora.safetensors",
+  "file": "sweta_lora.safetensors",
+  "size": 130958064,
+  "sha256": "a58c166610b7bab3e6c8625d982d9ac608b6371f8875366f600ec7c2666134da",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\wan\\DR34ML4Y_I2V_14B_HIGH.safetensors",
+  "file": "DR34ML4Y_I2V_14B_HIGH.safetensors",
+  "size": 306807976,
+  "sha256": "4dfb0470c2d2766694d7839a24b8263f97fe5e5e5b05edeb367d8bbbea6ec3f4",
+  "meta": {},
+  "civitai": {
+   "modelId": 1811313,
+   "modelName": "DR34ML4Y - All-In-One NSFW (WAN/LTX2)",
+   "versionName": "DR34ML4Yv1.0_I2V_14B_HIGH",
+   "baseModel": "Wan Video 2.2 I2V-A14B",
+   "trainedWords": [
+    "m15510n4ry",
+    "bl0wj0b",
+    "d0ubl3_bj",
+    "d0gg1e",
+    "c0wg1rl"
+   ],
+   "url": "https://civitai.com/models/1811313?modelVersionId=2176505"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\wan\\DR34ML4Y_I2V_14B_LOW.safetensors",
+  "file": "DR34ML4Y_I2V_14B_LOW.safetensors",
+  "size": 306807976,
+  "sha256": "1ef9f1634197872154992b8cfd901572ec69b937e5e7b5a15c0682c87fc2d040",
+  "meta": {},
+  "civitai": {
+   "modelId": 1811313,
+   "modelName": "DR34ML4Y - All-In-One NSFW (WAN/LTX2)",
+   "versionName": "DR34ML4Y_v1.0_I2V_14B_LOW",
+   "baseModel": "Wan Video 2.2 I2V-A14B",
+   "trainedWords": [
+    "m15510n4ry",
+    "bl0wj0b",
+    "d0ubl3_bj",
+    "d0gg1e",
+    "c0wg1rl"
+   ],
+   "url": "https://civitai.com/models/1811313?modelVersionId=2190476"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\wan\\DR34ML4Y_LTXXX_V2.safetensors",
+  "file": "DR34ML4Y_LTXXX_V2.safetensors",
+  "size": 1940553800,
+  "sha256": "d91d2e783879601bc7a638c978f8257e5ed340c012e7d668b7cd32de443ff2e1",
+  "meta": {},
+  "civitai": {
+   "modelId": 1811313,
+   "modelName": "DR34ML4Y - All-In-One NSFW (WAN/LTX2)",
+   "versionName": "DR34ML4Y_LT3X_v2",
+   "baseModel": "LTXV 2.3",
+   "trainedWords": [
+    "m15510n4ry",
+    "bl0wj0b",
+    "d0ubl3_bj",
+    "d0gg1e",
+    "c0wg1rl",
+    "r3v3rs3_c0wg1rl"
+   ],
+   "url": "https://civitai.com/models/1811313?modelVersionId=2950842"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\wan\\Wan21_I2V_14B_lightx2v_cfg_step_distill_lora_rank64.safetensors",
+  "file": "Wan21_I2V_14B_lightx2v_cfg_step_distill_lora_rank64.safetensors",
+  "size": 739472104,
+  "sha256": "8833bd4fd7c8eabebf0bc8ee5cfaf47f4f310ce116928a02c1adf8941dd4b0f1",
+  "meta": {},
+  "civitai": {
+   "modelId": 1585622,
+   "modelName": "Lightning Lora, massive speed up for Wan2.1 / Wan2.2 made by Lightx2v / Kijai",
+   "versionName": "Self-Forcing 14B I2V",
+   "baseModel": "Wan Video 14B i2v 480p",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/1585622?modelVersionId=2014449"
+  }
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\wan\\Wan21_PusaV1_LoRA_14B_rank512_bf16.safetensors",
+  "file": "Wan21_PusaV1_LoRA_14B_rank512_bf16.safetensors",
+  "size": 4907437824,
+  "sha256": "a510b5562e05efa831127bd6a6b3aecf1c4747cffdddcc0b28f88c0667ef1694",
+  "meta": {},
+  "civitai": null
+ },
+ {
+  "path": "D:\\ComfyUiCuda\\models\\loras\\z_image\\NSFW_ZI_V01_r1_Epoch31_AstroNSFW-V02-ZIG.safetensors",
+  "file": "NSFW_ZI_V01_r1_Epoch31_AstroNSFW-V02-ZIG.safetensors",
+  "size": 913154540,
+  "sha256": "03930710409f6cf19c2cf543d76f522feab9d7197a9a6f98e854561912fabf7e",
+  "meta": {
+   "ss_output_name": "NSFW_ZI_V01_r1",
+   "modelspec.title": "NSFW_ZI_V01_r1",
+   "ss_base_model_version": "sdxl_base_v1-0",
+   "top_tags": [
+    "astronsfw-v02-zig",
+    "the image is a high-resolution",
+    "straight",
+    "this is a high-resolution",
+    "athletic build",
+    "likely in her early twenties"
+   ]
+  },
+  "civitai": {
+   "modelId": 2299623,
+   "modelName": "Z-Image Turbo NSFW",
+   "versionName": "V2-Released",
+   "baseModel": "ZImageTurbo",
+   "trainedWords": [],
+   "url": "https://civitai.com/models/2299623?modelVersionId=2640231"
+  }
+ }
+]
