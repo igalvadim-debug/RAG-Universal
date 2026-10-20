@@ -583,9 +583,14 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
             return set()
         inner = band_idx[-1] + step                   # erste Linie hinter dem Band
         n_perp = h if horizontal else w             # Gegenrichtung: Zeilen resp. Spalten
+        # `line_edge` und `along` (im Aufrufer) indizieren die Band-Achse
+        # selbst: bei horizontalen Baender h Eintraege, sonst w. Diese Laenge
+        # ist die obere Schranke fuer `inner`; die Gegenachse (`n_perp`) hat
+        # bei nicht-quadratischen Panels eine andere Laenge.
+        n = h if horizontal else w
         lo = max(0, min(perp_lo, perp_hi))
         hi = min(n_perp, max(perp_lo, perp_hi))
-        if hi - lo < 4 or not (0 <= inner < n_perp):
+        if hi - lo < 4 or not (0 <= inner < n):
             return set()
         # Farbe des Bands an seinen aeussersten Linien (Median der RGB-Werte).
         if horizontal:                                # Zeilenband, Pruefung links/rechts
