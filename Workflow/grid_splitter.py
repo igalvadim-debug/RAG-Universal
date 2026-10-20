@@ -611,7 +611,7 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
 
     def band(start: int, perp_lo: int, perp_hi: int,
              perp_full: np.ndarray, along: np.ndarray,
-             line_edge: np.ndarray) -> list[int]:
+             line_edge: np.ndarray, horizontal: bool) -> list[int]:
         """Linienindex-Folge des Randbands bei `start` (0 oder letzter Index).
         `along` = Uniformitaets-/Rinnenflags der Linien selbst (bei Zeilen
         row_band_flags, bei Spalten col_band_flags); die Traversierung endet
@@ -625,6 +625,8 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
         Achse, wenn deren Median durch seitliche Baender verschoben wird.
         Leere Liste = kein Rahmen."""
         n = len(along)
+        perp = perp_full          # Gegenachse: Volllinien-Hintergrundflags
+        perp_edge = line_edge     # Grenzkantenflags auf der Band-Achse
         step = 1 if start == 0 else -1
         limit = max(3, int(0.05 * min(h, w)))
         idx = []
@@ -635,16 +637,24 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
         if not idx:
             return []
         inner = i                                   # erste Linie hinter dem Band
-        m_ = len(perp_full)
-        lo = max(0, min(perp_lo, perp_hi))
-        hi = min(m_, max(perp_lo, perp_hi))
-        if not (0 <= inner < n and (line_edge[inner] or
-                                    (hi > lo and bool(perp_full[lo:hi].all())))):
+        if not (0 <= inner < len(perp) and (perp[inner] or perp_edge[inner])):
             return []                               # keine Background-Begrenzung
+        outer_ok = True
         for j in idx:
             o = j - step                            # aeussere Nachbarlinie
-            if not (o < 0 or o >= n or line_edge[o]):
-                return []                           # Aussenrand nicht sauber
+            if not (o < 0 or o >= len(perp) or perp[o]):
+                outer_ok = False
+                break
+        if not outer_ok:
+            return []
+        m_ = min(len(perp), len(perp_edge))         # gemeinsames Span beider Flag-Vektoren
+        lo = max(0, min(perp_lo, perp_hi))
+        hi = min(m_, max(perp_lo, perp_hi))
+        if hi > lo and not bool((perp[lo:hi] | perp_edge[lo:hi]).all()):
+            return []                               # Grenze nicht ueber den ganzen Span
+        # Mit dem Rahmen verbundene Linien vor der Deckungsrechnung ausscheiden.
+        rejected = connected_lines(idx, step, perp_lo, perp_hi, horizontal)
+        idx = [j for j in idx if j not in rejected]
         return idx
 
     def span_edge(lines: np.ndarray, lo: int, hi: int) -> np.ndarray:
@@ -671,8 +681,8 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
     # Band-Linien selbst (Spaltenflags laengs Spaltenachse, Zeilenflags
     # laengs Zeilenachse); nur `perp_full` wird auf der Gegenachse indiziert.
     col_edge_full = span_edge(np.swapaxes(par, 0, 1), 0, h)
-    left_band = band(0, 0, h, row_full_bg, col_band_flags, col_edge_full)
-    right_band = band(w - 1, 0, h, row_full_bg, col_band_flags, col_edge_full)
+    left_band = band(0, 0, h, row_full_bg, col_band_flags, col_edge_full, False)
+    right_band = band(w - 1, 0, h, row_full_bg, col_band_flags, col_edge_full, False)
     x_lo = max(left_band) + 1 if left_band else 0   # Span innhalb der Seitenbaender
     x_hi = min(right_band) if right_band else w
     row_edge_span = span_edge(par, x_lo, x_hi)
@@ -709,11 +719,12 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
          [par[:, j].reshape(-1, 3) for j in strip_cols]
     bg = np.median(np.concatenate(px), axis=0)
     content = (np.abs(par - bg).max(axis=2) >= 24)     # True = Pixel mit Inhalt
-    # Rahmenzeilen (-) und Rahmenspalten (|) ueber Maskenform OR-verknuepfen;
-    # bei nicht-quadratischen Panels ergibt ein direktes `|` von (h,) und
-    # (w,1) eine falsche (w,h)-Masche und Indexfehler.
-    content[np.repeat(frame_rows[:, None], w, axis=1) |
-            np.repeat(frame_cols[None, :], h, axis=0)] = False  # Rahmen ist kein Inhalt
+    # Rahmen ist kein Inhalt. getrennt setzen: die Maske `frame_rows` hat h,
+    # `frame_cols` w Eintraege; eine kombinierte boolesche Indexierung wie
+    # `frame_rows | frame_cols[:, None]` erzeugt bei nicht-quadratischen
+    # Panels (h != w) eine (w, h)-Maske und wirft IndexError.
+    content[frame_rows, :] = False                     # Rahmenzeilen
+    content[:, frame_cols] = False                     # Rahmenkolonnen
     row_cov = content.mean(axis=1)                     # Inhaltsanteil pro Zeile
     col_cov = content.mean(axis=0)                     # Inhaltsanteil pro Spalte
 
