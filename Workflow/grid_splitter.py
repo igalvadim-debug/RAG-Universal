@@ -718,7 +718,12 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
          [par[:, j].reshape(-1, 3) for j in strip_cols]
     bg = np.median(np.concatenate(px), axis=0)
     content = (np.abs(par - bg).max(axis=2) >= 24)     # True = Pixel mit Inhalt
-    content[frame_rows | frame_cols[:, None]] = False  # Rahmen ist kein Inhalt
+    # Rahmen ist kein Inhalt. getrennt setzen: die Maske `frame_rows` hat h,
+    # `frame_cols` w Eintraege; eine kombinierte boolesche Indexierung wie
+    # `frame_rows | frame_cols[:, None]` erzeugt bei nicht-quadratischen
+    # Panels (h != w) eine (w, h)-Maske und wirft IndexError.
+    content[frame_rows, :] = False                     # Rahmenzeilen
+    content[:, frame_cols] = False                     # Rahmenkolonnen
     row_cov = content.mean(axis=1)                     # Inhaltsanteil pro Zeile
     col_cov = content.mean(axis=0)                     # Inhaltsanteil pro Spalte
 
