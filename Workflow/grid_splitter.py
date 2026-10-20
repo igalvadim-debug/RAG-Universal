@@ -560,6 +560,49 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
     # vollflaechig hell/finster (breite Rinne am Rand).
     row_band_flags = np.array([line_uniform(par[i]) or line_gutter(par[i]) for i in range(h)])
     col_band_flags = np.array([line_uniform(par[:, j]) or line_gutter(par[:, j]) for j in range(w)])
+
+    def connected_lines(band_idx: list[int], step: int,
+                        perp_lo: int, perp_hi: int, horizontal: bool) -> set[int]:
+        """Indizes der Linien, die mit einer Bandlinie zusammenhaengen.
+
+        Verbunden ist eine Linie unmittelbar vor dem inneren Rand des Bands
+        (die erste Linie jenseits der Begrenzung), wenn sie dort in den
+        Randlinien des Spanns [perp_lo, perp_hi] dieselbe Farbe tragt wie das
+        Band selbst und ueber ihre ganze Laenge fast einfarbig ist: z.B. eine
+        Beschriftungszeile, die bis in die seitlichen Rahmenbaender
+        hineinreicht und an deren dunklen Pixeln haengt. Signale: `line_edge`
+        (span_edge ueber die volle Gegenrichtung - die Linie ist dort
+        einfarbig) und `perp_full` (die senkrechte Volllinie am
+        Beruehrungspunkt). Solche Linien werden vor der Deckungsberechnung
+        (row_cov/col_cov) aus dem Band entfernt, damit ein Streifen, der nur
+        am Rand festhaengt, nicht als Rahmen gilt und strip_caption die weisse
+        Rinne unter dem Bild abschneidet statt sie stehen zu lassen. Leert die
+        Menge das Band, gilt es als kein Rahmen.
+        """
+        if not band_idx:
+            return set()
+        inner = band_idx[-1] + step                   # erste Linie hinter dem Band
+        lo = max(0, min(perp_lo, perp_hi))
+        hi = min(h if horizontal else w, max(perp_lo, perp_hi))
+        if hi - lo < 4 or not (0 <= inner < (h if horizontal else w)):
+            return set()
+        # Farbe des Bands an seinen aeussersten Linien (Median der RGB-Werte).
+        if horizontal:                                # Zeilenband, Pruefung links/rechts
+            seg = par[band_idx[0]:band_idx[-1] + 1, :].reshape(-1, 3)
+            line_edge = span_edge(par, 0, w)          # pro Zeile: ueber alle Spalten einfarbig?
+            perp_full = col_full_bg                   # senkrechte Volllinie = gleichmaessige Spalte
+            at = lambda a, b: par[a, b]               # Zugriff Zeile, Spalte
+        else:                                         # Spaltenband, Pruefung oben/unten
+            seg = par[:, band_idx[0]:band_idx[-1] + 1].reshape(-1, 3)
+            line_edge = span_edge(par.T, 0, h)        # pro Spalte: ueber alle Zeilen einfarbig?
+            perp_full = row_full_bg                   # senkrechte Volllinie = gleichmaessige Zeile
+            at = lambda a, b: par[b, a]               # Zugriff umgekehrt (Linie, Gegenposition)
+        band_med = np.median(seg, axis=0)
+        same = lambda p: float(np.abs(np.asarray(p, dtype=np.int16) - band_med).max()) < 24
+        edge_ok = bool(line_edge[inner]) and bool(perp_full[lo]) and bool(perp_full[hi - 1])
+        left_ok = edge_ok and same(at(inner, lo))
+        right_ok = edge_ok and same(at(inner, hi - 1))
+        return {inner} if (left_ok and right_ok) else set()
     # Zusaetzliche Grenzkante: eine Linie ueber dem Span der bereits
     # erkannten senkrechten Bander, deren Pixel fast alle nahe einer einzigen
     # Farbe liegen (z.B. die weisse Rinne zwischen Bild und Beschriftung,
@@ -634,8 +677,8 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
     row_edge_span = span_edge(par, x_lo, x_hi)
 
     frame_rows = np.zeros(h, dtype=bool)
-    top_band = band(0, x_lo, x_hi, col_full_bg, row_band_flags, row_edge_span)
-    bottom_band = band(h - 1, x_lo, x_hi, col_full_bg, row_band_flags, row_edge_span)
+    top_band = band(0, x_lo, x_hi, col_full_bg, row_band_flags, row_edge_span, True)
+    bottom_band = band(h - 1, x_lo, x_hi, col_full_bg, row_band_flags, row_edge_span, True)
     frame_rows[top_band] = True
     frame_rows[bottom_band] = True
 
@@ -643,8 +686,8 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
     y_hi = min(bottom_band) if bottom_band else h
     col_edge_span = span_edge(np.swapaxes(par, 0, 1), y_lo, y_hi)
     frame_cols = np.zeros(w, dtype=bool)
-    frame_cols[band(0, y_lo, y_hi, row_full_bg, col_band_flags, col_edge_span)] = True
-    frame_cols[band(w - 1, y_lo, y_hi, row_full_bg, col_band_flags, col_edge_span)] = True
+    frame_cols[band(0, y_lo, y_hi, row_full_bg, col_band_flags, col_edge_span, False)] = True
+    frame_cols[band(w - 1, y_lo, y_hi, row_full_bg, col_band_flags, col_edge_span, False)] = True
 
     # Randzonen des Panels: vom aeusseren Rand bis zu m Nicht-Rahmenlinien;
     # ein davor liegendes Rahmenband wird uebersprungen, zaehlt aber nie mit.
