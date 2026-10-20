@@ -610,22 +610,20 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
     # wenn seitliche schwarze Baender denselben Wert verschieben wuerden).
 
     def band(start: int, perp_lo: int, perp_hi: int,
-             perp: np.ndarray, along: np.ndarray,
-             perp_edge: np.ndarray, horizontal: bool) -> list[int]:
+             perp_full: np.ndarray, along: np.ndarray,
+             line_edge: np.ndarray) -> list[int]:
         """Linienindex-Folge des Randbands bei `start` (0 oder letzter Index).
         `along` = Uniformitaets-/Rinnenflags der Linien selbst (bei Zeilen
         row_band_flags, bei Spalten col_band_flags); die Traversierung endet
-        an der ersten nicht zum Band gehoerigen Linie. `perp` = Flags der
-        Linien senkrecht dazu; die Innenbegrenzung wird zusaetzlich von
-        `perp_edge` erfuetzt (gleicher Linientyp wie `perp`, ueber den Span
-        der Gegenrichtung berechnet). Die Begrenzungspruefung laeuft nur
+        an der ersten nicht zum Band gehoerigen Linie. `perp_full` = volle
+        Hintergrundflags der senkrechten Linien; die Innenbegrenzung wird
         ueber das Span [perp_lo, perp_hi] der bereits erkannten senkrechten
-        Bander, damit ein gueltiges Rahmenband nicht an einer durchgehenden
-        Vollbild-Hintergrundlinie scheitert. Vor der Rueckgabe werden Linien
-        entfernt, die laut connected_lines mit dem Rahmenband zusammenhangen
-        (z.B. Beschriftungszeilen, die in die Seitenbaender reichen); bleibt
-        nichts uebrig, gilt das Band als kein Rahmen. Leere Liste = kein
-        Rahmen."""
+        Bander geprueft, damit ein gueltiges Rahmenband nicht an einzelnen
+        Inhaltssenken in Gegenrichtung scheitert. `line_edge` =
+        Grenzkantenflags auf der Achse der Band-Linien selbst (ueber den
+        Gegen-Span berechnet); sie ersetzen die Flag-Pruefung derselben
+        Achse, wenn deren Median durch seitliche Baender verschoben wird.
+        Leere Liste = kein Rahmen."""
         n = len(along)
         step = 1 if start == 0 else -1
         limit = max(3, int(0.05 * min(h, w)))
@@ -637,31 +635,23 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
         if not idx:
             return []
         inner = i                                   # erste Linie hinter dem Band
-        if not (0 <= inner < len(perp) and (perp[inner] or perp_edge[inner])):
-            return []                               # keine Background-Begrenzung
-        outer_ok = True
-        for j in idx:
-            o = j - step                            # aeussere Nachbarlinie
-            if not (o < 0 or o >= len(perp) or perp[o]):
-                outer_ok = False
-                break
-        if not outer_ok:
-            return []
-        m_ = len(perp)
+        m_ = len(perp_full)
         lo = max(0, min(perp_lo, perp_hi))
         hi = min(m_, max(perp_lo, perp_hi))
-        if hi > lo and not bool((perp | perp_edge)[lo:hi].all()):
-            return []                               # Grenze nicht ueber den ganzen Span
-        # Mit dem Rahmen verbundene Linien vor der Deckungsrechnung ausscheiden.
-        rejected = connected_lines(idx, step, perp_lo, perp_hi, horizontal)
-        idx = [j for j in idx if j not in rejected]
+        if not (0 <= inner < n and (line_edge[inner] or
+                                    (hi > lo and bool(perp_full[lo:hi].all())))):
+            return []                               # keine Background-Begrenzung
+        for j in idx:
+            o = j - step                            # aeussere Nachbarlinie
+            if not (o < 0 or o >= n or line_edge[o]):
+                return []                           # Aussenrand nicht sauber
         return idx
 
     def span_edge(lines: np.ndarray, lo: int, hi: int) -> np.ndarray:
-        """Flag pro Linie (Zeilen 0. Achse von `lines`): ueber dem Span
-        [lo:hi] der 1. Achse fast nur eine einzige Farbe. `lines` sind die
-        Rohpixel; liegt die Farbkanalachse vorn (z.B. par.T -> (3, h, w)),
-        wird sie an das Ende gebracht."""
+        """Flag pro Linie (0. Achse von `lines`): ueber dem Span [lo:hi] der
+        1. Achse fast nur eine einzige Farbe. `lines` sind die Rohpixel mit
+        Farbkanal am Ende (h, w, 3); liegt die Farbkanalachse vorn
+        (z.B. par.T -> (3, h, w)), wird sie an das Ende gebracht."""
         if lines.ndim == 3 and lines.shape[0] == 3:
             lines = np.moveaxis(lines, 0, -1)
         if hi - lo < 4:
@@ -674,14 +664,15 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
                 out[k] = True
         return out
 
-    # Reihenfolge der band()-Aufrufe: erst die senkrechten Randspalten uber
-    # die volle Laenge (ihre Grenzen sind unabhaengig von Zeilenbandern),
-    # dann die Zeilenbaender innerhalb des Seiten-Spanns mit row_band_flags
-    # als `along`-Sequenz, schliesslich die restlichen Seitenbaender
-    # innerhalb des Zeilen-Spanns.
-    col_edge_full = span_edge(par.T, 0, h)
-    left_band = band(0, 0, h, row_full_bg, col_band_flags, col_edge_full, False)
-    right_band = band(w - 1, 0, h, row_full_bg, col_band_flags, col_edge_full, False)
+    # Reihenfolge der band()-Aufrufe: erst die senkrechten Randspalten ueber
+    # den vollen Zeilen-Span, dann die Zeilenbaender innerhalb des Seiten-
+    # Spanns, schliesslich die restlichen Seitenbaender innerhalb des
+    # Zeilen-Spanns. Die `*_edge`-Flags stehen jeweils auf der Achse der
+    # Band-Linien selbst (Spaltenflags laengs Spaltenachse, Zeilenflags
+    # laengs Zeilenachse); nur `perp_full` wird auf der Gegenachse indiziert.
+    col_edge_full = span_edge(np.swapaxes(par, 0, 1), 0, h)
+    left_band = band(0, 0, h, row_full_bg, col_band_flags, col_edge_full)
+    right_band = band(w - 1, 0, h, row_full_bg, col_band_flags, col_edge_full)
     x_lo = max(left_band) + 1 if left_band else 0   # Span innhalb der Seitenbaender
     x_hi = min(right_band) if right_band else w
     row_edge_span = span_edge(par, x_lo, x_hi)
@@ -694,7 +685,7 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
 
     y_lo = max(top_band) + 1 if top_band else 0     # Span innhalb der oberen/unteren Baender
     y_hi = min(bottom_band) if bottom_band else h
-    col_edge_span = span_edge(par.T, y_lo, y_hi)
+    col_edge_span = span_edge(np.swapaxes(par, 0, 1), y_lo, y_hi)
     frame_cols = np.zeros(w, dtype=bool)
     frame_cols[band(0, y_lo, y_hi, row_full_bg, col_band_flags, col_edge_span, False)] = True
     frame_cols[band(w - 1, y_lo, y_hi, row_full_bg, col_band_flags, col_edge_span, False)] = True
