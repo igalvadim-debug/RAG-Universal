@@ -647,10 +647,10 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
                 break
         if not outer_ok:
             return []
-        m_ = len(perp)
+        m_ = min(len(perp), len(perp_edge))         # gemeinsames Span beider Flag-Vektoren
         lo = max(0, min(perp_lo, perp_hi))
         hi = min(m_, max(perp_lo, perp_hi))
-        if hi > lo and not bool((perp | perp_edge)[lo:hi].all()):
+        if hi > lo and not bool((perp[lo:hi] | perp_edge[lo:hi]).all()):
             return []                               # Grenze nicht ueber den ganzen Span
         # Mit dem Rahmen verbundene Linien vor der Deckungsrechnung ausscheiden.
         rejected = connected_lines(idx, step, perp_lo, perp_hi, horizontal)
