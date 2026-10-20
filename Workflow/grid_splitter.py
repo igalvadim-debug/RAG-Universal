@@ -611,7 +611,7 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
 
     def band(start: int, perp_lo: int, perp_hi: int,
              perp_full: np.ndarray, along: np.ndarray,
-             line_edge: np.ndarray) -> list[int]:
+             line_edge: np.ndarray, horizontal: bool) -> list[int]:
         """Linienindex-Folge des Randbands bei `start` (0 oder letzter Index).
         `along` = Uniformitaets-/Rinnenflags der Linien selbst (bei Zeilen
         row_band_flags, bei Spalten col_band_flags); die Traversierung endet
@@ -625,6 +625,8 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
         Achse, wenn deren Median durch seitliche Baender verschoben wird.
         Leere Liste = kein Rahmen."""
         n = len(along)
+        perp = perp_full          # Gegenachse: Volllinien-Hintergrundflags
+        perp_edge = line_edge     # Grenzkantenflags auf der Band-Achse
         step = 1 if start == 0 else -1
         limit = max(3, int(0.05 * min(h, w)))
         idx = []
@@ -679,8 +681,8 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
     # Band-Linien selbst (Spaltenflags laengs Spaltenachse, Zeilenflags
     # laengs Zeilenachse); nur `perp_full` wird auf der Gegenachse indiziert.
     col_edge_full = span_edge(np.swapaxes(par, 0, 1), 0, h)
-    left_band = band(0, 0, h, row_full_bg, col_band_flags, col_edge_full)
-    right_band = band(w - 1, 0, h, row_full_bg, col_band_flags, col_edge_full)
+    left_band = band(0, 0, h, row_full_bg, col_band_flags, col_edge_full, False)
+    right_band = band(w - 1, 0, h, row_full_bg, col_band_flags, col_edge_full, False)
     x_lo = max(left_band) + 1 if left_band else 0   # Span innhalb der Seitenbaender
     x_hi = min(right_band) if right_band else w
     row_edge_span = span_edge(par, x_lo, x_hi)
