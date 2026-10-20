@@ -544,8 +544,9 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
     # Bild gibt es solche Begrenzung nicht, dort wird nichts abgetrennt.
     def line_uniform(line: np.ndarray) -> bool:
         """True, wenn eine Zeile/Spalte fast nur aus einer einzigen Farbe besteht."""
-        med = np.median(line.reshape(-1, line.shape[-1]), axis=0)
-        near = (np.abs(line - med).max(axis=-1) < 16)
+        pts = line.reshape(-1, 3)
+        med = np.median(pts, axis=0)
+        near = (np.abs(pts - med).max(axis=1) < 16)
         return bool(near.mean() >= 0.97 and float(med.max()) - float(med.min()) <= 32)
 
     def line_gutter(line: np.ndarray) -> bool:
@@ -553,43 +554,99 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
         m_ = float(line.mean())
         return m_ > 235 or m_ < 20
 
-    def is_band_line(line: np.ndarray) -> bool:
-        return line_uniform(line) or line_gutter(line)
-
     row_full_bg = np.array([line_uniform(par[i]) for i in range(h)])
     col_full_bg = np.array([line_uniform(par[:, j]) for j in range(w)])
+    # Linien, die als Rahmenband-Linie in Frage kommen: einfarbig oder
+    # vollflaechig hell/finster (breite Rinne am Rand).
+    row_band_flags = np.array([line_uniform(par[i]) or line_gutter(par[i]) for i in range(h)])
+    col_band_flags = np.array([line_uniform(par[:, j]) or line_gutter(par[:, j]) for j in range(w)])
+    # Zusaetzliche Grenzkante: eine Linie ueber dem Span der bereits
+    # erkannten senkrechten Bander, deren Pixel fast alle nahe einer einzigen
+    # Farbe liegen (z.B. die weisse Rinne zwischen Bild und Beschriftung,
+    # wenn seitliche schwarze Baender denselben Wert verschieben wuerden).
 
-    def band(start: int, perp: np.ndarray, along: np.ndarray) -> list[int]:
+    def band(start: int, perp_lo: int, perp_hi: int,
+             perp: np.ndarray, along: np.ndarray,
+             perp_edge: np.ndarray) -> list[int]:
         """Linienindex-Folge des Randbands bei `start` (0 oder letzter Index).
-        `perp` = Linien senkrecht dazu (volle Hintergrundgrenze), `along` =
-        Uniformitaet entlang der Linien selbst. Leere Liste = kein Rahmen."""
+        `along` = Uniformitaets-/Rinnenflags der Linien selbst (bei Zeilen
+        row_band_flags, bei Spalten col_band_flags); die Traversierung endet
+        an der ersten nicht zum Band gehoerigen Linie. `perp` = Flags der
+        Linien senkrecht dazu; die Innenbegrenzung wird zusaetzlich von
+        `perp_edge` erfuetzt (gleicher Linientyp wie `perp`, ueber den Span
+        der Gegenrichtung berechnet). Die Begrenzungspruefung laeuft nur
+        ueber das Span [perp_lo, perp_hi] der bereits erkannten senkrechten
+        Bander, damit ein gueltiges Rahmenband nicht an einer durchgehenden
+        Vollbild-Hintergrundlinie scheitert. Leere Liste = kein Rahmen."""
         n = len(along)
         step = 1 if start == 0 else -1
         limit = max(3, int(0.05 * min(h, w)))
         idx = []
         i = start
-        while 0 <= i < n and len(idx) < limit and is_band_line(along[i]):
+        while 0 <= i < n and len(idx) < limit and along[i]:
             idx.append(i)
             i += step
         if not idx:
             return []
         inner = i                                   # erste Linie hinter dem Band
-        if not (0 <= inner < n and perp[inner]):
+        if not (0 <= inner < len(perp) and (perp[inner] or perp_edge[inner])):
             return []                               # keine Background-Begrenzung
         outer_ok = True
         for j in idx:
             o = j - step                            # aeussere Nachbarlinie
-            if not (o < 0 or o >= n or perp[o]):
+            if not (o < 0 or o >= len(perp) or perp[o]):
                 outer_ok = False
                 break
-        return idx if outer_ok else []
+        if not outer_ok:
+            return []
+        m_ = len(perp)
+        lo = max(0, min(perp_lo, perp_hi))
+        hi = min(m_, max(perp_lo, perp_hi))
+        if hi > lo and not bool((perp | perp_edge)[lo:hi].all()):
+            return []                               # Grenze nicht ueber den ganzen Span
+        return idx
+
+    def span_edge(lines: np.ndarray, lo: int, hi: int) -> np.ndarray:
+        """Flag pro Linie (Zeilen 0. Achse von `lines`): ueber dem Span
+        [lo:hi] der 1. Achse fast nur eine einzige Farbe. `lines` sind die
+        Rohpixel; liegt die Farbkanalachse vorn (z.B. par.T -> (3, h, w)),
+        wird sie an das Ende gebracht."""
+        if lines.ndim == 3 and lines.shape[0] == 3:
+            lines = np.moveaxis(lines, 0, -1)
+        if hi - lo < 4:
+            return np.zeros(len(lines), dtype=bool)
+        out = np.zeros(len(lines), dtype=bool)
+        for k, ln in enumerate(lines):
+            pts = ln[lo:hi].reshape(-1, ln.shape[-1])
+            med = np.median(pts, axis=0)
+            if bool((np.abs(pts - med).max(axis=1) < 16).mean() >= 0.98):
+                out[k] = True
+        return out
+
+    # Reihenfolge der band()-Aufrufe: erst die senkrechten Randspalten uber
+    # die volle Laenge (ihre Grenzen sind unabhaengig von Zeilenbandern),
+    # dann die Zeilenbaender innerhalb des Seiten-Spanns mit row_band_flags
+    # als `along`-Sequenz, schliesslich die restlichen Seitenbaender
+    # innerhalb des Zeilen-Spanns.
+    col_edge_full = span_edge(par.T, 0, h)
+    left_band = band(0, 0, h, row_full_bg, col_band_flags, col_edge_full)
+    right_band = band(w - 1, 0, h, row_full_bg, col_band_flags, col_edge_full)
+    x_lo = max(left_band) + 1 if left_band else 0   # Span innhalb der Seitenbaender
+    x_hi = min(right_band) if right_band else w
+    row_edge_span = span_edge(par, x_lo, x_hi)
 
     frame_rows = np.zeros(h, dtype=bool)
+    top_band = band(0, x_lo, x_hi, col_full_bg, row_band_flags, row_edge_span)
+    bottom_band = band(h - 1, x_lo, x_hi, col_full_bg, row_band_flags, row_edge_span)
+    frame_rows[top_band] = True
+    frame_rows[bottom_band] = True
+
+    y_lo = max(top_band) + 1 if top_band else 0     # Span innhalb der oberen/unteren Baender
+    y_hi = min(bottom_band) if bottom_band else h
+    col_edge_span = span_edge(par.T, y_lo, y_hi)
     frame_cols = np.zeros(w, dtype=bool)
-    frame_rows[band(0, col_full_bg, par)] = True
-    frame_rows[band(h - 1, col_full_bg, par)] = True
-    frame_cols[band(0, row_full_bg, par.T)] = True
-    frame_cols[band(w - 1, row_full_bg, par.T)] = True
+    frame_cols[band(0, y_lo, y_hi, row_full_bg, col_band_flags, col_edge_span)] = True
+    frame_cols[band(w - 1, y_lo, y_hi, row_full_bg, col_band_flags, col_edge_span)] = True
 
     # Randzonen des Panels: vom aeusseren Rand bis zu m Nicht-Rahmenlinien;
     # ein davor liegendes Rahmenband wird uebersprungen, zaehlt aber nie mit.
@@ -649,14 +706,20 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
             cut = max(int(0.4 * h), min(h, cut))
             if cut < h:
                 return (l, t, r, t + cut)
-        elif frame_rows.any() and glist and glist[-1][1] >= h - 2:
+        elif frame_rows.any():
             # Unterer Rahmen wurde aus der Maske entfernt; die verbleibende
             # letzte Gruppe endet an der Rinne ueber dem Rahmen -> dorthin
             # schneiden (Rahmen und moglicher Text darunter entfallen).
-            last_s = glist[-1][0]
+            # `lim` nach derselben Regel wie in band(); nur Indizes im
+            # unteren Bereich zaehlen, damit ein ausschliesslich oberer
+            # Rahmenband den Schnitt nicht ausloest.
+            lim = max(3, int(0.05 * min(h, w)))
+            last_s = glist[-1][0] if glist else None
             fr_idx = np.nonzero(frame_rows)[0]
-            if len(fr_idx) and fr_idx[0] >= h - lim and last_s >= int(0.4 * h) \
-                    and last_s < h - int(frame_rows.sum() // 2):
+            low_band = [int(i) for i in fr_idx if i >= h - lim]
+            if low_band and low_band[0] == h - len(low_band) \
+                    and last_s is not None and last_s >= int(0.4 * h) \
+                    and last_s < low_band[0]:
                 return (l, t, r, t + last_s)
         return box                                     # nichts abzuschneiden
 
