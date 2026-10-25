@@ -42,7 +42,28 @@ from PIL import Image
 # ----------------------------------------------------------------------------
 # Konfiguration
 # ----------------------------------------------------------------------------
-SERVER_EXE = Path(r"D:\Unsloth\C-claude\llama.cpp\llama-server.exe")   # wie in start.py
+def _find_server_exe() -> Path:
+    """Aktueller llama-server-Pfad: Umgebungsvariablen zuerst, dann alle bekannten Orte.
+    Der erste existente Pfad gewinnt; sonst bleibt der alte Pfad als Fehler-Hinweis stehen."""
+    candidates: list[Path] = []
+    for var in ("GRID_SERVER_EXE", "LLAMA_EXE"):
+        v = os.environ.get(var)
+        if v:
+            candidates.append(Path(v))
+    candidates += [
+        Path(r"G:\llama.cpp\llama-b9204-bin-win-cuda-13.1-x64\llama-server.exe"),  # aktueller Pfad (start.bat)
+        Path(r"D:\SillyTavernNeurogen\kobold\llama.cpp-master\llama-b9553-bin-win-cuda-13.3-x64\llama-server.exe"),
+        Path(r"D:\Unsloth\C-claude\llama.cpp\llama-server.exe"),                    # alter Pfad (Fallback)
+    ]
+    for p in candidates:
+        try:
+            if p.exists():
+                return p
+        except OSError:
+            continue
+    return candidates[-1]
+
+SERVER_EXE = _find_server_exe()
 # Vision-Modelle: Modell + zugehoeriges mmproj starten immer als Paar
 VL_SETS = {
     "gemma": (
