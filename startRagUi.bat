@@ -1,54 +1,63 @@
 @echo off
-chcp 65001 >nul
-title RAG Video Prompts
+chcp 850 >nul
+setlocal EnableExtensions
 
-echo  RAG
+rem ============================================================
+rem  RAG WebUI Starter (Alternative zu start.bat) - 2026-10-25
+rem
+rem  FRUEHERE VERSIONEN waren kaputt:
+rem   * "%node --version%" ist keine gueltige Variable -> Fehlermeldung
+rem     "... kann syntaktisch an dieser Stelle nicht verarbeitet werden"
+rem   * taskkill /f /im node.exe hat ALLE Node-Prozesse des PCs
+rem     abgeschossen (VS Code, Discord, ...)
+rem   * hat ein React/Vite-Frontend gestartet, das es in diesem Projekt
+rem     gar nicht gibt (src/ fehlt) -> "totale kaputte Seite"
+rem   * lief auf Port 7860/7960 durch den Vite-Dev-Server, die echte
+rem     WebUI (Gradio) kam nie hoch
+rem
+rem  Diese Version startet nur die echte Python/Gradio-WebUI auf Port 7960.
+rem  Reines ASCII + CRLF, damit cmd.exe (auch DE-Windows) nicht stolpert.
+rem ============================================================
+
+set "ROOT=%~dp0"
+set "CONDA=%ROOT%miniforge"
+set "ENV=%ROOT%env"
+set "WEBUI_PORT=7960"
+set "WEBUI_HOST=0.0.0.0"
+
+rem llama.cpp-Pfade (nur setzen, falls nicht schon gesetzt)
+if not defined LLAMA_EXE set "LLAMA_EXE=G:\llama.cpp\llama-b9204-bin-win-cuda-13.1-x64\llama-server.exe"
+if not defined MODELS_ROOT set "MODELS_ROOT=C:\Users\bunny\.lmstudio\models"
+if not defined MODELS_ROOT2 set "MODELS_ROOT2=G:\ComfyUI\models\LLM"
+if not defined CTX_SIZE set "CTX_SIZE=8192"
+if not defined NGL set "NGL=99"
+set "PYTHONNOUSERSITE=1"
+
+if exist "%ROOT%env.bat" call "%ROOT%env.bat"
+
+if not exist "%ENV%\python.exe" goto :no_env
+
+echo --- RAG WebUI (Python/Gradio) ---
+echo Adresse: http://127.0.0.1:%WEBUI_PORT%
 echo.
 
-cd /d "g:\RAG"
-
-echo [1/3] Pruefe Node.js...
-node --version >nul 2>&1
-if errorlevel 1 (
-    echo FEHLER: Node.js nicht gefunden. Installiere Node.js 18+.
-    pause
-    exit /b 1
-)
-echo       OK: %node --version%
-
-echo [2/3] Pruefe Abhaengigkeiten...
-if not exist "node_modules" (
-    echo       Installiere npm Pakete...
-    npm install
-    if errorlevel 1 (
-        echo FEHLER: npm install fehlgeschlagen.
-        pause
-        exit /b 1
+rem Alte Instanz auf Port %WEBUI_PORT% beenden (nur deren PID, NIE pauschal)
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr /r /i /c:"[.:]%WEBUI_PORT% " /c:"[.:]%WEBUI_PORT%] "') do (
+    if not "%%a"=="0" (
+        echo     Beende alten Prozess auf Port %WEBUI_PORT% - PID %%a
+        taskkill /f /pid %%a >nul 2>&1
     )
-) else (
-    echo       OK: node_modules vorhanden
 )
 
-echo [3/3] Starte Backend + Frontend...
-echo.
-echo --------------------------------------------------
-echo  Frontend:  http://localhost:7860
-echo  Backend:   http://localhost:7861 (API + WebSocket)
-echo  ChromaDB:  g:\RAG\chroma_zaebalo
-echo --------------------------------------------------
-echo.
-
-start "RAG Backend" cmd /k "npm run start:backend"
-timeout /t 2 >nul
-start "RAG Frontend" cmd /k "npm run dev"
-
-echo Beide Server gestartet. Browser oeffnet sich automatisch...
-timeout /t 3 >nul
-start "" http://localhost:7860
+"%CONDA%\Scripts\conda.exe" run -p "%ENV%" --no-capture-output python -s "%ROOT%webui.py"
 
 echo.
-echo Druecke eine Taste zum Beenden aller Fenster...
-pause >nul
+echo WebUI beendet.
+pause
+exit /b 0
 
-taskkill /f /im node.exe >nul 2>&1
-echo Fertig.
+:no_env
+echo [FEHLER] Keine portable Umgebung gefunden: %ENV%\python.exe
+echo          Bitte zuerst setup.bat ausfuehren (oder start.bat nutzen).
+pause
+exit /b 1
