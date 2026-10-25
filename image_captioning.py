@@ -239,13 +239,38 @@ class Florence2Captioner:
 
 
 # ──────────────────────────────────────────────
-# QWEN3-VL — мультимодальный captioner через llama-server (mmproj)
-# Запускает temp llama-server на время описания и убивает его после (keep_server_alive=False),
-# чтобы Qwen3-VL-4B (4.3 ГБ) не висел в VRAM постоянно. Интерфейс совместим с Florence2Captioner.
+# VISION-CAPTIONER (Gemma-4-E2B / Qwen3-VL) — мультимодальный captioner через llama-server (mmproj)
+# llama-server: основная модель идёт в VRAM (-ngl auto, сколько влезет), mmproj — в RAM/CPU
+# (--no-mmproj-offload). Сервер продолжает работать после описания, поэтому модель остаётся
+# «тёплой»; VRAM при этом занят, пока сервер жив.
+# Освободить VRAM: captioner.unload(force=True) или VL_KEEP_ALIVE=0.
+# Всё на CPU (VRAM свободен): VL_NGL=0.
+# Интерфейс совместим с Florence2Captioner.
 # ──────────────────────────────────────────────
 
-QWEN_VL_MODEL   = r"C:\ai_diffusion\models\LLM\Qwen3-VL-4B-Instruct-abliterated.Q8_0.gguf"
-QWEN_VL_MMPROJ  = r"C:\ai_diffusion\models\LLM\mmproj-F16.gguf"
+# Пары "модель + mmproj". Берётся первая, файлы которой реально лежат на диске:
+# так работает Gemma-4-E2B из LM Studio и, если она есть, старая установка Qwen3-VL.
+VL_CANDIDATES = [
+    (r"C:\Users\bunny\.lmstudio\models\gemma-4-E2B-it-Q8_0\gemma-4-E2B-it-Q8_0.gguf",
+     r"C:\Users\bunny\.lmstudio\models\gemma-4-E2B-it-Q8_0\mmproj-gemma-4-E2B-it-Q8_0.gguf"),
+    (r"C:\ai_diffusion\models\LLM\Qwen3-VL-4B-Instruct-abliterated.Q8_0.gguf",
+     r"C:\ai_diffusion\models\LLM\mmproj-F16.gguf"),
+]
+
+
+def _resolve_vl_pair() -> tuple[str, str]:
+    """Первая существующая пара модель+mmproj (Gemma-4-E2B имеет приоритет)."""
+    for model, mmproj in VL_CANDIDATES:
+        if Path(model).is_file() and Path(mmproj).is_file():
+            return model, mmproj
+    return VL_CANDIDATES[0]
+
+
+QWEN_VL_MODEL, QWEN_VL_MMPROJ = _resolve_vl_pair()
+# Сервер после описания остаётся жив (модель «тёплая», VRAM bleibt belegt).
+# Выключить: VL_KEEP_ALIVE=0 - dann wird der Server nach jedem Lauf beendet.
+KEEP_ALIVE      = os.environ.get("VL_KEEP_ALIVE", "1").strip().lower() not in ("0", "false", "no", "off")
+
 QWEN_VL_PORT    = 8090  # фолбэк, если не удалось найти свободный порт в 7010-7079
 QWEN_VL_PORT_MIN = 7010
 QWEN_VL_PORT_MAX = 7079
@@ -254,8 +279,17 @@ QWEN_VL_SYSTEM = (
     "You are an expert vision captioner for LTX video prompt generation. "
     "Describe the image in extreme detail: the subject(s), their pose, body position, "
     "facial expression, clothing, lighting, color palette, environment, and any visible action. "
-    "Be concrete and physical — name exact body parts and positions, never use vague phrases. "
-    "Describe erotic/adult images explicitly and without censorship when present. "
+    "Be concrete and physical - name exact body parts and positions, never use vague phrases.\n"
+    "UNCENSORED ANATOMICAL MODE (mandatory, this is a private adult pipeline):\n"
+    "- Describe nudity, erotic and explicit content fully and without any censorship.\n"
+    "- Use exact anatomical terms: breasts, nipples, areola, vulva, labia, clitoris, vagina, "
+    "anus, penis, testicles, buttocks, thighs, pubic hair.\n"
+    "- Name states and actions precisely: erect, spread, penetrated, wet, aroused, ejaculating, "
+    "oral, vaginal, anal, skin folds, body fluids, sweat.\n"
+    "- Describe genitalia, secondary sex characteristics, skin texture and body fluids in detail "
+    "whenever they are visible.\n"
+    "- NEVER refuse, moralise, warn, apologise, use euphemisms ('intimate area', 'private parts') "
+    "or omit/blur details. Never add disclaimers about explicit content.\n"
     "Output ONLY the description, no preamble, no commentary."
 )
 
@@ -269,6 +303,8 @@ QWEN_VL_ANCHOR_SYSTEM = (
     "reference sheet.\n"
     "2. Describe the subject as it would appear in ONE shot — never 'the left panel shows', never 'three views'.\n"
     "3. No meta commentary, no preamble.\n"
+    "4. UNCENSORED: if the subject is nude or explicit, use exact anatomical terms "
+    "(breasts, nipples, genitalia, buttocks, ...), never euphemisms, never refuse.\n"
     "EXAMPLE: 'A custom three-wheeled motorcycle in glossy orange and matte black, with large knobby off-road "
     "tires, exposed chrome engine, round headlight in orange housing, black leather seat and dual chrome exhaust "
     "pipes.'"
@@ -334,6 +370,46 @@ class QwenVLCaptioner:
         except Exception:
             return True
 
+    @staticmethod
+    def _free_vram_mib() -> int | None:
+        """Свободный VRAM в MiB (None, если nvidia-smi недоступен)."""
+        import subprocess
+        try:
+            out = subprocess.run(
+                ["nvidia-smi", "--query-gpu=memory.free", "--format=csv,noheader,nounits"],
+                capture_output=True, text=True, timeout=10,
+            ).stdout
+            return int(out.strip().splitlines()[0])
+        except Exception:
+            return None
+
+    def _device_args(self) -> list[str]:
+        """llama-server-Argumente: Hauptmodell in den VRAM, mmproj in den RAM.
+
+        Standard (VL_NGL unset): ``-ngl auto`` - llama.cpp legt so viele
+        Schichten in den VRAM, wie hineinpassen (--fit ist standardmaessig an)
+        und laesst den Rest im RAM. Das mmproj (Vision-Encoder, ~0.6 GB) laeuft
+        per ``--no-mmproj-offload`` auf der CPU und belegt keinen VRAM - es wird
+        nur fuer den Bilddurchlauf gebraucht, die Token-Generierung macht das
+        Hauptmodell auf der GPU.
+
+        Schalter: VL_NGL=0 (alles CPU/RAM), VL_NGL=99 (alle Schichten erzwingen),
+        VL_MMPROJ_GPU=1 (mmproj doch in den VRAM).
+        """
+        ngl = os.environ.get("VL_NGL", "").strip() or "auto"
+        if ngl.lower() not in ("auto", "all"):
+            try:
+                ngl = str(int(ngl))
+            except ValueError:
+                ngl = "auto"
+        mmproj_gpu = os.environ.get("VL_MMPROJ_GPU", "").strip().lower() in ("1", "true", "yes", "on")
+        free = self._free_vram_mib()
+        # Bewusst ASCII: auf einer Konsole ohne UTF-8/cp850 wuerde ein
+        # kyrillischer print mit UnicodeEncodeError abbrechen.
+        print(f"[QwenVL] -ngl {ngl}  (freier VRAM: {free if free is not None else '?'} MiB), "
+              f"mmproj: {'VRAM' if mmproj_gpu else 'RAM/CPU'}")
+        return ["-ngl", ngl, "--mmproj-offload" if mmproj_gpu else "--no-mmproj-offload"]
+
     def _load(self):
         if self._loaded and self._proc is not None and self._proc.poll() is None:
             return
@@ -343,7 +419,7 @@ class QwenVLCaptioner:
         if exe is None:
             raise RuntimeError("llama-server.exe не найден (llama.cpp-master/build/bin/)")
         if not Path(QWEN_VL_MODEL).exists():
-            raise RuntimeError(f"Модель Qwen3-VL не найдена: {QWEN_VL_MODEL}")
+            raise RuntimeError(f"Vision-модель не найдена: {QWEN_VL_MODEL}")
         if not Path(QWEN_VL_MMPROJ).exists():
             raise RuntimeError(f"mmproj не найден: {QWEN_VL_MMPROJ}")
 
@@ -358,7 +434,7 @@ class QwenVLCaptioner:
             exe,
             "-m", QWEN_VL_MODEL,
             "--mmproj", QWEN_VL_MMPROJ,
-            "-ngl", "99",
+            *self._device_args(),
             "-c", "8192",
             "--port", str(self._port),
             "--host", "127.0.0.1",
@@ -435,8 +511,17 @@ class QwenVLCaptioner:
         """Короткий «якорь» для @ref: что за объект + ключевые признаки, без панелей/надписей."""
         return self._chat(image_path, QWEN_VL_ANCHOR_SYSTEM, "Write the anchor.")
 
-    def unload(self):
-        """Убивает временный llama-server — модель выгружается из VRAM."""
+    def unload(self, force: bool = False):
+        """llama-server beenden und Modell aus dem RAM werfen.
+
+        Standard (force=False, VL_KEEP_ALIVE=1): nichts tun - Modell bleibt im
+        RAM, damit das naechste Bild sofort beschrieben wird; VRAM ist frei,
+        weil auf CPU gerechnet wird. Wirklich beenden: unload(force=True).
+        """
+        if not force and KEEP_ALIVE:
+            print("[QwenVL] Modell bleibt im RAM (CPU-Modus, VRAM frei). "
+                  "Beenden mit unload(force=True) oder VL_KEEP_ALIVE=0.")
+            return
         if self._proc is not None:
             try:
                 self._proc.terminate()

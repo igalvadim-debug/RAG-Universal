@@ -2071,7 +2071,8 @@ footer { display: none; }
         gr.Markdown("---")
         with gr.Accordion("✂️ Grid-Splitter (Storyboard-Gitter → Einzelbilder)", open=False):
             gr.Markdown(
-                "Schneidet ein Gitter-Bild per **Qwen3-VL** sauber in Einzelbilder (mit Beschriftung). "
+                "Schneidet ein Gitter-Bild per **Vision-Modell** (Gemma-4-E2B, alternativ Qwen3-VL) "
+                "sauber in Einzelbilder (mit Beschriftung). "
                 "Dateinamen: Nummer + 3 Zufallsbuchstaben, Ordner `workflow\\gridN` (erster freier Name laut `used.md`). "
                 "<small>Ohne laufenden Vision-Server startet das Tool einen eigenen und beendet ihn danach "
                 "(bei wenig freiem VRAM langsamer auf CPU).</small>"
@@ -2080,8 +2081,8 @@ footer { display: none; }
                 grid_img = gr.Image(label="🖼️ Gitter-Bild", type="filepath", height=320, scale=2)
                 with gr.Column(scale=1):
                     grid_model_dd = gr.Dropdown(
-                        label="Vision-Modell", choices=["Qwen3-VL-4B", "Gemma-4-E2B"],
-                        value="Qwen3-VL-4B",
+                        label="Vision-Modell", choices=["Gemma-4-E2B", "Qwen3-VL-4B"],
+                        value="Gemma-4-E2B",
                     )
                     grid_captions_dd = gr.Dropdown(
                         label="✂️ Нарезать с текстом или без (подписи под кадрами)",
