@@ -6,7 +6,13 @@ setlocal
 set "ROOT=%~dp0"
 
 :: = Modelle & Server =
-if not defined LLAMA_EXE set "LLAMA_EXE=G:\llama.cpp\llama-b9204-bin-win-cuda-13.1-x64\llama-server.exe"
+if not defined LLAMA_EXE (
+    if exist "G:\llama.cpp\llama-b9204-bin-win-cuda-13.1-x64\llama-server.exe" (
+        set "LLAMA_EXE=G:\llama.cpp\llama-b9204-bin-win-cuda-13.1-x64\llama-server.exe"
+    ) else (
+        set "LLAMA_EXE=llama-server.exe"
+    )
+)
 if not defined MODEL_PATH set "MODEL_PATH=C:\Users\bunny\.lmstudio\models\Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf"
 if not defined MODELS_ROOT set "MODELS_ROOT=C:\Users\bunny\.lmstudio\models"
 if not defined WEBUI_PORT set "WEBUI_PORT=7960"
