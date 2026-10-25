@@ -21,6 +21,9 @@ set "WEBUI_PORT=7960"
 :: 0.0.0.0 = WebUI im lokalen Netzwerk erreichbar (andere PCs: http://<IP-dieses-PCs>:7960)
 set "WEBUI_HOST=0.0.0.0"
 
+:: Node-Backend fuer die React/Vite-Oberflaeche (API + WebSocket, Port 7961)
+set "BACKEND_PORT=7961"
+
 if not exist "%ENV%\python.exe" (
     echo [FEHLER] Umgebung nicht gefunden. Bitte zuerst setup.bat ausfuehren.
     pause
@@ -50,9 +53,25 @@ if "%WAHL%"=="2" (
 )
 
 echo.
-echo  Adresse : http://127.0.0.1:%WEBUI_PORT%
+echo  Adresse : http://127.0.0.1:%WEBUI_PORT%  (LAN: http://<PC-IP>:%WEBUI_PORT%)
 echo  KoboldCpp auf Port 5001 wird automatisch erkannt.
 echo.
+
+:: Node-Backend (API + WebSocket) und React/Vite-Frontend starten, falls vorhanden
+if exist "%ROOT%package.json" (
+    echo --- Starte Node-Backend (Port %BACKEND_PORT%) fuer die React/Vite-Oberflaeche ---
+    if not exist "%ROOT%node_modules" (
+        echo   [INFO] node_modules fehlt - fuehre npm install aus...
+        call npm install
+    )
+    start "RAG Node-Backend" cmd /k "cd /d "%ROOT%" && set BACKEND_PORT=%BACKEND_PORT% && npm run start:backend"
+    timeout /t 2 >nul
+    echo --- Starte Vite-Dev-Server (Port %WEBUI_PORT%) ---
+    start "RAG Vite-Frontend" cmd /k "cd /d "%ROOT%" && npm run dev -- --port %WEBUI_PORT%"
+    echo   React-UI: http://127.0.0.1:%WEBUI_PORT%
+    echo   API:      http://127.0.0.1:%BACKEND_PORT%
+    echo.
+)
 
 "%CONDA%\Scripts\conda.exe" run -p "%ENV%" --no-capture-output python -s "%ROOT%webui_server.py"
 

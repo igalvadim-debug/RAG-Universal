@@ -23,6 +23,9 @@ set "WEBUI_PORT=7960"
 :: 127.0.0.1 wuerde den Zugriff auf diesen Rechner beschraenken
 set "WEBUI_HOST=0.0.0.0"
 
+:: Node-Backend fuer die React/Vite-Oberflaeche (API + WebSocket, Port 7961)
+set "BACKEND_PORT=7961"
+
 if not exist "%LLAMA_EXE%" echo [WARN] LLAMA_EXE nicht gefunden: %LLAMA_EXE%
 
 :: Optionale extra Variablen aus env.bat (z.B. API-Keys), falls vorhanden
@@ -49,6 +52,16 @@ for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":%WEBUI_PORT%"') do (
 )
 echo.
 
+:: Altes Node-Backend auf Port %BACKEND_PORT% automatisch beenden (sonst startet das neue nicht)
+echo --- Altes Node-Backend pruefen (Port %BACKEND_PORT%) ---
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":%BACKEND_PORT%"') do (
+    if not "%%a"=="0" (
+        echo   Beende altes Backend PID %%a
+        taskkill /f /pid %%a >nul 2>&1
+    )
+)
+echo.
+
 echo --- RAG WebUI ---
 echo Adresse: http://127.0.0.1:%WEBUI_PORT%
 echo KoboldCpp auf Port 5001 wird automatisch erkannt.
@@ -58,6 +71,22 @@ type "%ROOT%settings.txt"
 echo.
 echo --------------------------------
 echo.
+
+:: Node-Backend (API + WebSocket) und React/Vite-Frontend starten, falls vorhanden
+if exist "%ROOT%package.json" (
+    echo --- Starte Node-Backend (Port %BACKEND_PORT%) fuer die React/Vite-Oberflaeche ---
+    if not exist "%ROOT%node_modules" (
+        echo   [INFO] node_modules fehlt - fuehre npm install aus...
+        call npm install
+    )
+    start "RAG Node-Backend" cmd /k "cd /d "%ROOT%" && set BACKEND_PORT=%BACKEND_PORT% && npm run start:backend"
+    timeout /t 2 >nul
+    echo --- Starte Vite-Dev-Server (Port %WEBUI_PORT%) ---
+    start "RAG Vite-Frontend" cmd /k "cd /d "%ROOT%" && npm run dev -- --port %WEBUI_PORT%"
+    echo   React-UI: http://127.0.0.1:%WEBUI_PORT%
+    echo   API:      http://127.0.0.1:%BACKEND_PORT%
+    echo.
+)
 
 "%CONDA%\Scripts\conda.exe" run -p "%ENV%" --no-capture-output python -s "%ROOT%webui.py"
 
