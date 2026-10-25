@@ -1,0 +1,43 @@
+---GLOBAL_PROMPT_START---
+A dim, wood-paneled study in a grand American mansion on the day of a family wedding, where warm amber lamplight and the hard horizontal stripes of venetian blinds cut across walnut desks, leather armchairs, and walls of leather-bound books. The air is thick with cigar smoke, old money, and unspoken obligation; a single red rose on a black lapel is the only bright thing in a room of deep browns, blacks, and gold. A gray tabby cat sleeps in the lap of the seated man, its slow breathing the calmest rhythm in the house. Outside, muffled music and laughter from the wedding drift through the walls, but inside the study everything moves at the speed of a decision. The mood is grave, ceremonial, and quietly dangerous — a place where favors are debts and debts are paid in blood.
+---GLOBAL_PROMPT_END---
+
+---SEQUENCE_1_START---
+[DURATION: 5.0s] An 85mm close-up holds on @ref1, an elderly gray-haired man in a dark suit and black tie, seated with his shoulders slumped forward, his face contorted with sorrow, eyes wide and wet, mouth slightly agape as he pleads toward the back of a listener who fills the left edge of the frame. The camera pulls back in a gentle dolly, revealing the vertical blinds behind him throwing sharp striped shadows across his wrinkled forehead and jaw. Dim amber light falls from the left, deepening the lines around his eyes. @ref1 says in Italian: "Don Corleone, I ask for justice." The muffled brass of a wedding band bleeds faintly through the wall.
+DURATION_WEIGHT: 5
+---SEQUENCE_1_END---
+
+---SEQUENCE_2_START---
+[DURATION: 4.5s] A 50mm medium shot tracks laterally across the walnut desk to @ref2, a gray-haired man in a black tuxedo with a white shirt and black bow tie, a red rose pinned to his left lapel, seated upright behind the desk with a gray tabby cat curled in his lap, his stern unblinking gaze fixed forward. His hands rest flat on the desk surface, shoulders squared, as the warm glow of a brass lamp on the right carves his face out of the amber shadows of the bookshelves. @ref2 says in Italian: "You never sought my friendship. You feared to be in my debt." A single low cello note hums beneath the room.
+DURATION_WEIGHT: 4
+---SEQUENCE_2_END---
+
+---SEQUENCE_3_START---
+[DURATION: 3.0s] A macro push-in drops low to the lap of @ref2, where a hand in a dark formal suit jacket with a white cuff and a red rose on the lapel strokes the head of the gray tabby cat, fingers curled and moving along the striped fur. The cat lies on its side against the man's chest, eyes closed, whiskers fine and white, ears relaxed. Warm lounge light softens the brass object glinting in the bottom left corner. The room stays silent except for the cat's slow breathing and the distant wedding music.
+DURATION_WEIGHT: 2
+---SEQUENCE_3_END---
+
+---SEQUENCE_4_START---
+[DURATION: 5.0s] A 75mm medium close-up pushes in on @ref2 in his ornate black leather armchair with carved wooden sides and nailhead trim, his right hand raised, index finger extended forward in a quiet pointing gesture, thumb tucked into the palm. The gray tabby cat lies flat against his chest, eyes closed, as his lips part in a neutral, faintly disapproving line and the vertical blinds stripe sharp horizontal bars of amber across his tuxedo and the deep red rose. @ref2 says in Italian: "You come to me on the day of my daughter's wedding and ask me to kill for money." A faint trumpet from the wedding answers through the wall.
+DURATION_WEIGHT: 5
+---SEQUENCE_4_END---
+
+---SEQUENCE_5_START---
+[DURATION: 4.5s] A 50mm two-shot glides in a gentle lateral track as @ref1 leans forward from the left of the frame, his face close to @ref2 at the desk, eyes locked on him, mouth slightly open mid-sentence, while @ref2 sits upright in the leather chair, one hand resting on the gray tabby cat lying calmly on the desk between them. Golden light filters through the horizontal window slats above, cutting sharp shadows across the dark wood bookshelves and the brass lamp. @ref1 says in Italian: "I only ask that you help me, Don Corleone." The cat's tail flicks once against the polished wood.
+DURATION_WEIGHT: 4
+---SEQUENCE_5_END---
+
+---SEQUENCE_6_START---
+[DURATION: 4.0s] A 65mm close-up cranes down and in on @ref2, his dark slicked-back hair graying at the temples, his somber eyes downcast and narrowed, brows furrowed, his right hand raised with curled fingers pressed against his temple and cheek. The ornate leather chair frames him against wood paneling and warm amber light falling through the horizontal slats. He breathes out once, long and heavy, and says nothing. A single sustained piano note hangs in the air.
+DURATION_WEIGHT: 4
+---SEQUENCE_6_END---
+
+---SEQUENCE_7_START---
+[DURATION: 5.0s] A 50mm medium shot arcs around the desk as @ref1 kneels on one knee before it, head bowed low, hands clasped together in front of him, eyes closed, while @ref2 sits upright in the dark leather chair, the gray tabby cat curled around his right forearm, head turned toward the lens, his left hand splayed on the table and his right hand extended forward, palm up. On the desk sit a glass bottle, a metal cup, and a small black stylus; vertical blinds behind them throw hard shadows across the bookshelves. @ref1 says in Italian: "I swear my loyalty to you and your family." A low, distant church bell tolls once through the wall.
+DURATION_WEIGHT: 5
+---SEQUENCE_7_END---
+
+---SEQUENCE_8_START---
+[DURATION: 5.0s] An 85mm close-up holds on @ref2 behind the polished wooden desk, his impassive face filling the frame, lips tightly set, brow slightly furrowed, his right hand flat on the desk and his left arm cradling the gray tabby cat curled into a tight sleeping ball against his chest, the red rose bright on his lapel. Heavy closed blinds lay horizontal slats of amber light across the room, the brass lamp glowing beside a stack of ledgers, and the blurred shoulder of @ref1 sits in the foreground, facing him. @ref2 says in Italian: "Some day — and that day may never come — I will call upon you to do me a service." The wedding music outside swells, then fades.
+DURATION_WEIGHT: 5
+---SEQUENCE_8_END---
