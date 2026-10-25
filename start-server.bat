@@ -1,4 +1,5 @@
 @echo off
+chcp 850 >nul
 title RAG WebUI
 setlocal
 
@@ -7,7 +8,7 @@ set "CONDA=%ROOT%miniforge"
 set "ENV=%ROOT%env"
 set "PYTHONNOUSERSITE=1"
 
-:: ── llama.cpp / Modelle (muss in derselben BAT stehen wie der WebUI-Start) ──
+:: = llama.cpp / Modelle (muss in derselben BAT stehen wie der WebUI-Start) =
 set "LLAMA_EXE=G:\llama.cpp\llama-b9204-bin-win-cuda-13.1-x64\llama-server.exe"
 set "MODELS_ROOT=C:\Users\bunny\.lmstudio\models"
 set "MODELS_ROOT2=G:\ComfyUI\models\LLM"
@@ -15,37 +16,40 @@ set "CTX_SIZE=8192"
 set "THREADS=8"
 set "NGL=99"
 
+:: = WebUI-Port =
+set "WEBUI_PORT=7960"
+
 if not exist "%ENV%\python.exe" (
-    echo [ERROR] Environment not found. Please run setup.bat first.
+    echo [FEHLER] Umgebung nicht gefunden. Bitte zuerst setup.bat ausfuehren.
     pause
     exit /b 1
 )
 
 echo.
 echo  +------------------------------------------+
-echo  ^|      RAG WebUI -- Select Database        ^|
+echo  ^|      RAG WebUI -- Datenbank auswaehlen   ^|
 echo  +------------------------------------------+
 echo.
-echo  [1]  Main RAG   (chroma_zaebalo)
-echo  [2]  Book RAG   (bookrag)
+echo  [1]  Haupt-RAG   (chroma_zaebalo)
+echo  [2]  Buch-RAG    (bookrag)
 echo.
-set /p CHOICE= Your choice [1/2]: 
+set /p WAHL= Deine Wahl [1/2]: 
 
-if "%CHOICE%"=="2" (
+if "%WAHL%"=="2" (
     set "RAG_DB=%ROOT%bookrag"
     set "RAG_COLLECTION=books"
     echo.
-    echo  [OK] Book RAG selected: bookrag
+    echo  [OK] Buch-RAG gewaehlt: bookrag
 ) else (
     set "RAG_DB=%ROOT%chroma_zaebalo"
     set "RAG_COLLECTION=zaebalo"
     echo.
-    echo  [OK] Main RAG selected: chroma_zaebalo
+    echo  [OK] Haupt-RAG gewaehlt: chroma_zaebalo
 )
 
 echo.
-echo  Address : http://127.0.0.1:7860
-echo  KoboldCpp on port 5001 will be detected automatically.
+echo  Adresse : http://127.0.0.1:%WEBUI_PORT%
+echo  KoboldCpp auf Port 5001 wird automatisch erkannt.
 echo.
 
 "%CONDA%\Scripts\conda.exe" run -p "%ENV%" --no-capture-output python -s "%ROOT%webui_server.py"

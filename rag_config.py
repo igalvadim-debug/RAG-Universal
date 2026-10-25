@@ -81,7 +81,7 @@ class NetConfig:
     # Дополнительные локальные порты llama-server (через запятую), напр. сервер из других лаунчеров на 8484
     llama_extra_ports: str = _env("LLAMA_EXTRA_PORTS", "8484")
     remote_llama: str = _env("REMOTE_LLAMA", "192.168.181.93:7860")
-    webui_port: int = int(_env("WEBUI_PORT", "7860"))
+    webui_port: int = int(_env("WEBUI_PORT", "7960"))
 
     health_timeout: float = float(_env("HEALTH_TIMEOUT", "5"))
     cloud_timeout: float = float(_env("CLOUD_TIMEOUT", "120"))

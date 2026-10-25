@@ -2422,6 +2422,6 @@ if __name__ == "__main__":
     ui = build_ui()
     ui.launch(
         server_name = "127.0.0.1",
-        server_port = 7860,
+        server_port = rag_core.NET.webui_port,   # WEBUI_PORT-Umgebung, Standard 7960
         inbrowser   = True,
     )

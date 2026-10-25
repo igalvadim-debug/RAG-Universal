@@ -1,18 +1,19 @@
 @echo off
+chcp 850 >nul
 title RAG + Qwen2.5 Coder + llama.cpp
 
 echo ================================
-echo   Активирую виртуальное окружение
+echo   Aktiviere virtuelle Umgebung
 echo ================================
 call "D:\ComfyUiCuda\venv\Scripts\activate.bat"
 
 echo.
 echo ================================
-echo   Запускаю Qwen2.5-Coder-7B-Instruct (GGUF)
+echo   Starte Qwen2.5-Coder-7B-Instruct (GGUF)
 echo ================================
 set MODEL_PATH=D:\Unsloth\C-claude\models\Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 
-echo Модель: %MODEL_PATH%
+echo Modell: %MODEL_PATH%
 echo.
 
 start "" /MIN cmd /c ^
@@ -25,17 +26,17 @@ start "" /MIN cmd /c ^
     --threads 8
 
 echo.
-echo Жду 3 секунды, пока сервер поднимется...
+echo Warte 3 Sekunden, bis der server bereit ist...
 timeout /t 3 >nul
 
 echo.
 echo ================================
-echo   Запускаю RAG-клиент
+echo   Starte RAG-Client
 echo ================================
 python "C:\Users\Startklar\Desktop\zaebalo_mirror\rag_query.py"
 
 echo.
 echo ================================
-echo   Готово
+echo   Fertig
 echo ================================
 pause

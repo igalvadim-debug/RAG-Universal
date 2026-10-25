@@ -1,5 +1,5 @@
 @echo off
-title RAG - Install Packages
+title RAG - Pakete installieren
 setlocal
 
 set "ROOT=%~dp0"
@@ -20,7 +20,7 @@ echo ============================================
 echo  Umgebung: %ENV%
 echo.
 
-echo [1/2] Installiere Torch mit CUDA 12.8 Support...
+echo [1/2] Installiere Torch mit CUDA 12.8 Unterstuetzung...
 "%PIP%" install torch==2.12.0 torchvision==0.27.0 torchaudio==2.11.0 --index-url https://download.pytorch.org/whl/cu128
 if errorlevel 1 (
     echo [FEHLER] Torch-Installation fehlgeschlagen!

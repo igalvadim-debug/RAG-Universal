@@ -9,7 +9,7 @@ set "INSTALLER=%ROOT%Miniforge3-installer.exe"
 
 echo ============================================
 echo  RAG Setup - Erstinstallation
-echo  Benoetigt: ~5GB freier Speicher, Internet
+echo  Benoetigt: ca. 5GB freier Speicher, Internet
 echo ============================================
 echo.
 
@@ -59,6 +59,9 @@ echo [OK] Python-Umgebung erstellt.
 :install_packages
 echo [4/4] Installiere Pakete...
 echo.
+
+:: WebUI-Port (Standard 7960)
+set "WEBUI_PORT=7960"
 
 :: Torch zuerst mit CUDA-Index
 "%ENV%\Scripts\pip.exe" install torch==2.12.0 torchvision==0.27.0 torchaudio==2.11.0 --index-url https://download.pytorch.org/whl/cu128

@@ -1,9 +1,9 @@
 @echo off
-chcp 65001 >nul
-title Z-Image-Turbo Generator
+chcp 850 >nul
+title Z-Image-Turbo Bildgenerator
 setlocal
 
-:: Python mit diffusers + torch waehlen (ComfyUi-venv)
+:: Python mit diffusers + torch auswaehlen (ComfyUi-venv)
 set "PY="
 if exist "D:\ComfyUiCuda\venv\Scripts\python.exe" set "PY=D:\ComfyUiCuda\venv\Scripts\python.exe"
 if exist "C:\ComfyUi\venv\Scripts\python.exe" set "PY=C:\ComfyUi\venv\Scripts\python.exe"
