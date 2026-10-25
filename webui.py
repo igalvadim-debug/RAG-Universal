@@ -27,6 +27,20 @@ UPLOAD_CACHE.mkdir(exist_ok=True)
 SONGS_DIR    = BASE_DIR / "Songs"
 SONGS_DIR.mkdir(exist_ok=True)
 
+
+def default_models_dir() -> Path:
+    """Standard-Ordner fuer GGUF-Modelle im WebUI-Feld "Папка с GGUF-моделями".
+
+    Reihenfolge: MODELS_ROOT / MODELS_ROOT2 / ... aus der Umgebung (start.bat),
+    sonst LM-Studio-Standardordner. Frueher stand hier BASE_DIR (= G:\RAG),
+    dort liegen aber keine Modelle.
+    """
+    for root in (getattr(rag_core, "MODEL_ROOTS", None) or []):
+        path = Path(root)
+        if path.is_dir():
+            return path
+    return Path(r"C:\Users\bunny\.lmstudio\models")
+
 # workflow/tripple.py — создание workflow-JSON (TripleUpscale / CS LTX Director)
 import sys as _sys
 if str(BASE_DIR / "workflow") not in _sys.path:
@@ -1591,24 +1605,33 @@ def build_ui():
         primary_hue="amber",
         secondary_hue="stone",
         neutral_hue="stone",
-        font=["Georgia", "Times New Roman", "serif"],
+        # Gradio 6: Schriftarten muessen Font-Objekte sein - reine Strings
+        # lassen launch() mit "AttributeError: str has no attribute name"
+        # abstuerzen (Vergleich gegen die Built-in-Themes).
+        font=[
+            gr.themes.Font("Georgia"),
+            gr.themes.Font("Times New Roman"),
+            gr.themes.Font("serif"),
+        ],
         radius_size=gr.themes.sizes.radius_md,
     ).set(
         body_background_fill="linear-gradient(160deg, #241a10 0%, #1b130b 55%, #120c07 100%)",
         background_fill_primary="#2b1f13",
         background_fill_secondary="#37281a",
         block_background_fill="linear-gradient(180deg, rgba(64,46,28,0.92), rgba(43,31,19,0.94))",
-        block_border="2px solid #8a6a3b",
+        block_border_width="2px",
+        block_border_color="#8a6a3b",
         block_shadow="0 6px 24px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,214,150,0.15)",
         block_title_text_color="#e8c98a",
         block_label_text_color="#d9b878",
         body_text_color="#eadbc0",
         input_background_fill="#221810",
-        input_border="1px solid #7a5c33",
+        input_border_width="1px",
+        input_border_color="#7a5c33",
         button_primary_background_fill="linear-gradient(180deg, #c98a3d, #8f5a22)",
-        button_primary_border="1px solid #e0aa5a",
+        button_primary_border_color="#e0aa5a",
         button_secondary_background_fill="#3b2c1c",
-        button_secondary_border="1px solid #8a6a3b",
+        button_secondary_border_color="#8a6a3b",
     )
 
     _LAYOUT_CSS = """
@@ -1651,7 +1674,10 @@ footer { display: none; }
 }
 """
 
-    with gr.Blocks(title="RAG — Генератор сценариев", theme=_STEAM_THEME, css=_LAYOUT_CSS) as demo:
+    # Gradio 6: theme/css gehoeren nicht mehr in den Blocks-Konstruktor,
+    # sondern in launch(). Sie werden hier am Demo-Objekt hinterlegt und
+    # unten in __main__ an ui.launch(theme=..., css=...) uebergeben.
+    with gr.Blocks(title="RAG — Генератор сценариев") as demo:
 
         gr.Markdown("# ⚙️🎬 RAG — Генератор сценариев")
 
@@ -1665,7 +1691,7 @@ footer { display: none; }
             with gr.Row():
                 model_folder = gr.Textbox(
                     label       = "Папка с GGUF-моделями",
-                    value       = str(BASE_DIR),
+                    value       = str(default_models_dir()),
                     placeholder = "Например: D:\\models",
                     scale       = 4,
                 )
@@ -2444,6 +2470,8 @@ footer { display: none; }
             js      = "(text) => {if (navigator.clipboard && navigator.clipboard.writeText) {navigator.clipboard.writeText(text).catch(function() {var ta=document.createElement(\"textarea\");ta.value=text;ta.style.position=\"fixed\";ta.style.opacity=\"0\";document.body.appendChild(ta);ta.select();document.execCommand(\"copy\");document.body.removeChild(ta);});} else {var ta=document.createElement(\"textarea\");ta.value=text;ta.style.position=\"fixed\";ta.style.opacity=\"0\";document.body.appendChild(ta);ta.select();document.execCommand(\"copy\");document.body.removeChild(ta);}}",
         )
 
+    demo.rag_theme = _STEAM_THEME
+    demo.rag_css = _LAYOUT_CSS
     return demo
 
 
@@ -2468,4 +2496,6 @@ if __name__ == "__main__":
         server_name = rag_core.NET.webui_host,   # WEBUI_HOST: 0.0.0.0 = Zugriff im LAN, Standard
         server_port = rag_core.NET.webui_port,   # WEBUI_PORT-Umgebung, Standard 7960
         inbrowser   = True,
+        theme       = getattr(ui, "rag_theme", None),   # Gradio 6: Theme/CSS nur hier
+        css         = getattr(ui, "rag_css", None),
     )
