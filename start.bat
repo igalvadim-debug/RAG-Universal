@@ -7,6 +7,21 @@ set "ROOT=%~dp0"
 set "CONDA=%ROOT%miniforge"
 set "ENV=%ROOT%env"
 
+:: ── llama.cpp / Modelle ─────────────────────────────────────────────
+:: Diese Variablen MUESSEN hier gesetzt sein (nicht in einer anderen CMD!),
+:: damit webui.py / rag_core.py sie beim Start sieht.
+set "LLAMA_EXE=G:\llama.cpp\llama-b9204-bin-win-cuda-13.1-x64\llama-server.exe"
+set "MODELS_ROOT=C:\Users\bunny\.lmstudio\models"
+set "MODELS_ROOT2=G:\ComfyUI\models\LLM"
+set "CTX_SIZE=8192"
+set "THREADS=8"
+set "NGL=99"
+
+if not exist "%LLAMA_EXE%" echo [WARN] LLAMA_EXE nicht gefunden: %LLAMA_EXE%
+
+:: Optionale extra Variablen aus env.bat (z.B. API-Keys), falls vorhanden
+if exist "%ROOT%env.bat" call "%ROOT%env.bat"
+
 :: Отключаем пользовательские пакеты из AppData\Roaming
 :: (они конфликтуют с portable окружением)
 set "PYTHONNOUSERSITE=1"

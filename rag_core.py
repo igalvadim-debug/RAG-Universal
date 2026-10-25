@@ -651,23 +651,32 @@ def start_llama_server(gguf_path: str, log_callback=None) -> bool:
     if exe is None:
         msg = ("[RAG] llama-server.exe nicht gefunden. Setze die Umgebungsvariable "
                'LLAMA_EXE, z.B.: set "LLAMA_EXE=G:\\llama.cpp\\llama-b9204-bin-win-cuda-13.1-x64\\llama-server.exe" '
-               "oder lege die Binary in llama.cpp-master/build/bin/")
+               "oder lege die Binary in llama.cpp-master/build/bin/. "
+               "WICHTIG: Variablen MUESSEN in derselben Shell/BAT gesetzt sein, "
+               "die webui.py startet (siehe start.bat).")
+        _debug_log(msg)
         print(msg)
         if log_callback:
             log_callback(msg)
         return False
 
     if llama_alive():
-        msg = "[RAG] llama-server уже запущен на порту 8080."
+        msg = f"[RAG] llama-server ist bereits erreichbar ({get_llama_url()})."
+        _debug_log(msg)
         print(msg)
         if log_callback:
             log_callback(msg)
         return True
 
     settings = load_settings()
-    ngl = settings.get("n_gpu_layers", DEFAULT_NGL)
-    ctx = settings.get("ctx_size", DEFAULT_CTX_SIZE)
-    threads = settings.get("threads", DEFAULT_THREADS)
+    # Umgebungsvariablen (NGL/CTX_SIZE/THREADS) haben VORRANG vor settings.txt —
+    # der Nutzer stellt sie in start.bat ein; settings.txt dient als Fallback.
+    env_ngl     = os.environ.get("NGL", "").strip()
+    env_ctx     = os.environ.get("CTX_SIZE", "").strip()
+    env_threads = os.environ.get("THREADS", "").strip()
+    ngl     = int(env_ngl)     if env_ngl     else settings.get("n_gpu_layers", DEFAULT_NGL)
+    ctx     = int(env_ctx)     if env_ctx     else settings.get("ctx_size", DEFAULT_CTX_SIZE)
+    threads = int(env_threads) if env_threads else settings.get("threads", DEFAULT_THREADS)
     port = settings.get("port", NET.llama_port)
     cmd = [
         str(exe),

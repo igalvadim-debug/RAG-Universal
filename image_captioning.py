@@ -303,9 +303,14 @@ class QwenVLCaptioner:
         self._loaded = False
 
     def _find_server_exe(self) -> Optional[str]:
-        # Известные пути из rag_core (BASE_DIR = папка RAG) + внешний Unsloth
+        # LLAMA_EXE aus der Umgebung hat Vorrang (start.bat), dann bekannte Pfade
         base = Path(__file__).parent
-        candidates = [
+        env_exe = os.environ.get("LLAMA_EXE", "").strip().strip('"')
+        candidates = []
+        if env_exe:
+            candidates.append(Path(env_exe))
+        candidates += [
+            Path(r"G:\llama.cpp") / "llama-b9204-bin-win-cuda-13.1-x64" / "llama-server.exe",
             Path(r"D:\Unsloth\C-claude\llama.cpp\llama-server.exe"),
             base / "llama.cpp-master" / "llama-b9553-bin-win-cuda-13.3-x64" / "llama-server.exe",
             base / "llama.cpp-master" / "build" / "bin" / "llama-server.exe",

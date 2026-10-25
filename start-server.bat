@@ -7,6 +7,14 @@ set "CONDA=%ROOT%miniforge"
 set "ENV=%ROOT%env"
 set "PYTHONNOUSERSITE=1"
 
+:: ── llama.cpp / Modelle (muss in derselben BAT stehen wie der WebUI-Start) ──
+set "LLAMA_EXE=G:\llama.cpp\llama-b9204-bin-win-cuda-13.1-x64\llama-server.exe"
+set "MODELS_ROOT=C:\Users\bunny\.lmstudio\models"
+set "MODELS_ROOT2=G:\ComfyUI\models\LLM"
+set "CTX_SIZE=8192"
+set "THREADS=8"
+set "NGL=99"
+
 if not exist "%ENV%\python.exe" (
     echo [ERROR] Environment not found. Please run setup.bat first.
     pause
