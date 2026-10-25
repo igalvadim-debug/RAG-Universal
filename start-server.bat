@@ -57,21 +57,33 @@ echo  Adresse : http://127.0.0.1:%WEBUI_PORT%  (LAN: http://<PC-IP>:%WEBUI_PORT%
 echo  KoboldCpp auf Port 5001 wird automatisch erkannt.
 echo.
 
-:: Node-Backend (API + WebSocket) und React/Vite-Frontend starten, falls vorhanden
-if exist "%ROOT%package.json" (
-    echo --- Starte Node-Backend (Port %BACKEND_PORT%) fuer die React/Vite-Oberflaeche ---
-    if not exist "%ROOT%node_modules" (
-        echo   [INFO] node_modules fehlt - fuehre npm install aus...
-        call npm install
-    )
-    start "RAG Node-Backend" cmd /k "cd /d "%ROOT%" && set BACKEND_PORT=%BACKEND_PORT% && npm run start:backend"
-    timeout /t 2 >nul
-    echo --- Starte Vite-Dev-Server (Port %WEBUI_PORT%) ---
-    start "RAG Vite-Frontend" cmd /k "cd /d "%ROOT%" && npm run dev -- --port %WEBUI_PORT%"
-    echo   React-UI: http://127.0.0.1:%WEBUI_PORT%
-    echo   API:      http://127.0.0.1:%BACKEND_PORT%
-    echo.
+rem Node-Backend (API + WebSocket) und React/Vite-Frontend starten, falls vorhanden.
+rem ACHTUNG: Das Vite-Frontend braucht das src-Verzeichnis (index.html -> src/frontend/main.tsx).
+rem Wenn src/ fehlt, wird KEIN Vite-Dev-Server gestartet - er wuerde nur eine kaputte
+rem Seite liefern und den Port blockieren, den die Gradio-WebUI braucht.
+if not exist "%ROOT%package.json" goto :skip_node
+if not exist "%ROOT%src\backend\server.ts" goto :skip_node
+echo --- Starte Node-Backend (Port %BACKEND_PORT%) fuer die React/Vite-Oberflaeche ---
+if not exist "%ROOT%node_modules" (
+    echo   [INFO] node_modules fehlt - fuehre npm install aus...
+    call npm install
 )
+start "RAG Node-Backend" cmd /k "cd /d "%ROOT%" && set BACKEND_PORT=%BACKEND_PORT% && npm run start:backend"
+timeout /t 2 >nul
+if not exist "%ROOT%src\frontend\main.tsx" goto :skip_vite
+echo --- Starte Vite-Dev-Server (Port %WEBUI_PORT%) ---
+start "RAG Vite-Frontend" cmd /k "cd /d "%ROOT%" && npm run dev -- --port %WEBUI_PORT%"
+echo   React-UI: http://127.0.0.1:%WEBUI_PORT%
+echo   API:      http://127.0.0.1:%BACKEND_PORT%
+echo.
+goto :skip_vite_done
+:skip_vite
+echo [INFO] src\frontend\main.tsx fehlt - Vite-Frontend wird NICHT gestartet.
+:skip_vite_done
+goto :after_node
+:skip_node
+echo [INFO] Kein vollstaendiges Node-Projekt gefunden (package.json / src/) - WebUI laeuft nur als Python/Gradio.
+:after_node
 
 "%CONDA%\Scripts\conda.exe" run -p "%ENV%" --no-capture-output python -s "%ROOT%webui_server.py"
 
