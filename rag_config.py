@@ -51,6 +51,10 @@ class Paths:
     stylemusic_path: Path = BASE_DIR / "stylemusic.json"
     settings_path: Path = BASE_DIR / "settings.txt"
     debug_log: Path = BASE_DIR / "webui_debug.log"
+    # Инвентарь моделей (результат scan_models): "path | GB | TYPE" построчно.
+    models_txt: Path = field(
+        default_factory=lambda: Path(_env("MODELS_TXT", str(BASE_DIR / "models.txt")))
+    )
     # Реальная папка ComfyUI-воркфлоу в этом репозитории — "Workflow" (с большой буквы!)
     workflow_dir: Path = BASE_DIR / "Workflow"
     # Каталог input того ComfyUI, куда экспортируются картинки/промпты.

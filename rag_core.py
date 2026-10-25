@@ -235,17 +235,59 @@ def _debug_log(msg: str):
 # Конфигурация провайдеров (url, модель, ключ из .env) — единый источник: rag_config.CLOUD_PROVIDERS
 CLOUD_PROVIDERS = CLOUD_PROVIDERS  # noqa: PLW0127 — реэкспорт для совместимости (webui.py и др.)
 
+def _env_path(name: str) -> Path | None:
+    """Возвращает непустую переменную окружения как Path (для LLAMA_EXE/MODELS_ROOT)."""
+    v = os.environ.get(name, "").strip().strip('"')
+    return Path(v) if v else None
+
+
+def _env_int(name: str, default: int) -> int:
+    """Целое из окружения (CTX_SIZE/THREADS/NGL), default если не задано или мусор."""
+    try:
+        return int(os.environ.get(name, "").strip())
+    except (TypeError, ValueError):
+        return default
+
+
 # llama-server бинарник — ищем в известных местах (порядок важен).
+# Переопределение: set "LLAMA_EXE=G:\llama.cpp\llama-b9204-bin-win-cuda-13.1-x64\llama-server.exe"
+# — тогда этот путь проверяется ПЕРВЫМ (и именно он используется для автозапуска).
 # ВНИМАНИЕ: Unsloth-сервер (D:\Unsloth\C-claude\LlamaCpp.bat) пользователь запускает САМ —
 # он сюда НЕ добавляется, чтобы автозапуск не конфликтовал с ручным сервером.
 # Обычная генерация подключается к уже запущенному серверу через llama_alive()/get_llama_url().
 LLAMA_CANDIDATES = [
+    p for p in [_env_path("LLAMA_EXE")] if p
+] + [
+    BASE_DIR / "llama.cpp-master" / "llama-b9204-bin-win-cuda-13.1-x64" / "llama-server.exe",
     BASE_DIR / "llama.cpp-master" / "llama-b9553-bin-win-cuda-13.3-x64" / "llama-server.exe",
     BASE_DIR / "llama.cpp-master" / "build" / "bin" / "llama-server.exe",
     BASE_DIR / "llama.cpp-master" / "build" / "bin" / "Release" / "llama-server.exe",
     BASE_DIR / "llama.cpp-master" / "llama-server.exe",
     BASE_DIR / "llama" / "llama-server.exe",
+    # типичные отдельные папки с llama.cpp вне репозитория (G:/D: диски)
+    Path(r"G:\llama.cpp") / "llama-b9204-bin-win-cuda-13.1-x64" / "llama-server.exe",
+    Path(r"D:\Unsloth\C-claude\llama.cpp") / "llama-server.exe",
 ]
+
+# Корни GGUF-моделей: MODELS_ROOT / MODELS_ROOT2 из окружения (LM Studio, ComfyUI LLM)
+# плюс исторические пути. Сканируются рекурсивно (см. scan_gguf / find_default_model).
+MODEL_ROOTS = [
+    p for p in [
+        _env_path("MODELS_ROOT"),
+        _env_path("MODELS_ROOT2"),
+        _env_path("MODELS_ROOT3"),
+        Path(r"C:\Users\bunny\.lmstudio\models"),
+        Path(r"G:\ComfyUI\models\LLM"),
+        Path(r"D:\ComfyUi\models\LLM"),
+        Path(r"E:\DC\comfyui\models\LLM"),
+        BASE_DIR / "models",
+    ] if p
+]
+
+# Параметры сервера по умолчанию из окружения (settings.txt имеет приоритет выше).
+DEFAULT_CTX_SIZE = _env_int("CTX_SIZE", 8192)
+DEFAULT_THREADS  = _env_int("THREADS", 8)
+DEFAULT_NGL      = _env_int("NGL", 99)
 
 KOBOLD_URL  = NET.kobold_url
 LLAMA_URL   = NET.llama_url
@@ -368,10 +410,162 @@ def get_collection_by_name(name: str):
 # ──────────────────────────────────────────────
 
 def find_llama_server() -> Path | None:
-    """Ищет llama-server.exe среди известных путей."""
+    """Ищет llama-server.exe среди известных путей (LLAMA_EXE из окружения — первым)."""
     for p in LLAMA_CANDIDATES:
-        if p.exists():
-            return p
+        try:
+            if p.exists():
+                return p
+        except OSError:
+            continue
+    # последний шанс — бинарник в PATH
+    from shutil import which
+    w = which("llama-server") or which("llama-server.exe")
+    return Path(w) if w else None
+
+
+# Префиксы имён GGUF, которые НЕ являются LLM-чекпойнтами (диффузия/VAE/mmproj/vocab).
+_NON_LLM_PREFIXES = (
+    "mmproj", "ggml-vocab", "ltx", "ltxv", "ltx-2", "10eros", "wan2", "wan 2",
+    "z_image", "z-image", "flux", "sd3", "sdxl", "pig_video", "vae",
+)
+
+# Ключевые слова LLM/VLM для фильтрации моделей из models.txt.
+_LLM_KEYWORDS = (
+    "qwen", "llama", "gemma", "jan-v1", "jan_v1", "mistral", "phi", "deepseek",
+    "hermes", "stheno", "mimo", "minimax", "glm", "internlm", "yi-", "command-r",
+    "abliterated", "coder", "vl-", "-vl", "instruct", "chat",
+)
+
+
+def _is_llm_gguf(name: str) -> bool:
+    """True, если имя файла GGUF похожа на LLM/VLM-модель (не диффузию, не mmproj/vocab)."""
+    n = name.lower()
+    if any(n.startswith(p) for p in _NON_LLM_PREFIXES):
+        return False
+    if "mmproj" in n or "vocab" in n:
+        return False
+    return any(k in n for k in _LLM_KEYWORDS)
+
+
+def parse_models_txt(path: Path | None = None) -> list[Path]:
+    """Читает models.txt-инвентарь ("path | GB | TYPE" построчно, пути с удвоенными \\).
+
+    Возвращает только реально существующие на этом компьютере *.gguf-файлы,
+    похожие на LLM/VLM (см. _is_llm_gguf). Отсутствующие диски и строки
+    инвентаря молча пропускаются.
+    """
+    path = Path(path) if path else PATHS.models_txt
+    if not path.exists():
+        return []
+    found: list[Path] = []
+    seen: set[str] = set()
+    try:
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError as e:
+        log.warning("models.txt не читается (%s): %s", path, e)
+        return []
+    for line in lines:
+        part = line.split("|")[0].strip().replace("\\\\", "\\")
+        if not part.lower().endswith(".gguf"):
+            continue
+        fname = Path(part).name
+        if not _is_llm_gguf(fname):
+            continue
+        key = part.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        try:
+            if Path(part).is_file():
+                found.append(Path(part))
+        except OSError:
+            continue
+    return found
+
+
+def scan_gguf(folder: str) -> list[str]:
+    """Сканирует папку (или список папок через ';') и возвращает пути к *.gguf.
+
+    Пропускает vocab-файлы, mmproj-адаптеры и мелкий мусор (< 50 МБ).
+    """
+    models: list[str] = []
+    seen: set[str] = set()
+    for one in str(folder).split(";"):
+        one = one.strip().strip('"')
+        if not one:
+            continue
+        p = Path(one)
+        if not p.exists():
+            continue
+        if p.is_file() and p.suffix.lower() == ".gguf":
+            candidates = [p]
+        else:
+            try:
+                candidates = sorted(p.rglob("*.gguf"))
+            except OSError:
+                continue
+        for f in candidates:
+            name_l = f.name.lower()
+            # Пропускаем токенизаторы (ggml-vocab-*), vision-адаптеры (mmproj*) и мелкий мусор
+            if "ggml-vocab-" in name_l or name_l.startswith("mmproj"):
+                continue
+            try:
+                if f.stat().st_size < 50 * 1024 * 1024:
+                    continue
+            except OSError:
+                continue
+            key = str(f).lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            models.append(str(f))
+    return models
+
+
+def find_default_model() -> tuple[str | None, str]:
+    """Определяет GGUF для автозапуска llama-server.
+
+    Порядок: MODEL_PATH из settings.txt → скан MODEL_ROOTS (MODELS_ROOT /
+    MODELS_ROOT2 из окружения) → релевантные модели из models.txt.
+    Возвращает (путь или None, человекочитаемое пояснение источника).
+    """
+    s = load_settings()
+    mp = str(s.get("MODEL_PATH") or "").strip()
+    if mp and Path(mp).exists():
+        return mp, "settings.txt (MODEL_PATH)"
+    for root in MODEL_ROOTS:
+        found = scan_gguf(str(root))
+        llm = [m for m in found if _is_llm_gguf(Path(m).name)]
+        if llm:
+            return llm[0], f"скан {root}"
+    inv = parse_models_txt()
+    if inv:
+        return str(inv[0]), "models.txt (инвентарь)"
+    return None, ""
+
+
+def resolve_model_path(gguf_path: str) -> str | None:
+    """Нормализует путь к модели: снимает кавычки/удвоенные слеши из models.txt,
+    раскрывает ~; если файл не найден как есть — ищет его по имени в MODEL_ROOTS
+    и models.txt. Возвращает абсолютный путь или None."""
+    raw = str(gguf_path or "").strip().strip('"').replace("\\\\", "\\")
+    if not raw:
+        return None
+    p = Path(raw)
+    try:
+        if p.expanduser().is_file():
+            return str(p.expanduser().resolve())
+    except OSError:
+        pass
+    # fallback: поиск по имени файла (модель могла переехать на другой диск)
+    target = p.name.lower()
+    for root in MODEL_ROOTS:
+        for m in scan_gguf(str(root)):
+            if Path(m).name.lower() == target:
+                return m
+    for m in parse_models_txt():
+        if m.name.lower() == target:
+            return str(m)
     return None
 
 
@@ -421,14 +615,43 @@ def get_llama_port() -> int | None:
 def start_llama_server(gguf_path: str, log_callback=None) -> bool:
     """
     Запускает llama-server.exe с нужными параметрами.
-    gguf_path — полный путь к GGUF-файлу.
-    Возвращает True если сервер поднялся.
+    gguf_path — полный путь к GGUF-файлу (пусто = find_default_model():
+    settings.txt → MODELS_ROOT/MODELS_ROOT2 → models.txt).
+    Параметры: settings.txt (ctx_size/n_gpu_layers), иначе окружение
+    CTX_SIZE/NGL/THREADS, иначе 8192/99/8. Возвращает True если сервер поднялся.
     """
     global _llama_proc
 
+    # модель: разрешаем путь (models.txt-формат с \\\\ и кавычками тоже understood)
+    resolved = resolve_model_path(gguf_path) if gguf_path else None
+    if resolved is None:
+        auto_src = ""
+        resolved, auto_src = find_default_model()
+        if resolved is None:
+            msg = ("[RAG] Keine GGUF-Modell gefunden: MODEL_PATH in settings.txt leer, "
+                   "MODELS_ROOT/MODELS_ROOT2 nicht gescannt worden, models.txt ohne relevante Modelle.")
+            print(msg)
+            if log_callback:
+                log_callback(msg)
+            return False
+        msg = f"[RAG] Modell automatisch gewählt ({auto_src}): {resolved}"
+        print(msg)
+        if log_callback:
+            log_callback(msg)
+    gguf_path = resolved
+
+    if not Path(gguf_path).exists():
+        msg = f"[RAG] Modelldatei nicht gefunden: {gguf_path}"
+        print(msg)
+        if log_callback:
+            log_callback(msg)
+        return False
+
     exe = find_llama_server()
     if exe is None:
-        msg = "[RAG] llama-server.exe не найден. Скомпилируй llama.cpp или положи бинарник в llama.cpp-master/build/bin/"
+        msg = ("[RAG] llama-server.exe nicht gefunden. Setze die Umgebungsvariable "
+               'LLAMA_EXE, z.B.: set "LLAMA_EXE=G:\\llama.cpp\\llama-b9204-bin-win-cuda-13.1-x64\\llama-server.exe" '
+               "oder lege die Binary in llama.cpp-master/build/bin/")
         print(msg)
         if log_callback:
             log_callback(msg)
@@ -442,20 +665,22 @@ def start_llama_server(gguf_path: str, log_callback=None) -> bool:
         return True
 
     settings = load_settings()
-    ngl = settings.get("n_gpu_layers", 99)
-    ctx = settings.get("ctx_size", 8192)
+    ngl = settings.get("n_gpu_layers", DEFAULT_NGL)
+    ctx = settings.get("ctx_size", DEFAULT_CTX_SIZE)
+    threads = settings.get("threads", DEFAULT_THREADS)
+    port = settings.get("port", NET.llama_port)
     cmd = [
         str(exe),
         "-m", gguf_path,
-        "-ngl", str(ngl),        # GPU-Layer aus settings.txt
-        "-c", str(ctx),          # Kontextfenster aus settings.txt
+        "-ngl", str(ngl),        # GPU-Layer: settings.txt > NGL > 99
+        "-c", str(ctx),          # Kontextfenster: settings.txt > CTX_SIZE > 8192
         "--flash-attn",         # Flash Attention — экономия VRAM
         "-b", "512",            # batch size
         "--ubatch-size", "512", # micro-batch
         "--mlock",              # не свопить модель
-        "-t", "8",              # потоки CPU
-        "--port", "8080",
-        "--host", "127.0.0.1",
+        "-t", str(threads),     # потоки CPU: THREADS > 8
+        "--port", str(port),
+        "--host", NET.llama_host,
     ]
 
     msg = f"[RAG] Запускаю llama-server: {' '.join(cmd)}"
@@ -2466,23 +2691,6 @@ def generate_controlnet_captions(image_paths: list, cloud_provider: str = "auto"
     lines.append("")
     lines.append("=" * 60)
     return "\n".join(lines)
-
-
-def scan_gguf(folder: str) -> list[str]:
-    """Сканирует папку и возвращает список путей к *.gguf файлам (пропускает vocab-файлы и мелкий мусор)."""
-    p = Path(folder)
-    if not p.exists():
-        return []
-    models = []
-    for f in sorted(p.rglob("*.gguf")):
-        # Пропускаем файлы токенизаторов (ggml-vocab-*) — это не модели
-        if "ggml-vocab-" in f.name:
-            continue
-        # Пропускаем файлы меньше 100 МБ — модели весят гигабайты
-        if f.stat().st_size < 100 * 1024 * 1024:
-            continue
-        models.append(str(f))
-    return models
 
 
 # ──────────────────────────────────────────────
