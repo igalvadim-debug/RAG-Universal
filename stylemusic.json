@@ -1,0 +1,120 @@
+{
+  "ltx_music_styles": [
+    {
+      "category": "cinematic",
+      "styles": [
+        "cinematic soundtrack",
+        "emotional piano",
+        "dark ambient",
+        "melancholic ambient",
+        "epic orchestral",
+        "horror drones",
+        "sci-fi synth",
+        "post-apocalyptic ambience"
+      ],
+      "prompt": "cinematic soundtrack mood, slow emotional tone, deep reverb atmosphere, drifting ambience, expressive breathing, dramatic lighting synced to the mood"
+    },
+    {
+      "category": "dark_gothic",
+      "styles": [
+        "gothic rock ambience",
+        "dark folk",
+        "slavic pagan folk",
+        "nordic folk",
+        "medieval bard style",
+        "ritual ambient"
+      ],
+      "prompt": "dark folk atmosphere, ritual rhythm, cold melancholic tone, ancient slavic mood, soft echo, expressive emotional delivery"
+    },
+    {
+      "category": "rock_metal",
+      "styles": [
+        "classic rock",
+        "soft rock",
+        "heavy rock",
+        "industrial rock",
+        "metal vibe",
+        "grunge atmosphere"
+      ],
+      "prompt": "heavy rock vibe, energetic expressive movement, gritty emotional delivery, intense rhythm, dramatic contrast lighting"
+    },
+    {
+      "category": "electronic",
+      "styles": [
+        "synthwave",
+        "retrowave",
+        "techno",
+        "deep house",
+        "trance",
+        "drum & bass",
+        "ambient techno"
+      ],
+      "prompt": "synthwave atmosphere, neon glow, pulsing rhythm, smooth head movement, futuristic tone, soft electronic reflections"
+    },
+    {
+      "category": "pop",
+      "styles": [
+        "soft pop",
+        "indie pop",
+        "emotional pop ballad",
+        "electro-pop",
+        "acoustic pop"
+      ],
+      "prompt": "soft pop style, warm emotional tone, expressive eyes, gentle rhythmic motion, intimate performance mood"
+    },
+    {
+      "category": "hiphop_rap",
+      "styles": [
+        "hip-hop vibe",
+        "trap mood",
+        "oldschool rap style",
+        "rhythmic spoken style"
+      ],
+      "prompt": "hip-hop vibe, confident expressive delivery, rhythmic head movement, subtle lip-sync style, urban atmosphere"
+    },
+    {
+      "category": "world_ethno",
+      "styles": [
+        "slavic folk",
+        "balkan folk",
+        "nordic folk",
+        "asian traditional",
+        "japanese shakuhachi style",
+        "middle-eastern oud style",
+        "medieval lute"
+      ],
+      "prompt": "traditional folk atmosphere, cultural acoustic tone, soft ritual rhythm, expressive storytelling performance, natural ambient mood"
+    },
+    {
+      "category": "emotional_minimal",
+      "styles": [
+        "minimal piano",
+        "soft acoustic",
+        "emotional ballad",
+        "whisper-style singing",
+        "intimate storytelling"
+      ],
+      "prompt": "intimate emotional performance, soft breathing, slow expressive delivery, warm lighting, gentle rhythm, poetic atmosphere"
+    },
+    {
+      "category": "futuristic_experimental",
+      "styles": [
+        "cyberpunk synth",
+        "glitch ambience",
+        "experimental electronic",
+        "dystopian drone"
+      ],
+      "prompt": "cyberpunk experimental mood, glitchy rhythm, neon reflections, synthetic emotional tone, futuristic ambience"
+    },
+    {
+      "category": "uplifting_bright",
+      "styles": [
+        "happy pop",
+        "upbeat acoustic",
+        "bright indie",
+        "cheerful folk"
+      ],
+      "prompt": "bright uplifting mood, soft cheerful rhythm, warm expressive smile, light acoustic energy, positive emotional tone"
+    }
+  ]
+}

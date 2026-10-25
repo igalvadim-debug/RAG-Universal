@@ -1,0 +1,513 @@
+"""
+webui.py — Gradio-интерфейс для RAG-проекта.
+
+Запуск:
+    python webui.py
+    или через bat:
+    start.bat
+"""
+
+import gradio as gr
+from pathlib import Path
+import threading
+
+import rag_core
+import update_db
+import stats
+
+BASE_DIR = Path(__file__).parent
+
+# ──────────────────────────────────────────────
+# СОСТОЯНИЕ
+# ──────────────────────────────────────────────
+_gguf_list   = []   # список найденных GGUF
+_last_chunks = []   # последние найденные чанки
+
+
+# ──────────────────────────────────────────────
+# ВСПОМОГАТЕЛЬНЫЕ
+# ──────────────────────────────────────────────
+
+def backend_status() -> str:
+    b = rag_core.get_backend()
+    if b == "kobold":
+        return "✅ KoboldCpp (порт 5001)"
+    if b == "llama":
+        return "✅ llama-server (порт 8080)"
+
+    env = rag_core.load_env()
+    clouds = []
+    for prov_name, cfg in rag_core.CLOUD_PROVIDERS.items():
+        if env.get(cfg["key_var"], "").strip():
+            clouds.append(f"{prov_name} ({cfg['model']})")
+
+    if clouds:
+        return f"☁️ Локальный сервер не запущен. Доступны облачные API: {', '.join(clouds)}"
+    return "⛔ Нет ни локального сервера, ни облачных API-ключей в .env"
+
+
+def scan_models(folder: str):
+    global _gguf_list
+    _gguf_list = rag_core.scan_gguf(folder)
+    if not _gguf_list:
+        env = rag_core.load_env()
+        has_cloud = any(env.get(cfg["key_var"], "").strip() for cfg in rag_core.CLOUD_PROVIDERS.values())
+        msg = f"⚠️ GGUF-модели не найдены в: {folder}"
+        if has_cloud:
+            msg += " (облачные API доступны — генерация работает без локальной модели)"
+        return gr.update(choices=[], value=None), msg
+    return gr.update(choices=_gguf_list, value=_gguf_list[0]), f"✅ Найдено моделей: {len(_gguf_list)}"
+
+
+def launch_llama(model_path: str):
+    if not model_path:
+        env = rag_core.load_env()
+        has_cloud = any(env.get(cfg["key_var"], "").strip() for cfg in rag_core.CLOUD_PROVIDERS.values())
+        if has_cloud:
+            return "ℹ️ Нет локальной модели, но облачные API доступны."
+        return "⚠️ Сначала выбери модель из списка."
+
+    log_lines = []
+    def cb(msg):
+        log_lines.append(msg)
+
+    ok = rag_core.start_llama_server(model_path, log_callback=cb)
+    result = "\n".join(log_lines)
+    if ok:
+        return result + "\n✅ llama-server запущен!"
+    return result + "\n⛔ Не удалось запустить llama-server."
+
+
+def load_system_prompt(path: str) -> tuple[str, str]:
+    path = path.strip()
+    if not path:
+        return "", "⚠️ Путь не указан."
+    p = Path(path)
+    if not p.exists():
+        return "", f"⚠️ Файл не найден: {path}"
+    try:
+        text = p.read_text(encoding="utf-8")
+        if p.suffix == ".json":
+            import json
+            data = json.loads(text)
+            text = data.get("system") or data.get("prompt") or json.dumps(data, ensure_ascii=False)
+        return text, f"✅ Загружено {len(text)} символов из: {p.name}"
+    except Exception as e:
+        return "", f"⚠️ Ошибка чтения: {e}"
+
+
+def do_generate(question: str, style: str, word_limit: int, mode: str,
+                language: str, script_mode: str, narrator: str,
+                director_mode: str, cloud_provider: str, sys_prompt: str,
+                cb_0_0, cb_0_1, cb_0_2, cb_0_3, cb_0_4,
+                cb_1_0, cb_1_1, cb_1_2, cb_1_3, cb_1_4,
+                cb_2_0, cb_2_1, cb_2_2, cb_2_3, cb_2_4,
+                cb_3_0, cb_3_1, cb_3_2, cb_3_3, cb_3_4,
+                cb_4_0, cb_4_1, cb_4_2, cb_4_3, cb_4_4):
+    if not question.strip():
+        return "⚠️ Введи вопрос или тему.", "", backend_status()
+
+    if script_mode == "сценарий":
+        eff_script_mode = "сценарий"
+    elif mode == "аналитический":
+        eff_script_mode = "аналитический"
+    else:
+        eff_script_mode = "художественный"
+
+    technique_names = ["Dutch Angle", "Dolly Zoom", "Push-In", "Low-Angle", "POV"]
+    cb_grid = [
+        [cb_0_0, cb_0_1, cb_0_2, cb_0_3, cb_0_4],
+        [cb_1_0, cb_1_1, cb_1_2, cb_1_3, cb_1_4],
+        [cb_2_0, cb_2_1, cb_2_2, cb_2_3, cb_2_4],
+        [cb_3_0, cb_3_1, cb_3_2, cb_3_3, cb_3_4],
+        [cb_4_0, cb_4_1, cb_4_2, cb_4_3, cb_4_4],
+    ]
+    timeline_techniques = []
+    for c in range(5):
+        selected = None
+        for r in range(5):
+            if cb_grid[r][c]:
+                selected = technique_names[r]
+                break
+        timeline_techniques.append(selected)
+
+    chunks  = rag_core.search_chunks(question)
+    context = rag_core.build_context(chunks)
+    answer  = rag_core.generate_rag_answer(
+        question            = question,
+        context             = context,
+        style               = style,
+        language            = language,
+        script_mode         = eff_script_mode,
+        narrator            = narrator,
+        word_limit          = int(word_limit),
+        sys_prompt          = (sys_prompt or "").strip(),
+        timeline_techniques = timeline_techniques,
+        cloud_provider      = cloud_provider,
+        director_mode       = director_mode,
+    )
+
+    global _last_chunks
+    _last_chunks = chunks
+    chunks_text  = "\n\n" + ("─" * 60) + "\n\n".join(chunks)
+    return answer, chunks_text, backend_status()
+
+
+def do_topics(seed: str):
+    result = rag_core.generate_topics()
+    return result, backend_status()
+
+
+def do_update_db():
+    lines = []
+    def cb(msg):
+        lines.append(msg)
+    update_db.main(log_callback=cb)
+    return "\n".join(lines)
+
+
+def do_stats():
+    return stats.get_stats()
+
+
+# ──────────────────────────────────────────────
+# ИНТЕРФЕЙС
+# ──────────────────────────────────────────────
+
+def build_ui():
+    with gr.Blocks(title="RAG — Генератор сценариев") as demo:
+
+        gr.Markdown("# 🎬 RAG — Генератор сценариев")
+
+        # ── БЛОК: Бэкенд ──────────────────────────────────────────────
+        with gr.Accordion("⚙️ Настройка сервера LLM", open=True):
+            status_box = gr.Textbox(
+                label       = "Статус бэкенда",
+                value       = backend_status(),
+                interactive = False,
+            )
+            with gr.Row():
+                model_folder = gr.Textbox(
+                    label       = "Папка с GGUF-моделями",
+                    value       = str(BASE_DIR),
+                    placeholder = "Например: D:\\models",
+                    scale       = 4,
+                )
+                scan_btn = gr.Button("🔍 Сканировать", scale=1)
+
+            scan_status = gr.Textbox(label="", interactive=False, lines=1)
+
+            model_dd = gr.Dropdown(
+                label       = "Выбери модель",
+                choices     = [],
+                value       = None,
+                interactive = True,
+            )
+
+            with gr.Row():
+                launch_btn = gr.Button("🚀 Запустить llama-server", variant="primary")
+                stop_btn   = gr.Button("⏹ Остановить", variant="stop")
+
+            launch_log = gr.Textbox(label="Лог запуска", lines=5, interactive=False)
+
+        # ── БЛОК: Системный промпт ─────────────────────────────────────
+        gr.Markdown("---")
+        with gr.Accordion("📝 Системный промпт", open=False):
+            with gr.Row():
+                prompt_path = gr.Textbox(
+                    label       = "Путь к файлу (.md / .txt / .json)",
+                    placeholder = r"D:\claudeAgent\RAG\prompt.md",
+                    scale       = 3,
+                )
+                browse_btn = gr.UploadButton(
+                    label      = "📁 Обзор",
+                    file_types = [".md", ".txt", ".json"],
+                    scale      = 1,
+                )
+                load_prompt_btn = gr.Button("📂 Загрузить", scale=1)
+            prompt_load_status = gr.Textbox(label="", interactive=False, lines=1)
+            sys_prompt_box = gr.Textbox(
+                label       = "Системный промпт (можно редактировать вручную)",
+                placeholder = "Например: Ты писатель в жанре магического реализма...",
+                lines       = 6,
+                interactive = True,
+            )
+
+        # ── БЛОК: Генерация ────────────────────────────────────────────
+        gr.Markdown("---")
+        with gr.Row():
+            with gr.Column(scale=3):
+                question = gr.Textbox(
+                    label       = "Вопрос / тема / запрос",
+                    placeholder = "Напиши рассказ про усталость от работы на 200 слов",
+                    lines       = 3,
+                )
+            with gr.Column(scale=1):
+                style_dd = gr.Dropdown(
+                    label   = "Стиль",
+                    choices = ["реализм", "мрачный", "юмор", "поток сознания"],
+                    value   = "реализм",
+                )
+                mode_dd = gr.Dropdown(
+                    label   = "Режим",
+                    choices = ["художественный", "аналитический"],
+                    value   = "художественный",
+                )
+                lang_dd = gr.Dropdown(
+                    label   = "Язык вывода",
+                    choices = ["русский", "немецкий", "английский", "испанский", "польский", "нидерландский", "французский"],
+                    value   = "русский",
+                )
+                env = rag_core.load_env()
+                cloud_choices = ["auto"]
+                for pn, cfg in rag_core.CLOUD_PROVIDERS.items():
+                    if env.get(cfg["key_var"], "").strip():
+                        cloud_choices.append(pn)
+                cloud_dd = gr.Dropdown(
+                    label   = "Облачный API",
+                    choices = cloud_choices,
+                    value   = "auto",
+                )
+                script_dd = gr.Dropdown(
+                    label   = "Формат LTX 2.3",
+                    choices = ["нет", "сценарий"],
+                    value   = "нет",
+                )
+                narrator_dd = gr.Dropdown(
+                    label   = "Рассказчик",
+                    choices = [
+                        "короткий фильм", "рассказ девушки", "рассказ парня",
+                        "рассказ старушки", "рассказ старика", "документация",
+                        "хоррор", "комедия", "скетч", "sci-fi", "боевик",
+                        "немое кино", "немое кино (фортепиано)", "детектив",
+                        "music: rock concert", "music: pop concert", "Talkshow",
+                        "music: русский шансон", "music: latino pop", "music: latin reggaeton",
+                    ],
+                    value   = "короткий фильм",
+                    visible = False,
+                )
+                director_dd = gr.Dropdown(
+                    label   = "Director Mode",
+                    choices = ["нет", "Director Mode"],
+                    value   = "нет",
+                    visible = False,
+                )
+                word_sl = gr.Slider(
+                    label   = "Длина (слов)",
+                    minimum = 50,
+                    maximum = 700,
+                    step    = 25,
+                    value   = 200,
+                )
+
+        # ── БЛОК: Timeline матрица приёмов ────────────────────────────
+        with gr.Column(visible=False) as timeline_column:
+            with gr.Accordion("🎥 Кинематографические приёмы (LTX Timeline)", open=False):
+                gr.Markdown("Выбери до одного приёма на каждый отрезок фильма. Пустые части = стандартная съёмка.")
+
+                technique_labels = [
+                    "🇳🇱 Dutch Angle (голландский угол — тревога)",
+                    "🌀 Dolly Zoom (Вертиго — шок, искажение)",
+                    "➡️ Push-In (наезд — усиление эмоций)",
+                    "⬆️ Low-Angle (снизу вверх — величие/угроза)",
+                    "👁️ POV (субъективная камера — от первого лица)",
+                ]
+
+                with gr.Row():
+                    gr.Markdown("&nbsp;")
+                    gr.Markdown("**Ч1: Начало**")
+                    gr.Markdown("**Ч2: Развитие**")
+                    gr.Markdown("**Ч3: Кульминация 1**")
+                    gr.Markdown("**Ч4: Кульминация 2**")
+                    gr.Markdown("**Ч5: Финал**")
+
+                cbs = []
+                for r in range(5):
+                    with gr.Row():
+                        gr.Markdown(f"**{technique_labels[r]}**")
+                        row_cbs = []
+                        for c in range(5):
+                            cb = gr.Checkbox(label="", value=False, interactive=True, container=False, min_width=40)
+                            row_cbs.append(cb)
+                        cbs.append(row_cbs)
+
+        # Каскадная логика: только 1 чекбокс на колонку
+        for r in range(5):
+            for c in range(5):
+                other_outputs = [cbs[rr][c] for rr in range(5) if rr != r]
+                def _make_cascade(row=r, col=c):
+                    def _handler(checked):
+                        updates = []
+                        for rr in range(5):
+                            if rr != row:
+                                if checked:
+                                    updates.append(gr.update(interactive=False, value=False))
+                                else:
+                                    updates.append(gr.update(interactive=True))
+                        return updates
+                    return _handler
+                cbs[r][c].change(fn=_make_cascade(), inputs=[cbs[r][c]], outputs=other_outputs)
+
+        # ── БЛОК: Мульти-кадровый таймлайн (Florence-2 + LLM) ─────────
+        gr.Markdown("---")
+        with gr.Accordion("🖼️ Мульти-кадровый таймлайн (T2I / I2V для LTX 2.3)", open=False):
+            gr.Markdown(
+                "Загрузи от 1 до 5 ключевых кадров. Пропущенные будут заполнены автоматически: "
+                "Florence-2 опишет кадры, LLM перепишет в LTX-промпты и сгенерирует переходы."
+            )
+            with gr.Row():
+                img_0  = gr.Image(label="🎥 0% (Старт)",  type="filepath", height=180)
+                img_20 = gr.Image(label="🎥 20%",          type="filepath", height=180)
+                img_40 = gr.Image(label="🎥 40%",          type="filepath", height=180)
+                img_60 = gr.Image(label="🎥 60%",          type="filepath", height=180)
+                img_80 = gr.Image(label="🎥 80% (Финал)",  type="filepath", height=180)
+            with gr.Row():
+                timeline_gen_btn  = gr.Button("⚡ Сгенерировать сквозной видео-промпт", variant="primary", scale=2)
+                timeline_copy_btn = gr.Button("📋 Copy", scale=1, min_width=80)
+            timeline_out = gr.Textbox(
+                label       = "🎬 Матрица промптов LTX 2.3",
+                lines       = 12,
+                interactive = False,
+                placeholder = "Здесь появятся готовые [0%]…[80%] промпты...",
+            )
+
+        # ── Кнопки действий ───────────────────────────────────────────
+        gr.Markdown("---")
+        with gr.Row():
+            gen_btn    = gr.Button("✍️ Сгенерировать",  variant="primary", scale=2)
+            topics_btn = gr.Button("💡 10 тем",          scale=1)
+            update_btn = gr.Button("🔄 Обновить базу",   scale=1)
+            stats_btn  = gr.Button("📊 Статистика",      scale=1)
+            cache_btn  = gr.Button("🧹 Очистить кэш",    scale=1)
+
+        backend_lbl = gr.Textbox(label="Бэкенд", interactive=False, lines=1)
+
+        with gr.Row():
+            answer_box = gr.Textbox(
+                label       = "Ответ",
+                lines       = 20,
+                interactive = False,
+                scale       = 9,
+            )
+            copy_btn = gr.Button("📋 Copy", scale=1, min_width=60)
+
+        with gr.Accordion("🔍 Найденные чанки", open=False):
+            chunks_box = gr.Textbox(lines=15, interactive=False)
+
+        update_log = gr.Textbox(label="Лог обновления базы", lines=8, interactive=False)
+
+        # ── СОБЫТИЯ ───────────────────────────────────────────────────
+        scan_btn.click(
+            fn      = scan_models,
+            inputs  = [model_folder],
+            outputs = [model_dd, scan_status],
+        )
+
+        launch_btn.click(
+            fn      = launch_llama,
+            inputs  = [model_dd],
+            outputs = [launch_log],
+        ).then(
+            fn      = backend_status,
+            outputs = [status_box],
+        )
+
+        stop_btn.click(
+            fn      = rag_core.stop_llama_server,
+            outputs = [],
+        ).then(
+            fn      = backend_status,
+            outputs = [status_box],
+        )
+
+        load_prompt_btn.click(
+            fn      = load_system_prompt,
+            inputs  = [prompt_path],
+            outputs = [sys_prompt_box, prompt_load_status],
+        )
+
+        browse_btn.upload(
+            fn      = lambda f: load_system_prompt(f.name),
+            inputs  = [browse_btn],
+            outputs = [sys_prompt_box, prompt_load_status],
+        )
+
+        copy_btn.click(
+            fn      = None,
+            inputs  = [answer_box],
+            outputs = [],
+            js      = "(text) => { navigator.clipboard.writeText(text); }",
+        )
+
+        all_cbs = [cb for row in cbs for cb in row]
+
+        gen_btn.click(
+            fn      = do_generate,
+            inputs  = [question, style_dd, word_sl, mode_dd, lang_dd, script_dd,
+                       narrator_dd, director_dd, cloud_dd, sys_prompt_box] + all_cbs,
+            outputs = [answer_box, chunks_box, backend_lbl],
+        )
+
+        script_dd.change(
+            fn      = lambda v: (
+                gr.update(visible=(v == "сценарий")),
+                gr.update(visible=(v == "сценарий")),
+                gr.update(visible=(v == "сценарий")),
+            ),
+            inputs  = [script_dd],
+            outputs = [narrator_dd, director_dd, timeline_column],
+        )
+
+        topics_btn.click(
+            fn      = do_topics,
+            inputs  = [question],
+            outputs = [answer_box, backend_lbl],
+        )
+
+        update_btn.click(
+            fn      = do_update_db,
+            outputs = [update_log],
+        )
+
+        stats_btn.click(
+            fn      = do_stats,
+            outputs = [answer_box],
+        )
+
+        cache_btn.click(
+            fn      = rag_core.clear_cache,
+            outputs = [answer_box],
+        )
+
+        # ── СОБЫТИЯ: Мульти-кадровый таймлайн ────────────────────────
+        timeline_gen_btn.click(
+            fn      = lambda p0, p20, p40, p60, p80, prov: rag_core.generate_image_timeline(
+                image_paths    = [p0, p20, p40, p60, p80],
+                cloud_provider = prov,
+            ),
+            inputs  = [img_0, img_20, img_40, img_60, img_80, cloud_dd],
+            outputs = [timeline_out],
+        )
+
+        timeline_copy_btn.click(
+            fn      = None,
+            inputs  = [timeline_out],
+            outputs = [],
+            js      = "(text) => { navigator.clipboard.writeText(text); }",
+        )
+
+    return demo
+
+
+# ──────────────────────────────────────────────
+# ЗАПУСК
+# ──────────────────────────────────────────────
+if __name__ == "__main__":
+    print("[RAG] Запускаю WebUI...")
+    print(f"[RAG] Бэкенд: {backend_status()}")
+    ui = build_ui()
+    ui.launch(
+        server_name = "127.0.0.1",
+        server_port = 7860,
+        inbrowser   = True,
+    )
