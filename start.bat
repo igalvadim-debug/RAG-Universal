@@ -17,8 +17,11 @@ set "CTX_SIZE=8192"
 set "THREADS=8"
 set "NGL=99"
 
-:: = WebUI-Port =
+:: = WebUI-Port und Netzwerk =
 set "WEBUI_PORT=7960"
+:: 0.0.0.0 = WebUI im lokalen Netzwerk erreichbar (andere PCs: http://<IP-dieses-PCs>:7960)
+:: 127.0.0.1 wuerde den Zugriff auf diesen Rechner beschraenken
+set "WEBUI_HOST=0.0.0.0"
 
 if not exist "%LLAMA_EXE%" echo [WARN] LLAMA_EXE nicht gefunden: %LLAMA_EXE%
 

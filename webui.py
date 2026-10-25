@@ -2421,7 +2421,7 @@ if __name__ == "__main__":
     print(f"[RAG] Бэкенд: {backend_status()}")
     ui = build_ui()
     ui.launch(
-        server_name = "127.0.0.1",
+        server_name = rag_core.NET.webui_host,   # WEBUI_HOST: 0.0.0.0 = Zugriff im LAN, Standard
         server_port = rag_core.NET.webui_port,   # WEBUI_PORT-Umgebung, Standard 7960
         inbrowser   = True,
     )

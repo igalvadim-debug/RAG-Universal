@@ -15,8 +15,13 @@ export default defineConfig({
     },
   },
   server: {
-    port: 7860,
-    host: true,
+    port: 7960,
+    host: true,          // 0.0.0.0 = Zugriff aus dem lokalen Netzwerk
+    allowedHosts: true,  // Vite blockt fremde Host-Header sonst im LAN
+    proxy: {
+      // /api an das Node-Backend (start.bat -> npm run start:backend, Port 7961)
+      '/api': 'http://127.0.0.1:7961',
+    },
   },
   build: {
     outDir: 'dist',

@@ -82,6 +82,9 @@ class NetConfig:
     llama_extra_ports: str = _env("LLAMA_EXTRA_PORTS", "8484")
     remote_llama: str = _env("REMOTE_LLAMA", "192.168.181.93:7860")
     webui_port: int = int(_env("WEBUI_PORT", "7960"))
+    # Bind-Adresse der WebUI: 0.0.0.0 = Zugriff aus dem lokalen Netzwerk erlaubt,
+    # 127.0.0.1 = nur dieser Rechner. Ueberschreibbar: set WEBUI_HOST=...
+    webui_host: str = _env("WEBUI_HOST", "0.0.0.0")
 
     health_timeout: float = float(_env("HEALTH_TIMEOUT", "5"))
     cloud_timeout: float = float(_env("CLOUD_TIMEOUT", "120"))

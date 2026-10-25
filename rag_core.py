@@ -675,7 +675,12 @@ def start_llama_server(gguf_path: str, log_callback=None) -> bool:
     env_ctx     = os.environ.get("CTX_SIZE", "").strip()
     env_threads = os.environ.get("THREADS", "").strip()
     ngl     = int(env_ngl)     if env_ngl     else settings.get("n_gpu_layers", DEFAULT_NGL)
-    ctx     = int(env_ctx)     if env_ctx     else settings.get("ctx_size", DEFAULT_CTX_SIZE)
+    try:
+        # CTX_SIZE aus der Umgebung muss eine ganze Zahl sein; Rueckfall auf Standard
+        ctx     = int(env_ctx)     if env_ctx     else settings.get("ctx_size", DEFAULT_CTX_SIZE)
+    except ValueError:
+        _debug_log(f"[RAG] Ungueltiger CTX_SIZE-Wert {env_ctx!r} — verwende Standard {DEFAULT_CTX_SIZE}.")
+        ctx = DEFAULT_CTX_SIZE
     threads = int(env_threads) if env_threads else settings.get("threads", DEFAULT_THREADS)
     port = settings.get("port", NET.llama_port)
     cmd = [
@@ -683,7 +688,7 @@ def start_llama_server(gguf_path: str, log_callback=None) -> bool:
         "-m", gguf_path,
         "-ngl", str(ngl),        # GPU-Layer: settings.txt > NGL > 99
         "-c", str(ctx),          # Kontextfenster: settings.txt > CTX_SIZE > 8192
-        "--flash-attn",         # Flash Attention — экономия VRAM
+        "--flash-attn", "on",   # Flash Attention — neue llama.cpp-Versionen verlangen on|off|auto
         "-b", "512",            # batch size
         "--ubatch-size", "512", # micro-batch
         "--mlock",              # не свопить модель
