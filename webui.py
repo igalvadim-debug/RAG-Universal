@@ -1587,7 +1587,51 @@ def do_grid_split(image_path, vl_choice, captions_choice):
 
 def build_ui():
     """Build and return the Gradio Blocks interface with its event handlers connected."""
+    _STEAM_THEME = gr.themes.Base(
+        primary_hue="amber",
+        secondary_hue="stone",
+        neutral_hue="stone",
+        font=["Georgia", "Times New Roman", "serif"],
+        radius_size=gr.themes.sizes.radius_md,
+    ).set(
+        body_background_fill="linear-gradient(160deg, #241a10 0%, #1b130b 55%, #120c07 100%)",
+        background_fill_primary="#2b1f13",
+        background_fill_secondary="#37281a",
+        block_background_fill="linear-gradient(180deg, rgba(64,46,28,0.92), rgba(43,31,19,0.94))",
+        block_border="2px solid #8a6a3b",
+        block_shadow="0 6px 24px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,214,150,0.15)",
+        block_title_text_color="#e8c98a",
+        block_label_text_color="#d9b878",
+        body_text_color="#eadbc0",
+        input_background_fill="#221810",
+        input_border="1px solid #7a5c33",
+        button_primary_background_fill="linear-gradient(180deg, #c98a3d, #8f5a22)",
+        button_primary_border="1px solid #e0aa5a",
+        button_secondary_background_fill="#3b2c1c",
+        button_secondary_border="1px solid #8a6a3b",
+    )
+
     _LAYOUT_CSS = """
+/* ══ Steampunk-Anstrich: Messing, Leder, Nieten ══ */
+.gradio-container { letter-spacing: 0.2px; }
+h1, h2, h3 { color: #f0cf8f !important; text-shadow: 0 2px 6px rgba(0,0,0,0.6); }
+h1 { border-bottom: 2px solid #8a6a3b; padding-bottom: 10px; letter-spacing: 1px; }
+.block, .form > .block {
+    border-radius: 10px !important;
+    position: relative;
+}
+/* Nietenecken */
+.panel::before, .gap > .block::after {
+    content: "";
+    position: absolute; top: 6px; right: 8px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ffd98a, #7a5c33 70%, #3a2a16);
+    box-shadow: -18px 0 0 -0.5px #6b4f2a, 0 0 4px rgba(0,0,0,0.6);
+    pointer-events: none; z-index: 5;
+}
+button { text-transform: uppercase; letter-spacing: 1.2px; font-weight: 600; }
+textarea, input[type="text"] { font-family: Georgia, 'Times New Roman', serif; }
+footer { display: none; }
 /* Блок генерации: запрос на всю ширину, ниже — сетка из 4 колонок, центрированно */
 #gen_block { max-width: 1320px; margin: 0 auto !important; }
 #ctrl_grid > .form,
@@ -1607,9 +1651,9 @@ def build_ui():
 }
 """
 
-    with gr.Blocks(title="RAG — Генератор сценариев", css=_LAYOUT_CSS) as demo:
+    with gr.Blocks(title="RAG — Генератор сценариев", theme=_STEAM_THEME, css=_LAYOUT_CSS) as demo:
 
-        gr.Markdown("# 🎬 RAG — Генератор сценариев")
+        gr.Markdown("# ⚙️🎬 RAG — Генератор сценариев")
 
         # ── БЛОК: Бэкенд ──────────────────────────────────────────────
         with gr.Accordion("⚙️ Настройка сервера LLM", open=True):

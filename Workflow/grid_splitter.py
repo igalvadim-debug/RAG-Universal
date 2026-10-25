@@ -27,6 +27,7 @@ import json
 import os
 import random
 import re
+import shutil
 import string
 import subprocess
 import sys
@@ -42,28 +43,47 @@ from PIL import Image
 # ----------------------------------------------------------------------------
 # Konfiguration
 # ----------------------------------------------------------------------------
-def _find_server_exe() -> Path:
-    """Aktueller llama-server-Pfad: Umgebungsvariablen zuerst, dann alle bekannten Orte.
-    Der erste existente Pfad gewinnt; sonst bleibt der alte Pfad als Fehler-Hinweis stehen."""
+SERVER_EXE = Path(r"D:\Unsloth\C-claude\llama.cpp\llama-server.exe")   # wie in start.py
+
+
+def _find_server_exe() -> str | None:
+    """Llama-server-Programm fuer den Grid-Splitter finden.
+
+    ``GRID_SERVER_EXE`` hat Vorrang, danach ``LLAMA_EXE`` aus der Umgebung
+    (start.bat/RAG.bat), dann die bekannten Installationspfade. Kahle Namen
+    ohne Verzeichnisanteil (z.B. ``llama-server.exe``) werden zuerst ueber
+    ``shutil.which`` per PATH aufgeloest; explizite Pfade bleiben unveraendert.
+    Rueckgabe: erster vorhandener Dateipfad als String oder None.
+    """
+    base = Path(__file__).resolve().parent.parent
     candidates: list[Path] = []
-    for var in ("GRID_SERVER_EXE", "LLAMA_EXE"):
-        v = os.environ.get(var)
-        if v:
-            candidates.append(Path(v))
+    for env_var in ("GRID_SERVER_EXE", "LLAMA_EXE"):
+        env_exe = os.environ.get(env_var, "").strip().strip('"')
+        if not env_exe:
+            continue
+        p = Path(env_exe)
+        if p.is_absolute() or p.parent != Path("."):
+            candidates.append(p)                 # expliziter Pfad: direkt pruefen
+        else:
+            resolved = shutil.which(env_exe)     # kahler Name: erst ueber PATH aufloesen
+            if resolved:
+                return str(Path(resolved))
+            candidates.append(p)
     candidates += [
-        Path(r"G:\llama.cpp\llama-b9204-bin-win-cuda-13.1-x64\llama-server.exe"),  # aktueller Pfad (start.bat)
-        Path(r"D:\SillyTavernNeurogen\kobold\llama.cpp-master\llama-b9553-bin-win-cuda-13.3-x64\llama-server.exe"),
-        Path(r"D:\Unsloth\C-claude\llama.cpp\llama-server.exe"),                    # alter Pfad (Fallback)
+        SERVER_EXE,
+        Path(r"G:\llama.cpp\llama-b9204-bin-win-cuda-13.1-x64\llama-server.exe"),
+        base / "llama.cpp-master" / "llama-b9553-bin-win-cuda-13.3-x64" / "llama-server.exe",
+        base / "llama.cpp-master" / "build" / "bin" / "llama-server.exe",
+        base / "llama.cpp-master" / "build" / "bin" / "Release" / "llama-server.exe",
+        base / "llama.cpp-master" / "llama-server.exe",
+        base / "llama" / "llama-server.exe",
     ]
     for p in candidates:
-        try:
-            if p.exists():
-                return p
-        except OSError:
-            continue
-    return candidates[-1]
+        if p.is_file():                          # Ordner ueberspringen und weitersuchen
+            return str(p)
+    return None
 
-SERVER_EXE = _find_server_exe()
+
 # Vision-Modelle: Modell + zugehoeriges mmproj starten immer als Paar
 VL_SETS = {
     "gemma": (
@@ -148,8 +168,12 @@ def free_vram_mib() -> int | None:
 
 def start_server(ngl_arg: int | None, vl: str) -> subprocess.Popen:
     VL_MODEL, VL_MMPROJ = VL_SETS[vl]
-    for p, what in ((SERVER_EXE, "llama-server.exe"), (VL_MODEL, "Vision-Modell"), (VL_MMPROJ, "mmproj")):
-        if not p.exists():
+    server_exe = _find_server_exe()
+    if server_exe is None:
+        raise RuntimeError(
+            "[FEHLER] llama-server.exe nicht gefunden (GRID_SERVER_EXE/LLAMA_EXE, bekannte Pfade oder PATH)")
+    for p, what in ((Path(server_exe), "llama-server.exe"), (VL_MODEL, "Vision-Modell"), (VL_MMPROJ, "mmproj")):
+        if not p.is_file():
             raise RuntimeError(f"[FEHLER] {what} nicht gefunden: {p}")
 
     free = free_vram_mib()
@@ -162,7 +186,7 @@ def start_server(ngl_arg: int | None, vl: str) -> subprocess.Popen:
         + ("  (CPU-Modus, dauert laenger)" if ngl == 0 else ""))
 
     cmd = [
-        str(SERVER_EXE),
+        server_exe,
         "-m", str(VL_MODEL),
         "--mmproj", str(VL_MMPROJ),
         "-c", "16384",
