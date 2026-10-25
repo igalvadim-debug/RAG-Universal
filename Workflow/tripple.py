@@ -1051,6 +1051,56 @@ def _prompt_widget_index(onode, widgets_values, out_slot=None):
     return None
 
 
+def _subgraph_driver(workflow, nodes_by_id, node):
+    """
+    Если вход ноды (Primitive*) получает значение от subgraph-ноды (панель управления),
+    реальное значение хранится в виджетах этой subgraph-ноды, а не в самой ноде.
+    Путь: вход node ← выход #k subgraph-ноды ← (внутри subgraph) внутренняя нода ← вход subgraph #i
+    → индекс i в widgets_values subgraph-ноды. Возвращает (sg_node, i) или None.
+    """
+    inp = next((i for i in node.get("inputs", []) or [] if i.get("link") is not None), None)
+    if not inp:
+        return None
+    oid, oslot = _link_origin(workflow, inp["link"])
+    sg_node = nodes_by_id.get(oid)
+    if sg_node is None:
+        return None
+    sgs = {s.get("id"): s for s in (workflow.get("definitions", {}) or {}).get("subgraphs", []) or []}
+    sg = sgs.get(sg_node.get("type"))
+    if sg is None:
+        return None
+    sg_links = sg.get("links", []) or []
+    # внутренняя нода, которая питает выход oslot (target_id == -20)
+    inner_id = next((l.get("origin_id") for l in sg_links
+                     if l.get("target_id") == -20 and l.get("target_slot") == oslot), None)
+    inner = next((n for n in sg.get("nodes", []) if n.get("id") == inner_id), None)
+    if inner is None:
+        return None
+    for i_inp in inner.get("inputs", []) or []:
+        lid = i_inp.get("link")
+        if lid is None:
+            continue
+        for l in sg_links:
+            if l.get("id") == lid and l.get("origin_id") == -10:
+                idx = l.get("origin_slot")
+                wv = sg_node.get("widgets_values")
+                if isinstance(wv, list) and isinstance(idx, int) and idx < len(wv):
+                    return sg_node, idx
+    return None
+
+
+def _set_primitive_value(workflow, nodes_by_id, node, value):
+    """Пишет значение в ноду и, если она питается от subgraph-панели, — в её виджет (это и есть реальный источник)."""
+    if node.get("widgets_values"):
+        node["widgets_values"][0] = value
+    drv = _subgraph_driver(workflow, nodes_by_id, node)
+    if drv:
+        sg_node, idx = drv
+        sg_node["widgets_values"][idx] = value
+        return f"subgraph-нода id {sg_node.get('id')}, виджет #{idx}"
+    return f"нода id {node.get('id')}"
+
+
 def _copy_to_input(src, comfy_input_dir):
     """Копирует файл в ComfyUI input, возвращает имя файла (или None, если файла нет)."""
     if not src:
@@ -1099,14 +1149,17 @@ def create_minimax_ref_workflow(template_path, out_path, prompt_text, images=Non
     pnode = _input_origin_node(workflow, nodes_by_id, main, "prompt")
     if pnode is None or not pnode.get("widgets_values"):
         raise ValueError("К входу prompt ноды MiniMaxH3ReferenceToVideo не подключена нода с текстом")
-    pnode["widgets_values"][0] = as_text(prompt_text)
+    where = _set_primitive_value(workflow, nodes_by_id, pnode, as_text(prompt_text))
+    print(f"📝 Промт записан → {where}")
 
     # если у текстовой ноды есть СВОЙ вход value, подключённый к другой ноде
     # (например, subgraph-обёртка «Prompt/Duration/Width/Height»), ComfyUI при загрузке
     # перерисует виджет из связи и новый текст пропадёт. Разрываем эту связь —
     # тогда значение виджета используется как есть. Заодно пишем новый текст
     # в ноду-источник, чтобы старый промт нигде не остался.
-    for inp in pnode.get("inputs", []) or []:
+    # [20.10.2026: отключено — промт и Duration теперь пишутся прямо в виджеты subgraph-панели
+    #  (_set_primitive_value), связи остаются целыми; старый блок писал текст в виджет #0 = aspect_ratio]
+    for inp in []:
         if inp.get("name") == "value" and inp.get("link") is not None:
             lid = inp["link"]
             oid, _ = _link_origin(workflow, lid)
@@ -1194,8 +1247,8 @@ def create_minimax_ref_workflow(template_path, out_path, prompt_text, images=Non
                     dnode = n
                     break
         if dnode is not None and dnode.get("widgets_values"):
-            dnode["widgets_values"][0] = float(duration)
-            print(f"⏱️  Duration = {float(duration)} с (нода id {dnode.get('id')})")
+            where = _set_primitive_value(workflow, nodes_by_id, dnode, float(duration))
+            print(f"⏱️  Duration = {float(duration)} с → {where}")
         else:
             print("⚠️  Нода Duration не найдена — длительность не записана")
 

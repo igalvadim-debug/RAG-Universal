@@ -1,0 +1,23 @@
+════════════════════════════════════════════════════════════
+🎬  LTX 2.3 MULTI-FRAME TIMELINE PROMPTS
+════════════════════════════════════════════════════════════
+GLOBAL PROMPT: 
+Generate a dark, gothic music video style scene with a dark folk atmosphere, ritual rhythm, cold melancholic tone, and ancient Slavic mood. The lighting should be soft with a natural, documentary feel, and an expressive emotional delivery. The camera should capture the gritty realism and raw, unpolished emotions of the scene.
+
+[0%]  [📷 Image]
+Slow push-in on a lone warrior, her metallic armor and flowing orange cape a stark contrast to the barren, rocky landscape, with a massive red planet looming in the background, casting a deep, ominous glow over the scene. Her blonde hair is windswept, and her determined expression is set, as she grips two swords tightly, ready for battle, with two allies standing poised in the distance, their own swords at the ready. The sky above is a deep, foreboding black, filled with twinkling stars and planets, and the air is electric with tension, as if the very fate of the universe hangs in the balance. The sound of distant, ominous drumming echoes through the stillness, punctuated by the soft crunch of gravel beneath her boots.
+
+[20%]  [📷 Image]
+Slow push-in on a lone figure standing at the edge of a fiery, mountainous landscape, her shiny silver suit adorned with intricate patterns and designs catching the light as she gazes off to the side with a serious expression, her loose blonde waves blowing gently in the wind. Behind her, six alien figures in similar attire stand watch, their faces obscured by the haze of flames and smoke that billows across the vast, orange-hued expanse, with a distant planet hanging low in the sky. The lighting is harsh and dramatic, with deep shadows and vibrant, fiery hues that evoke a sense of otherworldly danger, and the color grading is cool and futuristic, with an emphasis on metallic silvers and deep, burning oranges. The scene is accompanied by a low, ominous hum, with the distant roar of flames and the soft whoosh of the spaceship flying overhead.
+
+[40%]  [📷 Image]
+Slow tracking shot from behind the woman, her futuristic blue and silver outfit glistening in the light of the surrounding planets, as she walks through the rugged, rocky terrain with a red lightsaber at the ready in her right hand. The background reveals a breathtaking vista of a large green planet surrounded by a fiery orange glow, with smaller planets and stars twinkling in the sky, casting a warm, intense light on the scene. The woman's determined expression and battle-ready stance are accentuated by the dramatic, high-contrast color grading and the ominous, pulsing lighting of the planets. The scene is accompanied by a haunting, epic soundtrack with a deep, resonant hum and the sound of crackling energy from the lightsaber.
+
+[60%]  [📷 Image]
+Slow push-in on a lone woman standing at the edge of a barren, alien landscape, her futuristic armor and intricately detailed outfit a stark contrast to the desolate environment, as she gazes off into the distance with a serious expression, her blonde hair blowing in the wind. Behind her, a squad of soldiers in full combat gear march towards a massive, crimson-hued planet looming in the background, set against a sky ablaze with fiery orange and red hues, explosions and smoke erupting across the horizon. The lighting is harsh and dramatic, with deep shadows and vibrant, hellish colors, casting an intense and foreboding atmosphere. The air is thick with the sounds of distant explosions and the hum of machinery, punctuated by an ominous, pulsing silence.
+
+[80%]  [📷 Image]
+Slow push-in on a woman standing at the forefront of a rocky terrain, her long blonde hair flowing behind her as she grasps a gun in her right hand, clad in a intricately detailed silver and gold outfit, with a group of helmeted and armored soldiers marching in a line behind her. The backdrop is a large red planet engulfed in orange and blue flames, with smoke billowing upwards, casting a warm, intense glow over the scene. The lighting is dramatic, with deep shadows accentuating the textures of the rocky terrain and the characters' armor, and a color grading that amplifies the fiery hues of the planet. The air is filled with the sound of distant explosions and the heavy, labored breathing of the soldiers, set against a hauntingly ominous silence.
+
+────────────────────────────────────────────────────────────
+💡 TIP: Copy each segment into the corresponding LTX 2.3 Director node.

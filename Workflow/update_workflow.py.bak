@@ -1,0 +1,369 @@
+import json
+import os
+import re
+import time
+from pathlib import Path
+from datetime import datetime
+
+SCRIPTDIR = Path(__file__).parent
+USEDFILE = SCRIPTDIR / "used.md"
+OUTPUTJSON = "modified_LTX_Dir.json"
+IMGEXTENSIONS = (".png", ".jpg", ".jpeg", ".webp")
+
+WTIMELINEDATA = 6
+WLOCALPROMPTS = 7
+WSEGMENTLENGTHS = 8
+
+TIMELINE_MARKERS = [0, 10, 11, 20, 22, 25, 33, 40, 44, 50, 56, 60, 67, 75, 78, 80, 89, 90, 100]
+TIMELINE_MARKER_RE = re.compile(r"(?<!\\d)(" + "|".join(str(x) for x in TIMELINE_MARKERS) + r")(?:\\.\\.\\.)?(?!\\d)")
+
+
+def load_used() -> set[str]:
+    if not USEDFILE.exists():
+        return set()
+    used = set()
+    for line in USEDFILE.read_text(encoding="utf-8").splitlines():
+        name = line.strip()
+        if name and not name.startswith("#"):
+            used.add(name.split()[0])
+    return used
+
+
+def mark_used(foldername: str) -> None:
+    stamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+    with open(USEDFILE, "a", encoding="utf-8") as f:
+        f.write(f"{foldername}  {stamp}\n")
+    print(f"{foldername} in used.md vermerkt.")
+
+
+def find_work_folder() -> Path | None:
+    used = load_used()
+    candidates = []
+    for entry in SCRIPTDIR.iterdir():
+        if not entry.is_dir():
+            continue
+        if entry.name in {"__pycache__", "output"}:
+            continue
+        candidates.append(entry)
+    if not candidates:
+        return None
+    candidates.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+    unused = [c for c in candidates if c.name not in used]
+    if unused:
+        print(f"{len(unused)} unbenutzte Ordner gefunden.")
+        return unused[0]
+    print(f"Alle {len(candidates)} Ordner bereits in used.md. Verwende neuesten.")
+    return candidates[0]
+
+
+def find_images(workdir: Path) -> list[str]:
+    images = set()
+    for ext in IMGEXTENSIONS:
+        images.update(f.name for f in workdir.glob(f"*{ext}"))
+        images.update(f.name for f in workdir.glob(f"*{ext.upper()}"))
+    return sorted(images)
+
+
+def _cleanup_block(text: str) -> str:
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    lines = [line.strip() for line in text.split("\n") if line.strip()]
+    return " ".join(lines).strip()
+
+
+def _parse_machine_delimiters(text: str) -> tuple[str, list[str]]:
+    globalprompt = ""
+    prompts: list[str] = []
+    gpmatch = re.search(
+        r"---GLOBAL[\s_]*PROMPT[\s_]*START---\s*(.*?)\s*---GLOBAL[\s_]*PROMPT[\s_]*END---",
+        text,
+        re.DOTALL | re.IGNORECASE,
+    )
+    if not gpmatch:
+        return "", []
+    globalprompt = _cleanup_block(gpmatch.group(1))
+    seqmatches = re.findall(
+        r"---SEQUENCE[\s_]*\d+[\s_]*START---\s*(.*?)\s*---SEQUENCE[\s_]*\d+[\s_]*END---",
+        text,
+        re.DOTALL | re.IGNORECASE,
+    )
+    for block in seqmatches:
+        cleaned = _cleanup_block(block)
+        if cleaned:
+            prompts.append(cleaned)
+    return globalprompt, prompts
+
+
+def _parse_legacy_sequence(text: str) -> tuple[str, list[str]]:
+    prompts: list[str] = []
+    m = re.search(r"GLOBAL[\s_]*PROMPT[\s_]*(.*?)(?=\bSEQUENCE[\s_]*\d+\b)", text, re.DOTALL | re.IGNORECASE)
+    if not m:
+        return "", []
+    globalprompt = _cleanup_block(m.group(1))
+    blocks = re.split(r"\bSEQUENCE[\s_]*\d+\b", text, flags=re.IGNORECASE)
+    for block in blocks[1:]:
+        cleaned = _cleanup_block(block)
+        cleaned = re.sub(r"---SEQUENCE[\s_]*\d+[\s_]*END---", "", cleaned, flags=re.IGNORECASE).strip()
+        if cleaned:
+            prompts.append(cleaned)
+    return globalprompt, prompts
+
+
+def _parse_timeline_anywhere(text: str) -> tuple[str, list[str]]:
+    prompts: list[str] = []
+    globalprompt = ""
+    gp = re.search(r"GLOBAL[\s_]+PROMPT", text, re.IGNORECASE)
+    start_pos = gp.end() if gp else 0
+    markers = list(TIMELINE_MARKER_RE.finditer(text, start_pos))
+
+    if gp:
+        if markers:
+            raw_gp = text[gp.end():markers[0].start()]
+        else:
+            raw_gp = text[gp.end():]
+        raw_gp = raw_gp.lstrip(": ")
+        globalprompt = _cleanup_block(raw_gp)
+
+    if not markers:
+        return globalprompt, []
+
+    for i, m in enumerate(markers):
+        seg_start = m.end()
+        while seg_start < len(text) and text[seg_start] in ('[', '%', ']', '.', ' ', '\t', '\n', '\r', ':', '-', '–'):
+            seg_start += 1
+        seg_end = markers[i + 1].start() if i + 1 < len(markers) else len(text)
+        cleaned = _cleanup_block(text[seg_start:seg_end])
+        if cleaned:
+            prompts.append(cleaned)
+
+    return globalprompt, prompts
+
+
+def parse_prompt_file(filepath: Path) -> tuple[str, list[str]]:
+    if not filepath.exists():
+        print(f"{filepath.name} nicht gefunden in {filepath.parent}")
+        return "", []
+
+    text = filepath.read_text(encoding="utf-8", errors="ignore")
+    text = text.replace("\r\n", "\n").replace("\r", "\n").strip()
+
+    globalprompt, prompts = _parse_machine_delimiters(text)
+    if prompts:
+        print(f"- Format machine delimiters: {len(prompts)} sequences")
+        return globalprompt, prompts
+
+    globalprompt, prompts = _parse_legacy_sequence(text)
+    if prompts:
+        print(f"- Format legacy SEQUENCE: {len(prompts)} sequences")
+        return globalprompt, prompts
+
+    globalprompt, prompts = _parse_timeline_anywhere(text)
+    if prompts:
+        print(f"- Format timeline ultra-tolerant: {len(prompts)} sequences")
+        return globalprompt, prompts
+
+    if globalprompt:
+        print("- Nur Global Prompt gefunden, keine Sequenzen erkannt")
+    return globalprompt, []
+
+
+def map_photos_to_segments(imagefiles: list[str], ntimeline: int, nsegments: int) -> dict[str, int]:
+    if not imagefiles or ntimeline <= 0 or nsegments <= 0:
+        return {}
+    mapping: dict[str, int] = {}
+    sortedfiles = sorted(imagefiles)
+    for seqidx, fname in enumerate(sortedfiles):
+        prefix = fname[0].lower() if fname else ""
+        exportslot = ord(prefix) - ord('a')
+        timelineslot = exportslot if 0 <= exportslot < ntimeline else min(seqidx, ntimeline - 1)
+        pct = round(timelineslot * 100 / max(1, ntimeline - 1)) if ntimeline > 1 else 0
+        segidx = round(pct * (nsegments - 1) / 100) if nsegments > 1 else 0
+        segidx = max(0, min(segidx, nsegments - 1))
+        mapping[fname] = segidx
+        print(f"Foto {fname} -> Export-Slot {exportslot}, Timeline-Slot {timelineslot}, {pct}% -> Segment {segidx + 1}")
+    return mapping
+
+
+def find_json_file(workdir: Path) -> str:
+    for searchdir in (workdir, SCRIPTDIR):
+        candidates = []
+        for pat in ("*.json", "*.json.txt"):
+            for f in searchdir.glob(pat):
+                if f.name != OUTPUTJSON:
+                    candidates.append(str(f))
+        candidates = list(dict.fromkeys(candidates))
+        if len(candidates) == 1:
+            return candidates[0]
+        if len(candidates) > 1:
+            raise ValueError(f"Mehrere JSON-Dateien in {searchdir}: {candidates}")
+    raise FileNotFoundError("Kein .json Workflow gefunden weder im Projektordner noch im workflow/")
+
+
+def safe_json_loads(value, fallback):
+    try:
+        return json.loads(value)
+    except Exception:
+        return fallback
+
+
+def ensure_segments_count(segments: list, ntimeline: int) -> list:
+    if ntimeline <= 0:
+        return []
+    if not segments:
+        segments = [{"id": f"seg_{int(time.time()*1000)}_0", "type": "text", "prompt": "", "start": 0, "length": 1}]
+    if len(segments) < ntimeline:
+        template = dict(segments[-1])
+        for i in range(len(segments), ntimeline):
+            newseg = dict(template)
+            newseg["id"] = f"seg_{int(time.time()*1000)}_{i}"
+            newseg["prompt"] = ""
+            newseg.pop("imageFile", None)
+            newseg.pop("imageB64", None)
+            segments.append(newseg)
+    elif len(segments) > ntimeline:
+        segments = segments[:ntimeline]
+    return segments
+
+
+def redistribute_segments(segments: list, totalduration: int) -> None:
+    if not segments:
+        return
+    totalduration = max(1, int(totalduration or 1))
+    n = len(segments)
+    base = totalduration // n
+    rem = totalduration % n
+    start = 0
+    for i, seg in enumerate(segments):
+        length = base + (1 if i < rem else 0)
+        seg["start"] = start
+        seg["length"] = max(1, length)
+        start += seg["length"]
+    if start != totalduration:
+        segments[-1]["length"] += totalduration - start
+
+
+def update_ltxdirector_node(node: dict, globalprompt: str, newprompts: list[str], imagefiles: list[str]) -> None:
+    widgets = node.get("widgets_values", [])
+    while len(widgets) <= WSEGMENTLENGTHS:
+        widgets.append("")
+
+    timelinedata = safe_json_loads(widgets[WTIMELINEDATA], {"segments": []})
+    if not isinstance(timelinedata, dict):
+        timelinedata = {"segments": []}
+
+    if globalprompt:
+        timelinedata["globalprompt"] = globalprompt
+        print("- Global Prompt aktualisiert")
+
+    segments = timelinedata.get("segments", [])
+    if not isinstance(segments, list):
+        segments = []
+
+    ntimeline = len(newprompts)
+    print(f"- Workflow hat {len(segments)} Segmente, Timeline hat {ntimeline} Slots")
+
+    segments = ensure_segments_count(segments, ntimeline)
+    timelinedata["segments"] = segments
+
+    totalduration = timelinedata.get("normaliseDurationFrames") or widgets[5] or 528
+    redistribute_segments(segments, totalduration)
+
+    photomap = map_photos_to_segments(imagefiles, ntimeline, len(segments))
+    image_by_segment: dict[int, str] = {}
+    for fname, segidx in photomap.items():
+        image_by_segment.setdefault(segidx, fname)
+
+    updatedpromptsforui = []
+    for i, seg in enumerate(segments):
+        prompt = newprompts[i] if i < len(newprompts) else ""
+        seg["prompt"] = prompt
+        updatedpromptsforui.append(prompt)
+        seg.pop("imageFile", None)
+        seg.pop("imageB64", None)
+        assignedimg = image_by_segment.get(i)
+        if assignedimg:
+            seg["imageFile"] = assignedimg
+            seg["imageB64"] = f"/api/view?filename={assignedimg}&type=input&subfolder="
+            seg["type"] = "image"
+            print(f"- Seg {i+1}: {assignedimg} zugewiesen")
+        else:
+            seg["type"] = "text"
+            print(f"- Seg {i+1}: kein Bild")
+
+    timelinedatastr = json.dumps(timelinedata, ensure_ascii=False)
+    localpromptsstr = "\n".join(updatedpromptsforui)
+    segmentlengthsstr = ",".join(str(seg.get("length", 1)) for seg in segments)
+
+    widgets[WTIMELINEDATA] = timelinedatastr
+    widgets[WLOCALPROMPTS] = localpromptsstr
+    widgets[WSEGMENTLENGTHS] = segmentlengthsstr
+    node["widgets_values"] = widgets
+
+    props = node.get("properties")
+    if isinstance(props, dict):
+        if globalprompt:
+            props["globalprompt"] = globalprompt
+        props["localprompts"] = localpromptsstr
+        props["segmentlengths"] = segmentlengthsstr
+        props["timelinedata"] = timelinedatastr
+        print("- properties synchronisiert")
+
+
+def main() -> None:
+    print("Workflow-Updater: suche unbearbeiteten Projektordner...")
+    workdir = find_work_folder()
+    if workdir is None:
+        print("Keine Projektordner in workflow gefunden.")
+        print("Exportiere zuerst einen Prompt über Export.")
+        return
+
+    print(f"Verwende Ordner: {workdir.name}")
+    os.chdir(workdir)
+
+    try:
+        inputjson = find_json_file(workdir)
+        print(f"Workflow: {Path(inputjson).name}")
+    except Exception as e:
+        print(e)
+        return
+
+    imagefiles = find_images(workdir)
+    print(f"Bilder ({len(imagefiles)}): {imagefiles}")
+
+    promptpath = workdir / "video.txt"
+    if not promptpath.exists():
+        promptpath = workdir / "novideo.txt"
+
+    globalprompt, newprompts = parse_prompt_file(promptpath)
+    print("Global Prompt gefunden" if globalprompt else "Kein Global Prompt gefunden")
+    print(f"Sequenzen: {len(newprompts)}")
+
+    if not newprompts:
+        print("Keine Sequenzen im Prompt gefunden. Abbruch.")
+        return
+
+    with open(inputjson, "r", encoding="utf-8") as f:
+        workflow = json.load(f)
+
+    nodesupdated = 0
+    for node in workflow.get("nodes", []):
+        if node.get("type") != "LTXDirector":
+            continue
+        nodesupdated += 1
+        print(f"LTXDirector Node ID {node.get('id')}")
+        update_ltxdirector_node(node, globalprompt, newprompts, imagefiles)
+
+    if nodesupdated == 0:
+        print("Kein LTXDirector-Node im JSON gefunden.")
+        return
+
+    outpath = workdir / OUTPUTJSON
+    with open(outpath, "w", encoding="utf-8") as f:
+        json.dump(workflow, f, indent=2, ensure_ascii=False)
+    print(f"Gespeichert: {outpath}")
+
+    mark_used(workdir.name)
+    print(f"Fertig. Lade {outpath.name} in ComfyUI.")
+
+
+if __name__ == "__main__":
+    main()
