@@ -3,7 +3,8 @@
 grid_splitter.py - schneidet ein Bildgitter (Storyboard / Contact Sheet) sauber in Einzelbilder.
 
 Ablauf:
-  1. Qwen3-VL (llama-server mit mmproj) liefert die Rahmen (bbox) aller Panels samt Beschriftung.
+  1. Das Vision-Modell (llama-server mit mmproj: Gemma-4-E2B oder Qwen3-VL) liefert die
+     Rahmen (bbox) aller Panels samt Beschriftung.
   2. Die Rahmen werden per Pixel-Analyse auf die echten Kanten eingerastet (sauberer Schnitt).
   3. Panels werden von links nach rechts, von oben nach unten sortiert.
   4. Dateinamen: laufende Nummer + 3 zufaellige Buchstaben (1abc, 2grd, 3wek ...), PNG.
@@ -15,7 +16,10 @@ Aufruf:
   python grid_splitter.py                             (fragt nach dem Pfad)
   Bild per Drag&Drop auf die Datei ziehen funktioniert ebenfalls.
 
-Optionen: --ngl N (GPU-Layer, Standard: automatisch), --keep-server, --debug, --out-root PFAD
+Optionen: --ngl N (Standard: auto = Hauptmodell in den VRAM, mmproj im RAM),
+          --[no-]keep-server, --debug,
+          --out-root PFAD. Der Vision-Server laeuft nach dem Schneiden weiter (Modell bleibt
+          im RAM, VRAM bleibt frei) und wird beim naechsten Lauf wiederverwendet.
 """
 
 from __future__ import annotations
@@ -86,16 +90,32 @@ def _find_server_exe() -> str | None:
 
 # Vision-Modelle: Modell + zugehoeriges mmproj starten immer als Paar
 VL_SETS = {
+    # Gemma-4-E2B aus LM Studio (vorhanden)
     "gemma": (
-        Path(r"D:\SillyTavernNeurogen\kobold\models\Gemma-4-E2B-Uncensored-HauhauCS-Aggressive-Q6_K_P.gguf"),
-        Path(r"D:\SillyTavernNeurogen\kobold\models\mmproj-Gemma-4-E2B-Uncensored-HauhauCS-Aggressive-f16.gguf"),
+        Path(r"C:\Users\bunny\.lmstudio\models\gemma-4-E2B-it-Q8_0\gemma-4-E2B-it-Q8_0.gguf"),
+        Path(r"C:\Users\bunny\.lmstudio\models\gemma-4-E2B-it-Q8_0\mmproj-gemma-4-E2B-it-Q8_0.gguf"),
     ),
+    # Qwen3-VL (aeltere Installation, nur falls die Dateien dort liegen)
     "qwen": (
         Path(r"D:\ComfyUiVid\models\LLM\Qwen3-VL-4B-Instruct-abliterated.Q8_0.gguf"),
         Path(r"D:\ComfyUiVid\models\LLM\mmproj-F16.gguf"),
     ),
 }
-DEFAULT_VL = "qwen"   # Gemma-E2B findet die Rahmen nicht zuverlaessig -> mit --model gemma waehlbar
+
+
+def first_available_vl() -> str:
+    """Erstes Vision-Set, dessen Modell UND mmproj wirklich existieren (gemma zuerst).
+
+    Verhindert den Abbruch "Vision-Modell nicht gefunden", wenn ein Satz
+    (z.B. Qwen3-VL) auf diesem Rechner gar nicht installiert ist.
+    """
+    for name in ("gemma", "qwen"):
+        if all(p.is_file() for p in VL_SETS[name]):
+            return name
+    return "gemma"
+
+
+DEFAULT_VL = first_available_vl()
 VL_PORT = 8485                      # eigener Port, stoert die 4 Dienste von start.py (8001-8003, 8484) nicht
 REUSE_PORTS = (8485, 8080, 8484)          # laeuft dort schon ein Vision-Server, wird er benutzt
 OUT_ROOT = Path(r"D:\claudeAgent\RAG\workflow")
@@ -178,12 +198,22 @@ def start_server(ngl_arg: int | None, vl: str) -> subprocess.Popen:
 
     free = free_vram_mib()
     if ngl_arg is not None:
-        ngl = ngl_arg
+        ngl = str(ngl_arg)
     else:
-        # Modell (~4 GB) + mmproj + Kontext brauchen ~6 GB freien VRAM, sonst auf CPU ausweichen
-        ngl = 99 if (free is None or free >= 6000) else 0
-    log(f"[INFO] Freier VRAM: {free if free is not None else '?'} MiB -> GPU-Layer: {ngl}"
-        + ("  (CPU-Modus, dauert laenger)" if ngl == 0 else ""))
+        # Standard: -ngl auto - llama.cpp legt so viele Schichten in den VRAM, wie
+        # hineinpassen (--fit ist an), der Rest bleibt im RAM. VL_NGL=0 = alles CPU,
+        # VL_NGL=99 = alle Schichten erzwingen.
+        env_ngl = os.environ.get("VL_NGL", "").strip() or "auto"
+        if env_ngl.lower() not in ("auto", "all"):
+            try:
+                env_ngl = str(int(env_ngl))
+            except ValueError:
+                env_ngl = "auto"
+        ngl = env_ngl
+    # mmproj (Vision-Encoder) standardmaessig in den RAM, nicht in den VRAM
+    mmproj_gpu = os.environ.get("VL_MMPROJ_GPU", "").strip().lower() in ("1", "true", "yes", "on")
+    log(f"[INFO] Freier VRAM: {free if free is not None else '?'} MiB -> -ngl {ngl}, "
+        f"mmproj auf {'GPU' if mmproj_gpu else 'CPU/RAM'}")
 
     cmd = [
         server_exe,
@@ -193,7 +223,7 @@ def start_server(ngl_arg: int | None, vl: str) -> subprocess.Popen:
         "--cache-type-k", "q8_0",
         "--cache-type-v", "q8_0",
         "-np", "1",
-        "-ngl", str(ngl),
+        "-ngl", ngl,
         "-fa", "on",
         "--jinja",
         "--host", "127.0.0.1",
@@ -201,7 +231,7 @@ def start_server(ngl_arg: int | None, vl: str) -> subprocess.Popen:
         "--temp", "0.1",
         "--top-k", "20",
     ]
-    cmd.append("--mmproj-offload" if ngl > 0 else "--no-mmproj-offload")
+    cmd.append("--mmproj-offload" if mmproj_gpu else "--no-mmproj-offload")
 
     log(f"[INFO] Starte llama-server ({VL_MODEL.name} + mmproj) auf Port {VL_PORT} ...")
     logf = open(SERVER_LOG, "w", encoding="utf-8", errors="replace")
@@ -919,7 +949,7 @@ def process(path: Path, port: int, out_root: Path, debug: bool,
 
     boxes = None
     for attempt in range(3):
-        log(f"[INFO] Frage Qwen3-VL (Versuch {attempt + 1}/3) ...")
+        log(f"[INFO] Frage Vision-Modell (Versuch {attempt + 1}/3) ...")
         text, sent = ask_model(port, img, attempt)
         if debug:
             log("[DEBUG] Antwort:\n" + text)
@@ -963,6 +993,15 @@ def process(path: Path, port: int, out_root: Path, debug: bool,
 _run_lock = threading.Lock()
 
 
+def keep_alive_enabled() -> bool:
+    """Vision-Server nach dem Lauf im RAM halten (Standard: ja).
+
+    Die Gewichte bleiben geladen (CPU-Modus -> VRAM bleibt frei), der naechste
+    Lauf startet dadurch sofort. Abschalten: VL_KEEP_ALIVE=0 oder --no-keep-server.
+    """
+    return os.environ.get("VL_KEEP_ALIVE", "1").strip().lower() not in ("0", "false", "no", "off")
+
+
 def split_image(image_path, out_root: Path = OUT_ROOT, vl: str = DEFAULT_VL,
                 ngl: int | None = None, debug: bool = False, on_log=None,
                 with_captions: bool = True) -> tuple[Path, list[Path]]:
@@ -1002,7 +1041,9 @@ def split_image(image_path, out_root: Path = OUT_ROOT, vl: str = DEFAULT_VL,
                 port = VL_PORT
             return process(path, port, out_root, debug, with_captions)
         finally:
-            stop_server(proc)
+            # Server im RAM lassen (Standard) und beim naechsten Mal wiederverwenden.
+            if proc is not None and not keep_alive_enabled():
+                stop_server(proc)
             _log_cb = None
 
 
@@ -1020,11 +1061,19 @@ def main() -> None:
     except Exception:
         pass
 
-    ap = argparse.ArgumentParser(description="Bildgitter per Qwen3-VL in Einzelbilder schneiden")
+    ap = argparse.ArgumentParser(description="Bildgitter per Vision-Modell in Einzelbilder schneiden")
     ap.add_argument("images", nargs="*", help="Pfad(e) zu den Gitter-Bildern")
-    ap.add_argument("--ngl", type=int, default=None, help="GPU-Layer (Standard: automatisch)")
-    ap.add_argument("--model", choices=sorted(VL_SETS), default=DEFAULT_VL, help="Vision-Modell (Standard: qwen)")
-    ap.add_argument("--keep-server", action="store_true", help="Server nach dem Lauf nicht beenden")
+    ap.add_argument("--ngl", default=None,
+                    help="GPU-Layer-Argument fuer llama.cpp (Standard: auto = so viel VRAM wie "
+                         "passt; 0 = alles CPU; 99 = alles VRAM). mmproj bleibt per Default im RAM"
+                         " (VL_MMPROJ_GPU=1 erzwingt GPU).")
+    ap.add_argument("--model", choices=sorted(VL_SETS), default=DEFAULT_VL,
+                    help=f"Vision-Modell (Standard: {DEFAULT_VL})")
+    ap.add_argument("--keep-server", dest="keep_server", action="store_true",
+                    default=keep_alive_enabled(),
+                    help="Server nach dem Lauf weiterlaufen lassen (Standard; Modell bleibt im RAM)")
+    ap.add_argument("--no-keep-server", dest="keep_server", action="store_false",
+                    help="Server nach dem Lauf beenden (Modell aus dem RAM werfen)")
     ap.add_argument("--debug", action="store_true", help="Modellantwort und Kontrollbild ausgeben")
     ap.add_argument("--out-root", default=str(OUT_ROOT), help="Basisordner (Standard: workflow)")
     ap.add_argument("--no-captions", action="store_true",
