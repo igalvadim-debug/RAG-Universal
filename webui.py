@@ -26,6 +26,8 @@ UPLOAD_CACHE = BASE_DIR / "_upload_cache"
 UPLOAD_CACHE.mkdir(exist_ok=True)
 SONGS_DIR    = BASE_DIR / "Songs"
 SONGS_DIR.mkdir(exist_ok=True)
+WORKFLOW_DIR = BASE_DIR / "Workflow"
+WORKFLOW_DIR.mkdir(exist_ok=True)
 
 
 def default_models_dir() -> Path:
@@ -43,8 +45,8 @@ def default_models_dir() -> Path:
 
 # workflow/tripple.py — создание workflow-JSON (TripleUpscale / CS LTX Director)
 import sys as _sys
-if str(BASE_DIR / "workflow") not in _sys.path:
-    _sys.path.insert(0, str(BASE_DIR / "workflow"))
+if str(BASE_DIR / "Workflow") not in _sys.path:
+    _sys.path.insert(0, str(BASE_DIR / "Workflow"))
 import tripple  # noqa: E402
 import grid_splitter  # noqa: E402  (Gitter/Storyboard in Einzelbilder schneiden)
 
@@ -160,7 +162,7 @@ def _slug_from_text(text: str, max_words: int = 4, max_len: int = 45) -> str:
 
 def save_song_generation(answer: str, question: str, song_style: str, singer: str, language: str) -> str:
     """
-    Speichert eine Song-Generation als TXT in D:\\claudeAgent\\RAG\\Songs,
+    Speichert eine Song-Generation als TXT im Songs-Ordner,
     benannt nach dem Sinn des Songs (erste gesungene Zeile / Thema) + Zeitstempel.
     Gibt den Pfad zurück.
     """
@@ -520,7 +522,7 @@ def _make_export_subfolder(prompt_text: str) -> Path:
     import re as _re
     from datetime import datetime as _dt
 
-    base = Path(r"D:\claudeAgent\RAG\workflow")
+    base = WORKFLOW_DIR
     base.mkdir(parents=True, exist_ok=True)
 
     # Erste 4 Woerter als Slug
@@ -574,10 +576,10 @@ def _rand_folder(base_dir: Path, prefix: str) -> Path:
 def do_export(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, prompt_text):
     """
     Exportiert Bilder + Prompt:
-    • ComfyUiVid\\input\\ — Bilder (a_XXXX_.png, ...)
+    • ComfyUi\\input\\ — Bilder (a_XXXX_.png, ...)
     • workflow\\video_<3 Zeichen>\\ — Bilder + video.txt/novideo.txt
     """
-    comfy_dir = Path(r"D:\ComfyUiVid\input")
+    comfy_dir = Path(r"D:\ComfyUi\input")
     comfy_dir.mkdir(parents=True, exist_ok=True)
 
     content = (prompt_text or "").strip()
@@ -586,7 +588,7 @@ def do_export(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, prompt_text):
     letters = string.ascii_lowercase
 
     # Projektordner: короткое имя video_<3>
-    proj_dir = _rand_folder(Path(r"D:\claudeAgent\RAG\workflow"), "video") if content else Path(r"D:\claudeAgent\RAG\workflow")
+    proj_dir = _rand_folder(WORKFLOW_DIR, "video") if content else WORKFLOW_DIR
     content = _split_and_save_notes(content, proj_dir)
 
     exported = 0
@@ -608,14 +610,14 @@ def do_export(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, prompt_text):
     pic_ok = _maybe_write_picture_prompts(proj_dir, content, images)
 
     if exported > 0:
-        return f"✅ {exported} Bilder + {txt_name} → {proj_dir.name} & ComfyUiVid\\input" + (" + picture_prompts.txt" if pic_ok else "")
+        return f"✅ {exported} Bilder + {txt_name} → {proj_dir.name} & ComfyUi\\input" + (" + picture_prompts.txt" if pic_ok else "")
     else:
         return f"⚠️ Keine Bilder — {txt_name} → {proj_dir.name}" + (" + picture_prompts.txt" if pic_ok else "")
 
 
 def do_json_workflow():
-    """Führt D:\\claudeAgent\\RAG\\workflow\\update_workflow.py aus."""
-    script = Path(r"D:\claudeAgent\RAG\workflow\update_workflow.py")
+    """Führt Workflow\\update_workflow.py aus."""
+    script = WORKFLOW_DIR / "update_workflow.py"
     if not script.exists():
         return f"⚠️ Script nicht gefunden: {script}"
     try:
@@ -661,9 +663,9 @@ def do_controlnet(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, prov):
 def save_controlnet(captions_text, negative_prompt):
     """
     Speichert ControlNet Captions + zusaetzlichen User-Negative-Prompt
-    als controlnet.txt in D:\\claudeAgent\\RAG\\workflow\\.
+    als controlnet.txt im Workflow-Ordner.
     """
-    workflow_dir = Path(r"D:\claudeAgent\RAG\workflow")
+    workflow_dir = WORKFLOW_DIR
     workflow_dir.mkdir(parents=True, exist_ok=True)
 
     if not captions_text.strip():
@@ -683,10 +685,10 @@ def save_controlnet(captions_text, negative_prompt):
 def export_answer_prompt(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, prompt_text, with_photos: bool):
     """
     Exportiert den GENERIERTEN Prompt + optional Bilder.
-    with_photos=True  → ComfyUiVid\\input + workflow\\video_<3 Zeichen>\\ (Bilder + video.txt)
-    with_photos=False → ComfyUiVid\\input + workflow\\novid_<3 Zeichen>\\ (nur novideo.txt)
+    with_photos=True  → ComfyUi\\input + workflow\\video_<3 Zeichen>\\ (Bilder + video.txt)
+    with_photos=False → ComfyUi\\input + workflow\\novid_<3 Zeichen>\\ (nur novideo.txt)
     """
-    comfy_dir = Path(r"D:\ComfyUiVid\input")
+    comfy_dir = Path(r"D:\ComfyUi\input")
     comfy_dir.mkdir(parents=True, exist_ok=True)
 
     images  = [p0, p1, p2, p3, p4, p5, p6, p7, p8, p9]
@@ -699,9 +701,9 @@ def export_answer_prompt(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, prompt_text, wi
 
     # ── папка: с фото — workflow/video_<3>, без фото — workflow/novid_<3> ──
     if with_photos:
-        proj_dir = _rand_folder(Path(r"D:\claudeAgent\RAG\workflow"), "video")
+        proj_dir = _rand_folder(WORKFLOW_DIR, "video")
     else:
-        proj_dir = _rand_folder(Path(r"D:\claudeAgent\RAG\workflow"), "novid")
+        proj_dir = _rand_folder(WORKFLOW_DIR, "novid")
 
     content = _split_and_save_notes(content, proj_dir)
 
@@ -724,7 +726,7 @@ def export_answer_prompt(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, prompt_text, wi
         pic_ok = _maybe_write_picture_prompts(proj_dir, content, images)
         _suffix = " + picture_prompts.txt" if pic_ok else ""
         if exported > 0:
-            return f"✅ Промт с фото: {exported} Bilder + {txt_name} → {proj_dir.name} & ComfyUiVid\\input{_suffix}"
+            return f"✅ Промт с фото: {exported} Bilder + {txt_name} → {proj_dir.name} & ComfyUi\\input{_suffix}"
         else:
             return f"⚠️ Keine Bilder — {txt_name} → {proj_dir.name} (nur Prompt){_suffix}"
     else:
@@ -733,11 +735,11 @@ def export_answer_prompt(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, prompt_text, wi
         (comfy_dir / txt_name).write_text(content, encoding="utf-8")
         pic_ok = _maybe_write_picture_prompts(proj_dir, content, images)
         _suffix = " + picture_prompts.txt" if pic_ok else ""
-        return f"✅ Промт ohne Fotos: {txt_name} → {proj_dir.name} & ComfyUiVid\\input ({len(content)} Zeichen){_suffix}"
+        return f"✅ Промт ohne Fotos: {txt_name} → {proj_dir.name} & ComfyUi\\input ({len(content)} Zeichen){_suffix}"
 
 
 def _comfy_input_dir() -> Path:
-    return Path(r"D:\ComfyUiVid\input")
+    return Path(r"D:\ComfyUi\input")
 
 
 def _norm_files(v, max_files: int = 2):
@@ -772,7 +774,7 @@ def export_tripple_json(answer_text, img0, video_length, director_mode):
         return ("⚠️ В ответе нет формата TripleUpscale (---GLOBAL_POSITIVE_START--- / ---SCENE_PROMPT_START---). "
                 "Сгенерируй промт в режиме TripleUpscale.")
 
-    workflow_dir = Path(r"D:\claudeAgent\RAG\workflow")
+    workflow_dir = WORKFLOW_DIR
     workflow_dir.mkdir(parents=True, exist_ok=True)
     # папка triple_<3 случайных символа> (короткое имя)
     folder = _rand_folder(workflow_dir, "triple")
@@ -832,7 +834,7 @@ def export_ltx25_json(answer_text, img_first, img_last, video_length, director_m
     if not prompt_clean:
         return "⚠️ Промт пуст после удаления SIGMA_STEPS."
 
-    workflow_dir = Path(r"D:\claudeAgent\RAG\workflow")
+    workflow_dir = WORKFLOW_DIR
     folder = _rand_folder(workflow_dir, "ltx25")
     duration = int(video_length) if video_length else 15
     sig = tripple.compute_sigmas(duration, 24, steps=sigma_steps)
@@ -877,7 +879,7 @@ def export_minimax_json(answer_text, video_length, director_mode, *imgs):
         return "⚠️ Промт пуст после разбора VIDEO/SOUND/MUSIC."
 
     pics = [p for p in imgs[:9] if p]
-    workflow_dir = Path(r"D:\claudeAgent\RAG\workflow")
+    workflow_dir = WORKFLOW_DIR
     folder = _rand_folder(workflow_dir, "mmanim" if director_mode == "Minimax H3 Anim" else "mmref")
     duration = int(video_length) if video_length else 10
 
@@ -914,7 +916,7 @@ def export_t2v_json(answer_text, video_length, director_mode):
     if not prompt_clean:
         return "⚠️ Промт пуст после удаления SIGMA_STEPS."
 
-    workflow_dir = Path(r"D:\claudeAgent\RAG\workflow")
+    workflow_dir = WORKFLOW_DIR
     folder = _rand_folder(workflow_dir, "t2v")
     duration = int(video_length) if video_length else 16
     sl, sh = tripple.compute_t2v_sigmas(duration, 24, high_steps=sigma_steps)
@@ -1165,7 +1167,7 @@ def export_cs_json(answer_text, n_seq, n_seq_tl2, video_length, director_mode, p
         return (f"⚠️ В ответе только {len(seqs)} сцен, а нужно ≥ {n1 + n2} (N1+N2) — "
                 f"сгенерируй промт заново в режиме CS LTX Director.")
 
-    workflow_dir = Path(r"D:\claudeAgent\RAG\workflow")
+    workflow_dir = WORKFLOW_DIR
     comfy = _comfy_input_dir()
 
     # ── длительность пропорционально: N1/(N1+N2) → TL1, остаток → TL2 ──
@@ -1325,7 +1327,7 @@ def export_ltx25_director_json(answer_text, n_seq, video_length, director_mode, 
     if not seqs:
         return "⚠️ Нет SEQUENCE — сгенерируй промт с количеством сцен ≥ 1."
 
-    workflow_dir = Path(r"D:\claudeAgent\RAG\workflow")
+    workflow_dir = WORKFLOW_DIR
     comfy = _comfy_input_dir()
     frames = tripple.frames_for_seconds(int(video_length) if video_length else 30)
 
@@ -1480,8 +1482,8 @@ def load_json_into_ui(json_path: str, n_sequences: int = 5):
         lines.append("---GLOBAL_PROMPT_END---")
         lines.append("")
 
-    # Куда искать картинки: рядом с JSON (папка проекта) или ComfyUiVid\\input
-    search_dirs = [p.parent] + [Path(r"D:\ComfyUiVid\input")]
+    # Куда искать картинки: рядом с JSON (папка проекта) или ComfyUi\\input
+    search_dirs = [p.parent] + [Path(r"D:\ComfyUi\input")]
     img_updates = []
     for i in range(10):
         if i >= n_show:
@@ -1718,7 +1720,7 @@ footer { display: none; }
             with gr.Row():
                 prompt_path = gr.Textbox(
                     label       = "Путь к файлу (.md / .txt / .json)",
-                    placeholder = r"D:\claudeAgent\RAG\prompt.md",
+                    placeholder = str(BASE_DIR / "prompt.md"),
                     scale       = 3,
                 )
                 browse_btn = gr.UploadButton(
@@ -2169,7 +2171,7 @@ footer { display: none; }
         with gr.Row():
             json_path_tb = gr.Textbox(
                 label       = "📥 Путь к JSON (загрузка обратно в UI)",
-                placeholder = r"D:\claudeAgent\RAG\workflow\<projektordner>\mod_high.json",
+                placeholder = str(WORKFLOW_DIR / "<projektordner>" / "mod_high.json"),
                 scale       = 4,
             )
             load_json_btn = gr.Button("📥 Load JSON → UI", variant="primary", scale=1)

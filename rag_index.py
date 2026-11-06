@@ -1,16 +1,22 @@
 import os
 import glob
 import chromadb
+from pathlib import Path
 from sentence_transformers import SentenceTransformer
 
-# Путь к твоей модели bge-m3
-MODEL_PATH = r"C:\Users\Startklar\Desktop\zaebalo_mirror\RAG"
+BASE_DIR = Path(__file__).parent
 
-# Папка с твоими output_*.md
-MD_DIR = r"C:\Users\Startklar\Desktop\zaebalo_mirror"
+# Путь к модели эмбеддингов (paraphrase-multilingual-MiniLM-L12-v2 из models.txt:
+# D:\ComfyUi\models\LLM\paraphrase-multilingual-MiniLM-L12-v2).
+# Локальная копия model/ имеет приоритет, иначе — папка из ComfyUI.
+COMFY_EMBED_MODEL = Path(r"D:\ComfyUi\models\LLM\paraphrase-multilingual-MiniLM-L12-v2")
+MODEL_PATH = str(BASE_DIR / "model") if (BASE_DIR / "model").exists() else str(COMFY_EMBED_MODEL)
 
-# Папка для Chroma
-DB_DIR = r"C:\Users\Startklar\Desktop\zaebalo_mirror\chroma_zaebalo"
+# Папка с твоими output_*.md (зеркало zaebalo.ru)
+MD_DIR = str(BASE_DIR)
+
+# Папка для Chroma (совпадает с RAG_DB по умолчанию в rag_config.py)
+DB_DIR = os.environ.get("RAG_DB", str(BASE_DIR / "chroma_zaebalo"))
 
 CHUNK_SIZE = 1500  # символов
 
