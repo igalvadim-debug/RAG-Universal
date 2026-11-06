@@ -26,8 +26,9 @@ def main():
     backend = get_backend()
     if backend == "none":
         print("\n⚠️  Ни KoboldCpp (5001), ни llama-server (8080) не запущены.")
-        print("Хочешь запустить llama-server? Введи путь к папке с GGUF или Enter чтобы пропустить:")
-        folder = input("  Папка: ").strip()
+        print("Хочешь запустить llama-server? Введи путь к папке с GGUF")
+        print(f"(Enter = {Path(r'D:\ComfyUi\models\LLM')} из models.txt):")
+        folder = input("  Папка: ").strip() or str(Path(r"D:\ComfyUi\models\LLM"))
         if folder:
             models = scan_gguf(folder)
             if models:

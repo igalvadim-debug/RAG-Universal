@@ -5,8 +5,9 @@ setlocal
 
 :: Python mit diffusers + torch auswaehlen (ComfyUi-venv)
 set "PY="
-if exist "D:\ComfyUiCuda\venv\Scripts\python.exe" set "PY=D:\ComfyUiCuda\venv\Scripts\python.exe"
-if exist "C:\ComfyUi\venv\Scripts\python.exe" set "PY=C:\ComfyUi\venv\Scripts\python.exe"
+if exist "D:\ComfyUi\venv\Scripts\python.exe" set "PY=D:\ComfyUi\venv\Scripts\python.exe"
+if not defined PY if exist "D:\ComfyUiCuda\venv\Scripts\python.exe" set "PY=D:\ComfyUiCuda\venv\Scripts\python.exe"
+if not defined PY if exist "C:\ComfyUi\venv\Scripts\python.exe" set "PY=C:\ComfyUi\venv\Scripts\python.exe"
 
 if not defined PY (
     echo [FEHLER] Kein ComfyUi-venv gefunden

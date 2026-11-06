@@ -2,7 +2,7 @@
 zimage_generate.py — separater Bild-Generator mit Z-Image-Turbo (GGUF).
 
 Läuft mit dem ComfyUi-Python (venv mit diffusers + torch):
-    C:\\ComfyUi\\venv\\Scripts\\python.exe zimage_generate.py "DEIN PROMPT" [Optionen]
+    D:\\ComfyUi\\venv\\Scripts\\python.exe zimage_generate.py "DEIN PROMPT" [Optionen]
 
 Vor der Bildgenerierung wird llama-server.exe gestoppt (VRAM freigeben),
 außer --keep-llm ist gesetzt.
@@ -21,11 +21,10 @@ import subprocess
 import sys
 from pathlib import Path
 
+# Kandidaten laut tests/models.txt (ComfyUI-Installationsverzeichnis D:\\ComfyUi):
 GGUF_CANDIDATES = [
-    Path(r"D:\ComfyUiCuda\models\checkpoints\z-image-turbo-Q8_0.gguf"),
-    Path(r"D:\ComfyUiCuda\models\checkpoints\z_image_turbo-Q8_0.gguf"),
-    Path(r"C:\ComfyUi\models\checkpoints\z-image-turbo-Q8_0.gguf"),
-    Path(r"C:\ComfyUi\models\checkpoints\z_image_turbo-Q8_0.gguf"),
+    Path(r"D:\ComfyUi\models\checkpoints\z-image-turbo-Q8_0.gguf"),
+    Path(r"D:\ComfyUi\models\diffusion_models\z_image_turbo-Q8_0.gguf"),
 ]
 
 
@@ -92,7 +91,7 @@ def main():
     gguf = find_gguf()
     if gguf is None:
         print("[ZImage] FEHLER: z-image-turbo-Q8_0.gguf nicht gefunden "
-              "(gesucht in D:\\ComfyUiCuda und C:\\ComfyUi checkpoints).")
+              "(gesucht in D:\\ComfyUi\\models\\checkpoints und D:\\ComfyUi\\models\\diffusion_models).")
         sys.exit(1)
 
     import torch
