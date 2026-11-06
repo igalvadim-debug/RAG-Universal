@@ -252,7 +252,7 @@ def _env_int(name: str, default: int) -> int:
 # llama-server бинарник — ищем в известных местах (порядок важен).
 # Переопределение: set "LLAMA_EXE=G:\llama.cpp\llama-b9204-bin-win-cuda-13.1-x64\llama-server.exe"
 # — тогда этот путь проверяется ПЕРВЫМ (и именно он используется для автозапуска).
-# ВНИМАНИЕ: Unsloth-сервер (D:\Unsloth\C-claude\LlamaCpp.bat) пользователь запускает САМ —
+# ВНИМАНИЕ: внешний llama-server (D:\Llama.cpp\llama-server.exe) пользователь может запускать САМ —
 # он сюда НЕ добавляется, чтобы автозапуск не конфликтовал с ручным сервером.
 # Обычная генерация подключается к уже запущенному серверу через llama_alive()/get_llama_url().
 LLAMA_CANDIDATES = [
@@ -266,7 +266,7 @@ LLAMA_CANDIDATES = [
     BASE_DIR / "llama" / "llama-server.exe",
     # типичные отдельные папки с llama.cpp вне репозитория (G:/D: диски)
     Path(r"G:\llama.cpp") / "llama-b9204-bin-win-cuda-13.1-x64" / "llama-server.exe",
-    Path(r"D:\Unsloth\C-claude\llama.cpp") / "llama-server.exe",
+    Path(r"D:\Llama.cpp") / "llama-server.exe",
 ]
 
 # Корни GGUF-моделей: MODELS_ROOT / MODELS_ROOT2 из окружения (LM Studio, ComfyUI LLM)
@@ -1211,8 +1211,8 @@ def _timeline_sequence_count(text: str) -> int:
 
 
 # ── MiniMax H3: системные промты из файлов (редактируются без правки кода) ──
-_MM_SP_FILE      = r"D:\claudeAgent\RAG\workflow\minimaxh3SP.txt"
-_MM_SP_ANIM_FILE = r"D:\claudeAgent\RAG\workflow\minimaxh3SP_anim.txt"
+_MM_SP_FILE      = str(BASE_DIR / "Workflow" / "minimaxh3SP.txt")
+_MM_SP_ANIM_FILE = str(BASE_DIR / "Workflow" / "minimaxh3SP_anim.txt")
 
 
 def _load_minimax_sp(anim: bool = False) -> str:

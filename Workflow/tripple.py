@@ -68,7 +68,7 @@ DEFAULT_JSON = Path(__file__).resolve().parent / "Tripple.json"
 DEFAULT_SC   = Path(__file__).resolve().parent / "SC.json"
 DEFAULT_LTX25 = Path(__file__).resolve().parent / "LTX 2.5 First and Last Frame Video Generation .json"
 DEFAULT_T2V = Path(__file__).resolve().parent / "Text-to-Video Fast LTX2.5 Sync Audio & Video.json"
-COMFY_INPUT_DIR = Path(r"D:\ComfyUiVid\input")
+COMFY_INPUT_DIR = Path(r"D:\ComfyUi\input")
 DEFAULT_MINIMAX_REF = Path(__file__).resolve().parent / "Minimax_reference_pictures.json"
 
 
