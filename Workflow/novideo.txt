@@ -1,0 +1,31 @@
+GLOBAL PROMPT: 
+Generate a dark, gothic music video style scene with a dark folk atmosphere, ritual rhythm, cold melancholic tone, and ancient Slavic mood. The lighting should be soft with a natural, documentary feel, and an expressive emotional delivery. The camera should capture the gritty realism and raw, unpolished emotions of the scene.
+
+SEQUENCE 1:
+Director Node: Close-up shot of the woman's face, framing her micro-expressions as she receives the unexpected news.
+Cinematographer Directive: Natural morning light streams through the kitchen windows, with a shallow depth of field to emphasize the woman's emotions.
+Audio Trigger: Soft, melancholic music starts playing in the background, with a gentle echo that amplifies the emotional impact.
+Dialogue Trigger: '¿Qué pasa? ¿Qué está sucediendo?' (What's going on? What's happening?)
+
+SEQUENCE 2:
+Director Node: The camera remains fixed on the woman's face as she processes the news, her hand trembling as she covers her mouth.
+Cinematographer Directive: The lighting becomes slightly darker, with a warmer tone to convey the woman's emotional pain.
+Audio Trigger: The music swells, with a subtle, mournful melody that underscores the woman's distress.
+Dialogue Trigger: 'No, no, no... esto no puede estar sucediendo' (No, no, no... this can't be happening)
+
+SEQUENCE 3:
+Director Node: The camera zooms out to reveal the woman's simple gray sweater and wedding ring, as she sinks slowly into a kitchen chair.
+Cinematographer Directive: The lighting becomes more muted, with a shallow depth of field to emphasize the woman's isolation.
+Audio Trigger: The music becomes more subdued, with a soft, eerie silence that amplifies the woman's emotional numbness.
+Dialogue Trigger: '¿Qué voy a hacer? ¿Qué voy a hacer ahora?' (What am I going to do? What am I going to do now?)
+
+SEQUENCE 4:
+Director Node: The camera captures the woman's tears welling up in her eyes, as she struggles to come to terms with the news.
+Cinematographer Directive: The lighting becomes more dramatic, with a strong contrast between light and dark to convey the woman's emotional turmoil.
+Audio Trigger: The music surges, with a haunting, atmospheric sound that underscores the woman's desperation.
+Dialogue Trigger: 'Ayúdame, por favor... ayúdame a entender' (Help me, please... help me to understand)
+
+SEQUENCE 5:
+Director Node: The camera lingers on the woman's face, as she finally breaks down in tears, the phone slipping from her hand.
+Cinematographer Directive: The lighting becomes more muted, with a soft, natural tone to convey the woman's emotional exhaustion.
+Audio Trigger: The music fades away, leaving only the sound of the woman's sobbing, and the soft echo of the

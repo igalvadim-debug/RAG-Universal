@@ -1,0 +1,5247 @@
+{
+  "id": "441d52db-8e39-40f7-a146-b3d30efbd252",
+  "revision": 0,
+  "last_node_id": 234,
+  "last_link_id": 608,
+  "nodes": [
+    {
+      "id": 7,
+      "type": "LTXVConcatAVLatent",
+      "pos": [
+        3691.538365353464,
+        4524.496307535617
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "flags": {},
+      "order": 62,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video_latent",
+          "type": "LATENT",
+          "link": 522
+        },
+        {
+          "name": "audio_latent",
+          "type": "LATENT",
+          "link": 586
+        }
+      ],
+      "outputs": [
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "links": [
+            14
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.16.0",
+        "Node name for S&R": "LTXVConcatAVLatent",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      }
+    },
+    {
+      "id": 108,
+      "type": "GetNode",
+      "pos": [
+        4391.381422285522,
+        4617.939934754459
+      ],
+      "size": [
+        210,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            228
+          ]
+        }
+      ],
+      "title": "Get_audio_vae",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "audio_vae"
+      ],
+      "widgets_values_named": {
+        "Constant": "audio_vae"
+      },
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 113,
+      "type": "GetNode",
+      "pos": [
+        4382.180390782251,
+        4525.786929249175
+      ],
+      "size": [
+        210,
+        34
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            233
+          ]
+        }
+      ],
+      "title": "Get_video_vae",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "video_vae"
+      ],
+      "widgets_values_named": {
+        "Constant": "video_vae"
+      },
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 16,
+      "type": "LTXVAudioVAEDecode",
+      "pos": [
+        4356.538365353464,
+        4575.777557535617
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 71,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 235
+        },
+        {
+          "label": "Audio VAE",
+          "name": "audio_vae",
+          "type": "VAE",
+          "link": 228
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Audio",
+          "type": "AUDIO",
+          "links": [
+            223
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.16.0",
+        "Node name for S&R": "LTXVAudioVAEDecode",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      }
+    },
+    {
+      "id": 95,
+      "type": "SetNode",
+      "pos": [
+        1429.8290233573816,
+        4011.369716578606
+      ],
+      "size": [
+        210,
+        34
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 42,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "link": 213
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": null
+        }
+      ],
+      "title": "Set_model_with_lora",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "SetNode",
+        "previousName": "model_with_lora",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "model_with_lora"
+      ],
+      "widgets_values_named": {
+        "Constant": "model_with_lora"
+      },
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 96,
+      "type": "SetNode",
+      "pos": [
+        1452.77276258331,
+        3950.892577817645
+      ],
+      "size": [
+        210,
+        34
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 40,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "link": 214
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": null
+        }
+      ],
+      "title": "Set_model_upscale",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "model_upscale",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "model_upscale"
+      ],
+      "widgets_values_named": {
+        "Constant": "model_upscale"
+      },
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 129,
+      "type": "SetNode",
+      "pos": [
+        1551.1053187262426,
+        4417.394085401405
+      ],
+      "size": [
+        210,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "*",
+          "type": "*",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "*",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "clip",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "clip"
+      ],
+      "widgets_values_named": {
+        "Constant": "clip"
+      }
+    },
+    {
+      "id": 109,
+      "type": "SetNode",
+      "pos": [
+        1525.7403651341965,
+        4594.978455341699
+      ],
+      "size": [
+        210,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 32,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "link": 229
+        }
+      ],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": null
+        }
+      ],
+      "title": "Set_video_vae",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "video_vae",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "video_vae"
+      ],
+      "widgets_values_named": {
+        "Constant": "video_vae"
+      },
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 107,
+      "type": "SetNode",
+      "pos": [
+        1509.7755834199008,
+        4749.514075011232
+      ],
+      "size": [
+        210,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 33,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "link": 227
+        }
+      ],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": null
+        }
+      ],
+      "title": "Set_audio_vae",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "audio_vae",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "audio_vae"
+      ],
+      "widgets_values_named": {
+        "Constant": "audio_vae"
+      },
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 78,
+      "type": "VAELoaderKJ",
+      "pos": [
+        1214.7116103410826,
+        4424.276141542676
+      ],
+      "size": [
+        270,
+        110
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            196
+          ]
+        }
+      ],
+      "title": "Tiny VAELoader KJ",
+      "properties": {
+        "cnr_id": "comfyui-kjnodes",
+        "ver": "1.2.5",
+        "Node name for S&R": "VAELoaderKJ",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "vae_name": true,
+            "device": true,
+            "weight_dtype": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "taeltx2_3.safetensors",
+        "main_device",
+        "bf16"
+      ],
+      "widgets_values_named": {
+        "vae_name": "taeltx2_3.safetensors",
+        "device": "main_device",
+        "weight_dtype": "bf16"
+      },
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 174,
+      "type": "SetNode",
+      "pos": [
+        4379.321869985733,
+        4425.215218104115
+      ],
+      "size": [
+        210,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 72,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "link": 382
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": null
+        }
+      ],
+      "title": "Set_audio_latent",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "audio_latent",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "audio_latent"
+      ],
+      "widgets_values_named": {
+        "Constant": "audio_latent"
+      },
+      "color": "#323",
+      "bgcolor": "#535"
+    },
+    {
+      "id": 175,
+      "type": "GetNode",
+      "pos": [
+        3331.024198179889,
+        4128.21530954976
+      ],
+      "size": [
+        210,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            383
+          ]
+        }
+      ],
+      "title": "Get_audio_latent",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "audio_latent"
+      ],
+      "widgets_values_named": {
+        "Constant": "audio_latent"
+      },
+      "color": "#323",
+      "bgcolor": "#535"
+    },
+    {
+      "id": 181,
+      "type": "GetNode",
+      "pos": [
+        4744.820649849728,
+        4051.0797594741784
+      ],
+      "size": [
+        210,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": [
+            392
+          ]
+        }
+      ],
+      "title": "Get_frame_rate",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "frame_rate"
+      ],
+      "widgets_values_named": {
+        "Constant": "frame_rate"
+      },
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 10,
+      "type": "SamplerCustomAdvanced",
+      "pos": [
+        4124.732370389621,
+        4386.207659334862
+      ],
+      "size": [
+        220,
+        261.33333333333337
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 66,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "noise",
+          "type": "NOISE",
+          "link": 51
+        },
+        {
+          "name": "guider",
+          "type": "GUIDER",
+          "link": 12
+        },
+        {
+          "name": "sampler",
+          "type": "SAMPLER",
+          "link": 53
+        },
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "link": 52
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 14
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "LATENT",
+          "links": [
+            267
+          ]
+        },
+        {
+          "name": "denoised_output",
+          "type": "LATENT",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.60",
+        "Node name for S&R": "SamplerCustomAdvanced",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65,
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [],
+      "widgets_values_named": {}
+    },
+    {
+      "id": 79,
+      "type": "LTX2SamplingPreviewOverride",
+      "pos": [
+        1188.543815306891,
+        4511.345498670506
+      ],
+      "size": [
+        260,
+        100.00000000000045
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 31,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 408
+        },
+        {
+          "name": "latent_upscale_model",
+          "shape": 7,
+          "type": "LATENT_UPSCALE_MODEL",
+          "link": null
+        },
+        {
+          "name": "vae",
+          "shape": 7,
+          "type": "VAE",
+          "link": 196
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            405
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-kjnodes",
+        "ver": "1.3.4",
+        "Node name for S&R": "LTX2SamplingPreviewOverride",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "preview_rate": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        24
+      ],
+      "widgets_values_named": {
+        "preview_rate": 24
+      }
+    },
+    {
+      "id": 188,
+      "type": "GetNode",
+      "pos": [
+        2555.447393577083,
+        4541.294394823571
+      ],
+      "size": [
+        210,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "*",
+          "type": "*",
+          "links": []
+        }
+      ],
+      "title": "Get_neg prompt",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "neg prompt"
+      ],
+      "widgets_values_named": {
+        "Constant": "neg prompt"
+      }
+    },
+    {
+      "id": 9,
+      "type": "CFGGuider",
+      "pos": [
+        3691.538365353464,
+        4384.496307535617
+      ],
+      "size": [
+        210,
+        100
+      ],
+      "flags": {},
+      "order": 63,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 523
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 520
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 521
+        }
+      ],
+      "outputs": [
+        {
+          "name": "GUIDER",
+          "type": "GUIDER",
+          "links": [
+            12
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.64",
+        "Node name for S&R": "CFGGuider",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65,
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "cfg": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        1
+      ],
+      "widgets_values_named": {
+        "cfg": 1
+      }
+    },
+    {
+      "id": 110,
+      "type": "GetNode",
+      "pos": [
+        3372.682948088843,
+        4486.85089002825
+      ],
+      "size": [
+        210,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            519
+          ]
+        }
+      ],
+      "title": "Get_video_vae",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "video_vae"
+      ],
+      "widgets_values_named": {
+        "Constant": "video_vae"
+      },
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 49,
+      "type": "CFGGuider",
+      "pos": [
+        3679.914746126751,
+        3815.6149642286105
+      ],
+      "size": [
+        210,
+        100
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 56,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 504
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 502
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 503
+        }
+      ],
+      "outputs": [
+        {
+          "name": "GUIDER",
+          "type": "GUIDER",
+          "links": [
+            124
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.64",
+        "Node name for S&R": "CFGGuider",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65,
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "cfg": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        1
+      ],
+      "widgets_values_named": {
+        "cfg": 1
+      }
+    },
+    {
+      "id": 50,
+      "type": "LTXVConcatAVLatent",
+      "pos": [
+        3679.914746126751,
+        4209.673624648785
+      ],
+      "size": [
+        210,
+        60
+      ],
+      "flags": {},
+      "order": 55,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video_latent",
+          "type": "LATENT",
+          "link": 505
+        },
+        {
+          "name": "audio_latent",
+          "type": "LATENT",
+          "link": 383
+        }
+      ],
+      "outputs": [
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "links": [
+            127
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.7.0",
+        "Node name for S&R": "LTXVConcatAVLatent",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65,
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      }
+    },
+    {
+      "id": 171,
+      "type": "GetNode",
+      "pos": [
+        4380.026730077076,
+        3833.6507837448257
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            527
+          ]
+        }
+      ],
+      "title": "Get_pos_g2",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "pos_g2"
+      ],
+      "widgets_values_named": {
+        "Constant": "pos_g2"
+      },
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 180,
+      "type": "SetNode",
+      "pos": [
+        2568.618152177039,
+        4106.725352814512
+      ],
+      "size": [
+        210,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 50,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "link": 591
+        }
+      ],
+      "outputs": [
+        {
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": null
+        }
+      ],
+      "title": "Set_frame_rate",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "frame_rate",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "frame_rate"
+      ],
+      "widgets_values_named": {
+        "Constant": "frame_rate"
+      },
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 182,
+      "type": "SetNode",
+      "pos": [
+        2505.307811672183,
+        4211.504979370948
+      ],
+      "size": [
+        210,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 51,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "link": 593
+        }
+      ],
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": null
+        }
+      ],
+      "title": "Set_clean_latent",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "clean_latent",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "clean_latent"
+      ],
+      "widgets_values_named": {
+        "Constant": "clean_latent"
+      },
+      "color": "#1b4669",
+      "bgcolor": "#29699c"
+    },
+    {
+      "id": 172,
+      "type": "GetNode",
+      "pos": [
+        4401.32292657882,
+        3874.007604558866
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 9,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            528
+          ]
+        }
+      ],
+      "title": "Get_neg_g2",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "neg_g2"
+      ],
+      "widgets_values_named": {
+        "Constant": "neg_g2"
+      },
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 160,
+      "type": "SetNode",
+      "pos": [
+        2808.8873442669296,
+        4041.5716616285104
+      ],
+      "size": [
+        223.53515625,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 46,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "link": 581
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": null
+        }
+      ],
+      "title": "Set_positive",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "positive",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "positive"
+      ],
+      "widgets_values_named": {
+        "Constant": "positive"
+      },
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 161,
+      "type": "SetNode",
+      "pos": [
+        2651.611208803993,
+        3943.663019434393
+      ],
+      "size": [
+        223.53515625,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 47,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "link": 583
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": null
+        }
+      ],
+      "title": "Set_negative",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "negative",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "negative"
+      ],
+      "widgets_values_named": {
+        "Constant": "negative"
+      },
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 47,
+      "type": "SamplerCustomAdvanced",
+      "pos": [
+        4112.490971119919,
+        3818.332523118286
+      ],
+      "size": [
+        230,
+        267.86328125
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 59,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "noise",
+          "type": "NOISE",
+          "link": 157
+        },
+        {
+          "name": "guider",
+          "type": "GUIDER",
+          "link": 124
+        },
+        {
+          "name": "sampler",
+          "type": "SAMPLER",
+          "link": 125
+        },
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "link": 550
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 127
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "LATENT",
+          "links": [
+            180
+          ]
+        },
+        {
+          "name": "denoised_output",
+          "type": "LATENT",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.60",
+        "Node name for S&R": "SamplerCustomAdvanced",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65,
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [],
+      "widgets_values_named": {}
+    },
+    {
+      "id": 5,
+      "type": "LTXVConditioning",
+      "pos": [
+        3036.805994963843,
+        4376.85089002825
+      ],
+      "size": [
+        213.2109375,
+        78
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 52,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 582
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 599
+        },
+        {
+          "name": "frame_rate",
+          "type": "FLOAT",
+          "widget": {
+            "name": "frame_rate"
+          },
+          "link": 592
+        }
+      ],
+      "outputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": [
+            513
+          ]
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": [
+            514
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.56",
+        "Node name for S&R": "LTXVConditioning",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65,
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "frame_rate": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        24
+      ],
+      "widgets_values_named": {
+        "frame_rate": 24
+      }
+    },
+    {
+      "id": 111,
+      "type": "GetNode",
+      "pos": [
+        3066.878983567528,
+        3978.796182150794
+      ],
+      "size": [
+        210,
+        58
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 10,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            231
+          ]
+        }
+      ],
+      "title": "Get_video_vae",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "video_vae"
+      ],
+      "widgets_values_named": {
+        "Constant": "video_vae"
+      },
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 176,
+      "type": "GetNode",
+      "pos": [
+        2639.136465714806,
+        3981.7714810737134
+      ],
+      "size": [
+        210,
+        58
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 11,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            384
+          ]
+        }
+      ],
+      "title": "Get_video_latent",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "video_latent"
+      ],
+      "widgets_values_named": {
+        "Constant": "video_latent"
+      },
+      "color": "#323",
+      "bgcolor": "#535"
+    },
+    {
+      "id": 169,
+      "type": "SetNode",
+      "pos": [
+        3376.874711176187,
+        3898.3444003470045
+      ],
+      "size": [
+        223.53515625,
+        50
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 53,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "link": 509
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": null
+        }
+      ],
+      "title": "Set_pos_g2",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "pos_g2",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "pos_g2"
+      ],
+      "widgets_values_named": {
+        "Constant": "pos_g2"
+      },
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 170,
+      "type": "SetNode",
+      "pos": [
+        3346.939246732877,
+        3952.0998974757003
+      ],
+      "size": [
+        223.53515625,
+        50
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 54,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "link": 510
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": null
+        }
+      ],
+      "title": "Set_neg_g2",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "neg_g2",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "neg_g2"
+      ],
+      "widgets_values_named": {
+        "Constant": "neg_g2"
+      },
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 112,
+      "type": "GetNode",
+      "pos": [
+        3337.0806938061965,
+        3958.80943372539
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 12,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            506
+          ]
+        }
+      ],
+      "title": "Get_video_vae",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "video_vae"
+      ],
+      "widgets_values_named": {
+        "Constant": "video_vae"
+      },
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 48,
+      "type": "LTXVSeparateAVLatent",
+      "pos": [
+        4369.936980799454,
+        3945.6149642286105
+      ],
+      "size": [
+        213.24723845342578,
+        102.59413081082812
+      ],
+      "flags": {},
+      "order": 65,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "av_latent",
+          "type": "LATENT",
+          "link": 180
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video_latent",
+          "type": "LATENT",
+          "links": [
+            529
+          ]
+        },
+        {
+          "name": "audio_latent",
+          "type": "LATENT",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.5.1",
+        "Node name for S&R": "LTXVSeparateAVLatent",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65,
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      }
+    },
+    {
+      "id": 207,
+      "type": "LTXDirectorCropGuidesCS25",
+      "pos": [
+        4372.490971119918,
+        3818.332523118286
+      ],
+      "size": [
+        266.11484375,
+        69.7102813687161
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 67,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 527
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 528
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "link": 529
+        }
+      ],
+      "outputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": null
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": null
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "links": [
+            602
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "CGlide/WhatDreamsCost-CSGlide",
+        "Node name for S&R": "LTXDirectorCropGuidesCS25",
+        "ver": "6a035f05769536a87d9764e8b91d5744dc014fd2",
+        "cnr_id": "WhatDreamsCost-ComfyUI",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      }
+    },
+    {
+      "id": 166,
+      "type": "SetNode",
+      "pos": [
+        3381.4492941316676,
+        4591.072928935333
+      ],
+      "size": [
+        223.53515625,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 61,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "link": 524
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": null
+        }
+      ],
+      "title": "Set_neg_g1",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "neg_g1",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "neg_g1"
+      ],
+      "widgets_values_named": {
+        "Constant": "neg_g1"
+      },
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 165,
+      "type": "SetNode",
+      "pos": [
+        3391.7023226616607,
+        4538.460330097065
+      ],
+      "size": [
+        223.53515625,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 60,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "link": 525
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": null
+        }
+      ],
+      "title": "Set_pos_g1",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "pos_g1",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "pos_g1"
+      ],
+      "widgets_values_named": {
+        "Constant": "pos_g1"
+      },
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 168,
+      "type": "GetNode",
+      "pos": [
+        3333.2969409104207,
+        3873.0292750064664
+      ],
+      "size": [
+        210,
+        58
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 13,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            512
+          ]
+        }
+      ],
+      "title": "Get_negative",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "negative"
+      ],
+      "widgets_values_named": {
+        "Constant": "negative"
+      },
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 13,
+      "type": "LTXVSeparateAVLatent",
+      "pos": [
+        4367.366513366797,
+        4387.811687505486
+      ],
+      "size": [
+        200,
+        50
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 68,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "av_latent",
+          "type": "LATENT",
+          "link": 267
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video_latent",
+          "type": "LATENT",
+          "links": [
+            539
+          ]
+        },
+        {
+          "name": "audio_latent",
+          "type": "LATENT",
+          "links": [
+            235,
+            382
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.16.0",
+        "Node name for S&R": "LTXVSeparateAVLatent",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      }
+    },
+    {
+      "id": 52,
+      "type": "LTXVLatentUpsampler",
+      "pos": [
+        3033.558756510417,
+        3938.209095039438
+      ],
+      "size": [
+        225.9224609375001,
+        69.56732373895738
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 34,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 384
+        },
+        {
+          "name": "upscale_model",
+          "type": "LATENT_UPSCALE_MODEL",
+          "link": 144
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 231
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            500
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.14.1",
+        "Node name for S&R": "LTXVLatentUpsampler",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65,
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      }
+    },
+    {
+      "id": 173,
+      "type": "SetNode",
+      "pos": [
+        4390.009414565058,
+        4731.862509106096
+      ],
+      "size": [
+        210,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 73,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "link": 534
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": null
+        }
+      ],
+      "title": "Set_video_latent",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "video_latent",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "video_latent"
+      ],
+      "widgets_values_named": {
+        "Constant": "video_latent"
+      },
+      "color": "#323",
+      "bgcolor": "#535"
+    },
+    {
+      "id": 163,
+      "type": "GetNode",
+      "pos": [
+        4377.355351179076,
+        4734.946318151326
+      ],
+      "size": [
+        210,
+        58
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 14,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            532
+          ]
+        }
+      ],
+      "title": "Get_neg_g1",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "neg_g1"
+      ],
+      "widgets_values_named": {
+        "Constant": "neg_g1"
+      },
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 162,
+      "type": "GetNode",
+      "pos": [
+        4400.411078901553,
+        4746.392745247446
+      ],
+      "size": [
+        210,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 15,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            533
+          ]
+        }
+      ],
+      "title": "Get_pos_g1",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "pos_g1"
+      ],
+      "widgets_values_named": {
+        "Constant": "pos_g1"
+      },
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 208,
+      "type": "LTXDirectorCropGuidesCS25",
+      "pos": [
+        4356.007935461286,
+        4677.788912247675
+      ],
+      "size": [
+        266.11484375,
+        81.53995919926001
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 70,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 533
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 532
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "link": 539
+        }
+      ],
+      "outputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": null
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": null
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "links": [
+            534
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "CGlide/WhatDreamsCost-CSGlide",
+        "Node name for S&R": "LTXDirectorCropGuidesCS25",
+        "ver": "6a035f05769536a87d9764e8b91d5744dc014fd2",
+        "cnr_id": "WhatDreamsCost-ComfyUI",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      }
+    },
+    {
+      "id": 167,
+      "type": "GetNode",
+      "pos": [
+        3334.4651115022702,
+        3830.093959691253
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 16,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            511
+          ]
+        }
+      ],
+      "title": "Get_positive",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "positive"
+      ],
+      "widgets_values_named": {
+        "Constant": "positive"
+      },
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 158,
+      "type": "MarkdownNote",
+      "pos": [
+        1464.0255349598156,
+        4920.963347548293
+      ],
+      "size": [
+        267.18943623097084,
+        131.4338305567444
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 17,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "Analyzing Images Ref infos",
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "in order to use the automatic description:\n\n\nINSTALL OLLAMA ON YOUR COMPUTER\n\nmodel used qwen 3.5  2b   (around 1.9gb)\n\n\nrun this command on your ollama model folder:\n\n\nollama run huihui_ai/qwen3.5-abliterated:2B\n\n\nput your ref on 16 : 9 ratio !\n\n"
+      ],
+      "widgets_values_named": {
+        "text": "in order to use the automatic description:\n\n\nINSTALL OLLAMA ON YOUR COMPUTER\n\nmodel used qwen 3.5  2b   (around 1.9gb)\n\n\nrun this command on your ollama model folder:\n\n\nollama run huihui_ai/qwen3.5-abliterated:2B\n\n\nput your ref on 16 : 9 ratio !\n\n"
+      },
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 150,
+      "type": "MarkdownNote",
+      "pos": [
+        4713.409101523936,
+        4789.328871446935
+      ],
+      "size": [
+        288.8383013624807,
+        147.09966422352863
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 18,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "About  Models",
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "\neuler_ancestral_cgf_pp (more photorealistic)\nres 3s (slower)\n\n\n20 steps (best)\n8 steps (ok)\n\nUpscale 3 ok 4 better (plug Basicscheduler to Sampler)\n\nDistilled 0.6 lora (good ref sheet fidelity)\n\n\n48 fps for perfect fast motion\n\nMSR Licon WORKING ! 0.75s artifacts when upscaled because of HD images reinjection\n \n"
+      ],
+      "widgets_values_named": {
+        "text": "\neuler_ancestral_cgf_pp (more photorealistic)\nres 3s (slower)\n\n\n20 steps (best)\n8 steps (ok)\n\nUpscale 3 ok 4 better (plug Basicscheduler to Sampler)\n\nDistilled 0.6 lora (good ref sheet fidelity)\n\n\n48 fps for perfect fast motion\n\nMSR Licon WORKING ! 0.75s artifacts when upscaled because of HD images reinjection\n \n"
+      },
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 54,
+      "type": "BasicScheduler",
+      "pos": [
+        3679.914746126751,
+        4053.7253528145116
+      ],
+      "size": [
+        210,
+        106.00000000000045
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 57,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 538
+        }
+      ],
+      "outputs": [
+        {
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.16.4",
+        "Node name for S&R": "BasicScheduler",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "scheduler": true,
+            "steps": true,
+            "denoise": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "linear_quadratic",
+        4,
+        0.42
+      ],
+      "widgets_values_named": {
+        "scheduler": "linear_quadratic",
+        "steps": 4,
+        "denoise": 0.42
+      }
+    },
+    {
+      "id": 104,
+      "type": "ManualSigmas",
+      "pos": [
+        4112.490971119919,
+        4168.76032716158
+      ],
+      "size": [
+        230,
+        58
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 19,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "links": [
+            550
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.14.1",
+        "Node name for S&R": "ManualSigmas",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "sigmas": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "0.85, 0.7250, 0.4219, 0.0"
+      ],
+      "widgets_values_named": {
+        "sigmas": "0.85, 0.7250, 0.4219, 0.0"
+      }
+    },
+    {
+      "id": 100,
+      "type": "LTXVChunkFeedForward",
+      "pos": [
+        1493.906478136476,
+        4220.506363558898
+      ],
+      "size": [
+        272.35703125,
+        82
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 38,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 217
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "links": [
+            216
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-kjnodes",
+        "ver": "0ea5ece1793263d9fb0ad97bb067f96b83a9dea3",
+        "Node name for S&R": "LTXVChunkFeedForward",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "chunks": true,
+            "dim_threshold": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        2,
+        4096
+      ],
+      "widgets_values_named": {
+        "chunks": 2,
+        "dim_threshold": 4096
+      }
+    },
+    {
+      "id": 102,
+      "type": "VHS_VideoCombine",
+      "pos": [
+        4713.409101523936,
+        3860.1307770768394
+      ],
+      "size": [
+        903.5017372863722,
+        937.0011581909148
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 74,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 222
+        },
+        {
+          "name": "audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": 223
+        },
+        {
+          "name": "meta_batch",
+          "shape": 7,
+          "type": "VHS_BatchManager",
+          "link": null
+        },
+        {
+          "name": "vae",
+          "shape": 7,
+          "type": "VAE",
+          "link": null
+        },
+        {
+          "name": "frame_rate",
+          "type": "FLOAT",
+          "widget": {
+            "name": "frame_rate"
+          },
+          "link": 392
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Filenames",
+          "type": "VHS_FILENAMES",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-videohelpersuite",
+        "ver": "8923bd836bdab8b7bbdf4ed104b7d045e70c66e2",
+        "Node name for S&R": "VHS_VideoCombine",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "frame_rate": true,
+            "loop_count": true,
+            "filename_prefix": true,
+            "format": true,
+            "pingpong": true,
+            "save_output": true,
+            "pix_fmt": true,
+            "bitrate": true,
+            "megabit": true,
+            "save_metadata": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": {
+        "frame_rate": 24,
+        "loop_count": 0,
+        "filename_prefix": "LTX-2",
+        "format": "video/nvenc_h264-mp4",
+        "pix_fmt": "yuv420p",
+        "bitrate": 10,
+        "megabit": true,
+        "save_metadata": true,
+        "pingpong": false,
+        "save_output": true,
+        "videopreview": {
+          "hidden": false,
+          "paused": false,
+          "params": {
+            "filename": "LTX-2_00053-audio.mp4",
+            "subfolder": "",
+            "type": "output",
+            "format": "video/nvenc_h264-mp4",
+            "frame_rate": 24,
+            "workflow": "LTX-2_00053.png",
+            "fullpath": "D:\\ComfyUiVideo\\output\\LTX-2_00053-audio.mp4"
+          }
+        }
+      },
+      "widgets_values_named": {
+        "frame_rate": 24,
+        "loop_count": 0,
+        "filename_prefix": "LTX-2",
+        "format": "video/nvenc_h264-mp4",
+        "pix_fmt": "yuv420p",
+        "bitrate": 10,
+        "megabit": true,
+        "save_metadata": true,
+        "pingpong": false,
+        "save_output": true,
+        "videopreview": {
+          "hidden": false,
+          "paused": false,
+          "params": {
+            "filename": "LTX-2_00053-audio.mp4",
+            "subfolder": "",
+            "type": "output",
+            "format": "video/nvenc_h264-mp4",
+            "frame_rate": 24,
+            "workflow": "LTX-2_00053.png",
+            "fullpath": "D:\\ComfyUiVideo\\output\\LTX-2_00053-audio.mp4"
+          }
+        }
+      }
+    },
+    {
+      "id": 15,
+      "type": "VAEDecode",
+      "pos": [
+        4358.291126900038,
+        4483.957850924158
+      ],
+      "size": [
+        210,
+        50
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 69,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 602
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 233
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            222
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.9.1",
+        "Node name for S&R": "VAEDecode",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      }
+    },
+    {
+      "id": 103,
+      "type": "GetNode",
+      "pos": [
+        3318.1918051885973,
+        3894.209095039438
+      ],
+      "size": [
+        210,
+        58
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 20,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            508
+          ]
+        }
+      ],
+      "title": "Get_model_with_lora",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "model_with_lora"
+      ],
+      "widgets_values_named": {
+        "Constant": "model_with_lora"
+      },
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 92,
+      "type": "MarkdownNote",
+      "pos": [
+        853.7244221523258,
+        4314.978455341699
+      ],
+      "size": [
+        270,
+        560
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 21,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "FAQ",
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "# LTX 2.5\n\n**Where do I download these models??**\n\nmodels, vae, text encoders, Loras, upscaler, download links here: <https://huggingface.co/Lightricks/LTX-2.5/tree/main>\n\n\n\nThe tiny vae (taeltx2_3.safetensors) is found here:\n<https://huggingface.co/Kijai/LTX2.3_comfy/blob/main/vae/taeltx2_3.safetensors>\n\n**I'm getting errors when running this workflow!**\n\nDouble check that you have all of the correct models loaded. This is using the newest version of 2x upscaler (v1.1). You can change it to the older one under the Model Loader.\n\nMsr Lora : \n\n<https://huggingface.co/LiconStudio/LTX-2.3-Multiple-Subject-Reference/resolve/main/LTX-2.3-Licon-MSR-V2.safetensors?download=true>"
+      ],
+      "widgets_values_named": {
+        "text": "# LTX 2.5\n\n**Where do I download these models??**\n\nmodels, vae, text encoders, Loras, upscaler, download links here: <https://huggingface.co/Lightricks/LTX-2.5/tree/main>\n\n\n\nThe tiny vae (taeltx2_3.safetensors) is found here:\n<https://huggingface.co/Kijai/LTX2.3_comfy/blob/main/vae/taeltx2_3.safetensors>\n\n**I'm getting errors when running this workflow!**\n\nDouble check that you have all of the correct models loaded. This is using the newest version of 2x upscaler (v1.1). You can change it to the older one under the Model Loader.\n\nMsr Lora : \n\n<https://huggingface.co/LiconStudio/LTX-2.3-Multiple-Subject-Reference/resolve/main/LTX-2.3-Licon-MSR-V2.safetensors?download=true>"
+      },
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 228,
+      "type": "ConditioningZeroOut",
+      "pos": [
+        3037.0133888806977,
+        4516.453577199619
+      ],
+      "size": [
+        204.134765625,
+        26
+      ],
+      "flags": {},
+      "order": 48,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 598
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            599
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.32.0",
+        "Node name for S&R": "ConditioningZeroOut",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      }
+    },
+    {
+      "id": 229,
+      "type": "ManualSigmas",
+      "pos": [
+        3851.6088881572637,
+        4871.180927565749
+      ],
+      "size": [
+        260.88208296265475,
+        58.833714139675976
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.14.1",
+        "Node name for S&R": "ManualSigmas",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "sigmas": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "1.0, 0.99375, 0.9875, 0.98125, 0.975, 0.909375, 0.725, 0.421875, 0.0"
+      ],
+      "widgets_values_named": {
+        "sigmas": "1.0, 0.99375, 0.9875, 0.98125, 0.975, 0.909375, 0.725, 0.421875, 0.0"
+      }
+    },
+    {
+      "id": 29,
+      "type": "KSamplerSelect",
+      "pos": [
+        3911.538365353464,
+        4514.496307535617
+      ],
+      "size": [
+        210,
+        60
+      ],
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "SAMPLER",
+          "type": "SAMPLER",
+          "links": [
+            53
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.56",
+        "Node name for S&R": "KSamplerSelect",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65,
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "sampler_name": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "euler_ancestral"
+      ],
+      "widgets_values_named": {
+        "sampler_name": "euler_ancestral"
+      }
+    },
+    {
+      "id": 53,
+      "type": "KSamplerSelect",
+      "pos": [
+        3679.914746126751,
+        3956.805179368286
+      ],
+      "size": [
+        210,
+        60
+      ],
+      "flags": {},
+      "order": 24,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "SAMPLER",
+          "type": "SAMPLER",
+          "links": [
+            125
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.56",
+        "Node name for S&R": "KSamplerSelect",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65,
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "sampler_name": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "euler_ancestral"
+      ],
+      "widgets_values_named": {
+        "sampler_name": "euler_ancestral"
+      }
+    },
+    {
+      "id": 28,
+      "type": "RandomNoise",
+      "pos": [
+        3911.538365353464,
+        4386.207659334862
+      ],
+      "size": [
+        210,
+        90
+      ],
+      "flags": {},
+      "order": 25,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "NOISE",
+          "type": "NOISE",
+          "links": [
+            51,
+            157
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.19.3",
+        "Node name for S&R": "RandomNoise",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "noise_seed": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        206300441411960,
+        "randomize"
+      ],
+      "widgets_values_named": {
+        "noise_seed": 206300441411960,
+        "control_after_generate": "randomize"
+      }
+    },
+    {
+      "id": 94,
+      "type": "UNETLoader",
+      "pos": [
+        1187.7290384972068,
+        4380.0957326862
+      ],
+      "size": [
+        260.8147768096842,
+        82
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 26,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            408
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.21.1",
+        "Node name for S&R": "UNETLoader",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "unet_name": true,
+            "weight_dtype": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "redgraftLTX25Fast2K\\redgraftLTX25Fast2K_ltx25RedgraftNSFW.safetensors",
+        "default"
+      ],
+      "widgets_values_named": {
+        "unet_name": "redgraftLTX25Fast2K\\redgraftLTX25Fast2K_ltx25RedgraftNSFW.safetensors",
+        "weight_dtype": "default"
+      }
+    },
+    {
+      "id": 226,
+      "type": "CLIPLoader",
+      "pos": [
+        1463.028468459651,
+        4381.49151502825
+      ],
+      "size": [
+        254.77479428318293,
+        110.35676930661157
+      ],
+      "flags": {},
+      "order": 27,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            597
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.29.0",
+        "Node name for S&R": "CLIPLoader",
+        "models": [
+          {
+            "name": "gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
+            "url": "https://huggingface.co/Lightricks/LTX-2.5/resolve/main/text_encoders/gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
+            "directory": "text_encoders"
+          }
+        ],
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "clip_name": true,
+            "type": true,
+            "device": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "Gemma-4-12B-it-uncensored-hereti20DeepNeuralNerd20-LTX202.5-ComfyUI-int8convrot.safetensors",
+        "ltxv",
+        "default"
+      ],
+      "widgets_values_named": {
+        "clip_name": "Gemma-4-12B-it-uncensored-hereti20DeepNeuralNerd20-LTX202.5-ComfyUI-int8convrot.safetensors",
+        "type": "ltxv",
+        "device": "default"
+      }
+    },
+    {
+      "id": 3,
+      "type": "VAELoaderKJ",
+      "pos": [
+        1464.0255349598156,
+        4559.496307535617
+      ],
+      "size": [
+        260,
+        110
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 28,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            229,
+            578
+          ]
+        }
+      ],
+      "title": "Video VAELoader",
+      "properties": {
+        "cnr_id": "comfyui-kjnodes",
+        "ver": "1.2.5",
+        "Node name for S&R": "VAELoaderKJ",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "vae_name": true,
+            "device": true,
+            "weight_dtype": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "ltx-2.5-video-vae-bf16.safetensors",
+        "main_device",
+        "bf16"
+      ],
+      "widgets_values_named": {
+        "vae_name": "ltx-2.5-video-vae-bf16.safetensors",
+        "device": "main_device",
+        "weight_dtype": "bf16"
+      }
+    },
+    {
+      "id": 4,
+      "type": "VAELoaderKJ",
+      "pos": [
+        1464.0255349598156,
+        4717.234908175401
+      ],
+      "size": [
+        260,
+        110
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 29,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            227,
+            577
+          ]
+        }
+      ],
+      "title": "Audio VAELoader",
+      "properties": {
+        "cnr_id": "comfyui-kjnodes",
+        "ver": "487c7d86a0230aae3d8c0a37d517159b73834f85",
+        "Node name for S&R": "VAELoaderKJ",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "vae_name": true,
+            "device": true,
+            "weight_dtype": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "ltx-2.5-audio-vae-bf16.safetensors",
+        "main_device",
+        "bf16"
+      ],
+      "widgets_values_named": {
+        "vae_name": "ltx-2.5-audio-vae-bf16.safetensors",
+        "device": "main_device",
+        "weight_dtype": "bf16"
+      }
+    },
+    {
+      "id": 205,
+      "type": "LTXDirectorGuideCS25",
+      "pos": [
+        3318.1918051885973,
+        3819.3885488536926
+      ],
+      "size": [
+        288.24609375,
+        453.36924006026265
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 49,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 511
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 512
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 506
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "link": 500
+        },
+        {
+          "name": "guide_data",
+          "type": "GUIDE_DATA",
+          "link": 587
+        },
+        {
+          "name": "motion_guide_data",
+          "shape": 7,
+          "type": "MOTION_GUIDE_DATA",
+          "link": 589
+        },
+        {
+          "name": "model",
+          "shape": 7,
+          "type": "MODEL",
+          "link": 508
+        }
+      ],
+      "outputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": [
+            502,
+            509
+          ]
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": [
+            503,
+            510
+          ]
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "links": [
+            505
+          ]
+        },
+        {
+          "name": "model",
+          "type": "MODEL",
+          "links": [
+            504,
+            538
+          ]
+        },
+        {
+          "name": "latent_downscale_factor",
+          "type": "FLOAT",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "CGlide/WhatDreamsCost-CSGlide",
+        "Node name for S&R": "LTXDirectorGuideCS25",
+        "ver": "6a035f05769536a87d9764e8b91d5744dc014fd2",
+        "cnr_id": "WhatDreamsCost-ComfyUI",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "ic_lora_name": true,
+            "ic_lora_strength": true,
+            "scale_by": true,
+            "upscale_method": true,
+            "image_attention_strength": true,
+            "crop": true,
+            "auto_snap_ic_grid": true,
+            "use_tiled_encode": true,
+            "tile_size": true,
+            "tile_overlap": true,
+            "retake_mode": true,
+            "msr_strength": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "ltx2\\ltx-2-19b-ic-lora-detailer.safetensors",
+        1,
+        1,
+        "bicubic",
+        1,
+        "center",
+        true,
+        false,
+        256,
+        64,
+        false,
+        0
+      ],
+      "widgets_values_named": {
+        "ic_lora_name": "ltx2\\ltx-2-19b-ic-lora-detailer.safetensors",
+        "ic_lora_strength": 1,
+        "scale_by": 1,
+        "upscale_method": "bicubic",
+        "image_attention_strength": 1,
+        "crop": "center",
+        "auto_snap_ic_grid": true,
+        "use_tiled_encode": false,
+        "tile_size": 256,
+        "tile_overlap": 64,
+        "retake_mode": false,
+        "msr_strength": 0
+      }
+    },
+    {
+      "id": 57,
+      "type": "LatentUpscaleModelLoader",
+      "pos": [
+        3038.558756510417,
+        3818.332523118286
+      ],
+      "size": [
+        220.9224609375001,
+        66.66415747513201
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 30,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT_UPSCALE_MODEL",
+          "type": "LATENT_UPSCALE_MODEL",
+          "links": [
+            144
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.16.4",
+        "Node name for S&R": "LatentUpscaleModelLoader",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "model_name": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "ltx-2.3-spatial-upscaler-x2-1.1.safetensors"
+      ],
+      "widgets_values_named": {
+        "model_name": "ltx-2.3-spatial-upscaler-x2-1.1.safetensors"
+      }
+    },
+    {
+      "id": 101,
+      "type": "Power Lora Loader (rgthree)",
+      "pos": [
+        1281.99104273915,
+        3879.383454438205
+      ],
+      "size": [
+        340.519921875,
+        262
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 41,
+      "mode": 0,
+      "inputs": [
+        {
+          "dir": 3,
+          "name": "model",
+          "type": "MODEL",
+          "link": 218
+        },
+        {
+          "dir": 3,
+          "name": "clip",
+          "type": "CLIP",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "dir": 4,
+          "name": "MODEL",
+          "shape": 3,
+          "type": "MODEL",
+          "links": [
+            213,
+            603
+          ]
+        },
+        {
+          "dir": 4,
+          "name": "CLIP",
+          "shape": 3,
+          "type": "CLIP",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "rgthree-comfy",
+        "ver": "1.0.2605082257",
+        "Show Strengths": "Single Strength",
+        "Match": "",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        {},
+        {
+          "type": "PowerLoraLoaderHeaderWidget"
+        },
+        {
+          "on": false,
+          "lora": "LTX\\LTX-2.3-Licon-MSR-V2.safetensors",
+          "strength": 1,
+          "strengthTwo": null
+        },
+        {
+          "on": false,
+          "lora": "LTX\\LTX2.3_Crisp_Enhance.safetensors",
+          "strength": 1,
+          "strengthTwo": null
+        },
+        {
+          "on": false,
+          "lora": "LTX\\LTX2.3_Soft_Enhance.safetensors",
+          "strength": 1,
+          "strengthTwo": null
+        },
+        {
+          "on": false,
+          "lora": "LTX\\Ltx2.3-Licon-VBVR-I2V-390K-R32.safetensors",
+          "strength": 0.5,
+          "strengthTwo": null
+        },
+        {
+          "on": false,
+          "lora": "LTX\\LTX2.3-IC-LORA-Dual-Character.safetensors",
+          "strength": 0.5,
+          "strengthTwo": null
+        },
+        {
+          "on": false,
+          "lora": "LTX\\ltx2.3-transition.safetensors",
+          "strength": 0.5,
+          "strengthTwo": null
+        },
+        {},
+        ""
+      ],
+      "widgets_values_named": {
+        "divider": {},
+        "PowerLoraLoaderHeaderWidget": {
+          "type": "PowerLoraLoaderHeaderWidget"
+        },
+        "lora_1": {
+          "on": false,
+          "lora": "LTX\\LTX-2.3-Licon-MSR-V2.safetensors",
+          "strength": 1,
+          "strengthTwo": null
+        },
+        "lora_2": {
+          "on": false,
+          "lora": "LTX\\LTX2.3_Crisp_Enhance.safetensors",
+          "strength": 1,
+          "strengthTwo": null
+        },
+        "lora_3": {
+          "on": false,
+          "lora": "LTX\\LTX2.3_Soft_Enhance.safetensors",
+          "strength": 1,
+          "strengthTwo": null
+        },
+        "lora_4": {
+          "on": false,
+          "lora": "LTX\\Ltx2.3-Licon-VBVR-I2V-390K-R32.safetensors",
+          "strength": 0.5,
+          "strengthTwo": null
+        },
+        "lora_5": {
+          "on": false,
+          "lora": "LTX\\LTX2.3-IC-LORA-Dual-Character.safetensors",
+          "strength": 0.5,
+          "strengthTwo": null
+        },
+        "lora_6": {
+          "on": false,
+          "lora": "LTX\\ltx2.3-transition.safetensors",
+          "strength": 0.5,
+          "strengthTwo": null
+        },
+        "➕ Add Lora": ""
+      }
+    },
+    {
+      "id": 231,
+      "type": "PurgeVRAM",
+      "pos": [
+        1828.0555630333881,
+        3635.6704694038517
+      ],
+      "size": [
+        270,
+        82
+      ],
+      "flags": {},
+      "order": 44,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "type": "*",
+          "link": 605
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "purgevram",
+        "ver": "3ff32e54a565af1e1e575d538e49412d35ca2a76",
+        "Node name for S&R": "PurgeVRAM",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        true,
+        false
+      ],
+      "widgets_values_named": {
+        "purge_cache": true,
+        "purge_models": false
+      }
+    },
+    {
+      "id": 230,
+      "type": "VRAMCleanup",
+      "pos": [
+        1480.0617334982596,
+        3692.9489610989913
+      ],
+      "size": [
+        270,
+        82
+      ],
+      "flags": {},
+      "order": 43,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "shape": 7,
+          "type": "*",
+          "link": 603
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": [
+            605,
+            608
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui_memory_cleanup",
+        "ver": "1.1.3",
+        "Node name for S&R": "VRAMCleanup",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        false,
+        true
+      ],
+      "widgets_values_named": {
+        "offload_model": false,
+        "offload_cache": true
+      }
+    },
+    {
+      "id": 220,
+      "type": "LTXDirectorCS25",
+      "pos": [
+        1816.0018641022125,
+        3805.09345122726
+      ],
+      "size": [
+        1147.6037202045532,
+        1128
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 45,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 608
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 597
+        },
+        {
+          "name": "audio_vae",
+          "shape": 7,
+          "type": "VAE",
+          "link": 577
+        },
+        {
+          "name": "optional_latent",
+          "shape": 7,
+          "type": "LATENT",
+          "link": null
+        },
+        {
+          "name": "global_prompt",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "name": "vae",
+          "shape": 7,
+          "type": "VAE",
+          "link": 578
+        },
+        {
+          "name": "ref_images",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "start",
+          "shape": 7,
+          "type": "FLOAT",
+          "link": null
+        },
+        {
+          "name": "end",
+          "shape": 7,
+          "type": "FLOAT",
+          "link": null
+        },
+        {
+          "name": "duration",
+          "shape": 7,
+          "type": "FLOAT",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "links": [
+            600
+          ]
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": [
+            581,
+            582
+          ]
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": [
+            583,
+            598
+          ]
+        },
+        {
+          "name": "video_latent",
+          "type": "LATENT",
+          "links": [
+            585
+          ]
+        },
+        {
+          "name": "audio_latent",
+          "type": "LATENT",
+          "links": [
+            586
+          ]
+        },
+        {
+          "name": "guide_data",
+          "type": "GUIDE_DATA",
+          "links": [
+            587,
+            588
+          ]
+        },
+        {
+          "name": "motion_guide_data",
+          "type": "MOTION_GUIDE_DATA",
+          "links": [
+            589,
+            590
+          ]
+        },
+        {
+          "name": "frame_rate",
+          "type": "FLOAT",
+          "links": [
+            591,
+            592
+          ]
+        },
+        {
+          "name": "combined_audio",
+          "type": "AUDIO",
+          "links": []
+        },
+        {
+          "name": "clean_latent_frames",
+          "type": "INT",
+          "links": [
+            593
+          ]
+        },
+        {
+          "name": "clean_pixel_frames",
+          "type": "INT",
+          "links": []
+        }
+      ],
+      "properties": {
+        "aux_id": "CGlide/WhatDreamsCost-CSGlide",
+        "Node name for S&R": "LTXDirectorCS25",
+        "global_prompt": "An ancient ruined cathedral of cracked stone pillars and broken archways opens onto a bright blue mountain sky, where sparse green vegetation clings to distant slopes and sunlight cuts sharp blades of shadow across the paving stones. Above this world the air thins into an endless white sea of clouds under a hard blue zenith, and higher still the sky turns to overcast gray-blue over a flat ocean horizon, then to a streaked blue afternoon with long shadows raking across green and brown farmland far below. The mood is bright, playful and absurd — a solemn convent world knocked sideways into a cartoon of flight, where black habits, wicker baskets, red silk and broken propeller blades tumble through the same clean daylight. Warm earth tones of stone and wicker sit against cold navy cloth, white cloud and silver fuselage metal; light is always direct, always high, always casting long honest shadows.",
+        "mainTrackEnabled": true,
+        "audioTrackEnabled": true,
+        "motionTrackEnabled": true,
+        "audioTrackWasEnabledBeforeOverride": false,
+        "inpaint_audio": true,
+        "override_audio": false,
+        "overrideAudio": false,
+        "showFilenames": false,
+        "showPromptZones": true,
+        "use_custom_audio": true,
+        "use_custom_motion": true,
+        "frame_rate": 24,
+        "display_mode": "seconds",
+        "custom_width": 768,
+        "custom_height": 512,
+        "resize_method": "stretch to fit",
+        "divisible_by": 32,
+        "img_compression": 18,
+        "guide_strength": "1.00,1.00,1.00,1.00,1.00",
+        "local_prompts": "The ruined cathedral tilts hard across the frame as @ref1 stands between the cracked stone pillars, her wide startled eyes fixed on the lens, lips parted, one gloved hand raised with fingers curled mid-gesture while her left arm hangs loose at her side. Her black witch's hat sits low, shadowing her forehead while sunlight from above lights her face and her bare chest, the open black corset with lace trim framing her breasts, long dark gloves ending below her elbows. Behind her the archways frame distant mountains and a hard blue sky, and the cracked stone tiles under her boots throw sharp black shadows. Wind moves through the ruin with a low hollow moan. @ref1 says in Russian: \"Сегодня я сотру их молитвы, как пыль с этих камней.\" | The view rises from the wicker basket rim toward the red hot air balloon envelope, taut silk swelling against a bright blue sky above a dense white sea of clouds. @ref2 and @ref3 sit side by side in the basket in dark clothing, heads bowed, shoulders almost touching, faces obscured, the woven fibers of the basket creaking under their weight while the ropes run up taut to the burner ring. Sunlight floods the cloud layer below and throws soft shadows across their bowed heads. The burner hisses and the balloon fabric snaps in the wind. @ref2 says in Russian: \"Сестра, почему у меня под ногами не каменный пол, а плетёное дно?\" | Focus pulls from the black cylindrical burner assembly and its metal hook in the foreground to the faces of @ref4 and @ref5 in profile inside the open basket, their white collars bright against dark blue habits, hoods covering their heads to the nose. @ref4 leans in with her mouth open mid-word while @ref5 watches her with wide, tender eyes, their gazes locked inches apart above the endless blue and white cloudscape. Diffused daylight softens every line of their skin and the wicker grain behind them. The ropes hum and the wind rushes past the basket. @ref5 says in Russian: \"Ведьма нас заколдовала, сестра. Мы летим, и я не чувствую под собой земли.\" | The view drives toward the nose cone of a small propeller aircraft as @ref6 sits inside it in a full-body blue hooded jumpsuit, arms flung out to the sides with palms forward, gripping the frame, her face calm and focused through the hood opening. The matte brown fuselage shudders, landing gear retracted beneath, one wing slicing the overcast gray-blue air above a flat ocean horizon at dusk. Cold dim light washes the metal and her blue cloth. The propeller chops the air in a hard rhythmic drone. @ref6 shouts in Russian: \"Прыгай на крыло! Держись за кромку и не смотри вниз!\" | The view drops low and close over the scarred silver fuselage of the bomber, fisheye distortion bending the sky as @ref7 crouches on the metal gripping a heavy black machine gun, muzzle flashing orange with smoke plumes, while @ref8 lies prone beside her, robe billowing in the violent wind, one hand clamped to a torn panel. Shattered cockpit glass and a fractured propeller blade trail smoke behind them, two dark raptors soaring in formation above, smaller birds tumbling through the debris field, green and brown farmland patchworked far below under long afternoon shadows. The engine roars and gunfire cracks across the sky. @ref7 yells in Russian: \"Мы держимся! Крыло выдержит — стреляй по курсу!\"",
+        "segment_lengths": "120,132,144,156,169",
+        "timeline_data": "{\"mainTrackEnabled\":true,\"audioTrackEnabled\":true,\"motionTrackEnabled\":true,\"propHeight\":90,\"globalPropHeight\":108,\"showFilenames\":false,\"showPromptZones\":true,\"overrideAudio\":false,\"inpaint_audio\":true,\"global_prompt\":\"An ancient ruined cathedral of cracked stone pillars and broken archways opens onto a bright blue mountain sky, where sparse green vegetation clings to distant slopes and sunlight cuts sharp blades of shadow across the paving stones. Above this world the air thins into an endless white sea of clouds under a hard blue zenith, and higher still the sky turns to overcast gray-blue over a flat ocean horizon, then to a streaked blue afternoon with long shadows raking across green and brown farmland far below. The mood is bright, playful and absurd — a solemn convent world knocked sideways into a cartoon of flight, where black habits, wicker baskets, red silk and broken propeller blades tumble through the same clean daylight. Warm earth tones of stone and wicker sit against cold navy cloth, white cloud and silver fuselage metal; light is always direct, always high, always casting long honest shadows.\",\"retake_global_prompt\":\"\",\"retakeMode\":false,\"retakeStart\":79,\"retakeLength\":66,\"retakePrompt\":\"replace driver with @char1 \",\"retakeStrength\":1,\"retakeVideo\":{\"fileName\":\"LTX-2_00650-audio.mp4\",\"imageFile\":\"whatdreamscost/LTX-2_00650-audio.mp4\",\"videoDurationFrames\":201,\"fileSize\":13238818},\"normalStartFrame\":0,\"normalDurationFrames\":721,\"reference_mode\":\"OFF\",\"disable_prompt_relay\":false,\"msr_prefix_frames\":41,\"analyzeProvider\":\"ollama\",\"analyzeBaseUrl\":\"\",\"analyzeModel\":\"\",\"characters\":[{\"images\":[],\"description\":\"\"},{\"images\":[],\"description\":\"\"},{\"images\":[],\"description\":\"\"}],\"segments\":[{\"id\":\"1790447620274seg0\",\"start\":0,\"length\":120,\"prompt\":\"The ruined cathedral tilts hard across the frame as @ref1 stands between the cracked stone pillars, her wide startled eyes fixed on the lens, lips parted, one gloved hand raised with fingers curled mid-gesture while her left arm hangs loose at her side. Her black witch's hat sits low, shadowing her forehead while sunlight from above lights her face and her bare chest, the open black corset with lace trim framing her breasts, long dark gloves ending below her elbows. Behind her the archways frame distant mountains and a hard blue sky, and the cracked stone tiles under her boots throw sharp black shadows. Wind moves through the ruin with a low hollow moan. @ref1 says in Russian: \\\"Сегодня я сотру их молитвы, как пыль с этих камней.\\\"\",\"type\":\"image\",\"isAnchor\":false,\"isEndFrame\":false,\"imageFile\":\"LTX25Dir_5l1_tl1/a_bekn_.png\",\"imageB64\":\"/api/view?filename=a_bekn_.png&type=input&subfolder=LTX25Dir_5l1_tl1\"},{\"id\":\"1790447620274seg1\",\"start\":120,\"length\":132,\"prompt\":\"The view rises from the wicker basket rim toward the red hot air balloon envelope, taut silk swelling against a bright blue sky above a dense white sea of clouds. @ref2 and @ref3 sit side by side in the basket in dark clothing, heads bowed, shoulders almost touching, faces obscured, the woven fibers of the basket creaking under their weight while the ropes run up taut to the burner ring. Sunlight floods the cloud layer below and throws soft shadows across their bowed heads. The burner hisses and the balloon fabric snaps in the wind. @ref2 says in Russian: \\\"Сестра, почему у меня под ногами не каменный пол, а плетёное дно?\\\"\",\"type\":\"image\",\"isAnchor\":false,\"isEndFrame\":false,\"imageFile\":\"LTX25Dir_5l1_tl1/b_ebpq_.png\",\"imageB64\":\"/api/view?filename=b_ebpq_.png&type=input&subfolder=LTX25Dir_5l1_tl1\"},{\"id\":\"1790447620274seg2\",\"start\":252,\"length\":144,\"prompt\":\"Focus pulls from the black cylindrical burner assembly and its metal hook in the foreground to the faces of @ref4 and @ref5 in profile inside the open basket, their white collars bright against dark blue habits, hoods covering their heads to the nose. @ref4 leans in with her mouth open mid-word while @ref5 watches her with wide, tender eyes, their gazes locked inches apart above the endless blue and white cloudscape. Diffused daylight softens every line of their skin and the wicker grain behind them. The ropes hum and the wind rushes past the basket. @ref5 says in Russian: \\\"Ведьма нас заколдовала, сестра. Мы летим, и я не чувствую под собой земли.\\\"\",\"type\":\"image\",\"isAnchor\":false,\"isEndFrame\":false,\"imageFile\":\"LTX25Dir_5l1_tl1/c_rocb_.png\",\"imageB64\":\"/api/view?filename=c_rocb_.png&type=input&subfolder=LTX25Dir_5l1_tl1\"},{\"id\":\"1790447620274seg3\",\"start\":396,\"length\":156,\"prompt\":\"The view drives toward the nose cone of a small propeller aircraft as @ref6 sits inside it in a full-body blue hooded jumpsuit, arms flung out to the sides with palms forward, gripping the frame, her face calm and focused through the hood opening. The matte brown fuselage shudders, landing gear retracted beneath, one wing slicing the overcast gray-blue air above a flat ocean horizon at dusk. Cold dim light washes the metal and her blue cloth. The propeller chops the air in a hard rhythmic drone. @ref6 shouts in Russian: \\\"Прыгай на крыло! Держись за кромку и не смотри вниз!\\\"\",\"type\":\"image\",\"isAnchor\":false,\"isEndFrame\":false,\"imageFile\":\"LTX25Dir_5l1_tl1/d_xsxe_.png\",\"imageB64\":\"/api/view?filename=d_xsxe_.png&type=input&subfolder=LTX25Dir_5l1_tl1\"},{\"id\":\"1790447620274seg4\",\"start\":552,\"length\":169,\"prompt\":\"The view drops low and close over the scarred silver fuselage of the bomber, fisheye distortion bending the sky as @ref7 crouches on the metal gripping a heavy black machine gun, muzzle flashing orange with smoke plumes, while @ref8 lies prone beside her, robe billowing in the violent wind, one hand clamped to a torn panel. Shattered cockpit glass and a fractured propeller blade trail smoke behind them, two dark raptors soaring in formation above, smaller birds tumbling through the debris field, green and brown farmland patchworked far below under long afternoon shadows. The engine roars and gunfire cracks across the sky. @ref7 yells in Russian: \\\"Мы держимся! Крыло выдержит — стреляй по курсу!\\\"\",\"type\":\"image\",\"isAnchor\":false,\"isEndFrame\":false,\"imageFile\":\"LTX25Dir_5l1_tl1/e_juyw_.png\",\"imageB64\":\"/api/view?filename=e_juyw_.png&type=input&subfolder=LTX25Dir_5l1_tl1\"}],\"motionSegments\":[],\"audioSegments\":[]}",
+        "epsilon": 0.001,
+        "start_second": 0,
+        "end_second": 30.042,
+        "duration_seconds": 30.042,
+        "start_frame": 0,
+        "end_frame": 721,
+        "duration_frames": 721,
+        "ver": "6a035f05769536a87d9764e8b91d5744dc014fd2",
+        "cnr_id": "WhatDreamsCost-ComfyUI",
+        "propHeight": 90,
+        "globalPropHeight": 108,
+        "reference_strength": 1,
+        "timeline_ui": "",
+        "has_serialized_properties": true,
+        "retakeMode": false,
+        "ltx_settings_ui": "",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "frame_rate": true,
+            "custom_width": true,
+            "custom_height": true,
+            "resize_method": true,
+            "reference_strength": true,
+            "timeline_data": true,
+            "local_prompts": true,
+            "segment_lengths": true,
+            "guide_strength": true,
+            "use_custom_audio": true,
+            "use_custom_motion": true,
+            "inpaint_audio": true,
+            "override_audio": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        0,
+        30.042,
+        30.042,
+        0,
+        721,
+        721,
+        "{\"mainTrackEnabled\":true,\"audioTrackEnabled\":true,\"motionTrackEnabled\":true,\"propHeight\":90,\"globalPropHeight\":108,\"showFilenames\":false,\"showPromptZones\":true,\"overrideAudio\":false,\"inpaint_audio\":true,\"global_prompt\":\"An ancient ruined cathedral of cracked stone pillars and broken archways opens onto a bright blue mountain sky, where sparse green vegetation clings to distant slopes and sunlight cuts sharp blades of shadow across the paving stones. Above this world the air thins into an endless white sea of clouds under a hard blue zenith, and higher still the sky turns to overcast gray-blue over a flat ocean horizon, then to a streaked blue afternoon with long shadows raking across green and brown farmland far below. The mood is bright, playful and absurd — a solemn convent world knocked sideways into a cartoon of flight, where black habits, wicker baskets, red silk and broken propeller blades tumble through the same clean daylight. Warm earth tones of stone and wicker sit against cold navy cloth, white cloud and silver fuselage metal; light is always direct, always high, always casting long honest shadows.\",\"retake_global_prompt\":\"\",\"retakeMode\":false,\"retakeStart\":79,\"retakeLength\":66,\"retakePrompt\":\"replace driver with @char1 \",\"retakeStrength\":1,\"retakeVideo\":{\"fileName\":\"LTX-2_00650-audio.mp4\",\"imageFile\":\"whatdreamscost/LTX-2_00650-audio.mp4\",\"videoDurationFrames\":201,\"fileSize\":13238818},\"normalStartFrame\":0,\"normalDurationFrames\":721,\"reference_mode\":\"OFF\",\"disable_prompt_relay\":false,\"msr_prefix_frames\":41,\"analyzeProvider\":\"ollama\",\"analyzeBaseUrl\":\"\",\"analyzeModel\":\"\",\"characters\":[{\"images\":[],\"description\":\"\"},{\"images\":[],\"description\":\"\"},{\"images\":[],\"description\":\"\"}],\"segments\":[{\"id\":\"1790447620274seg0\",\"start\":0,\"length\":120,\"prompt\":\"The ruined cathedral tilts hard across the frame as @ref1 stands between the cracked stone pillars, her wide startled eyes fixed on the lens, lips parted, one gloved hand raised with fingers curled mid-gesture while her left arm hangs loose at her side. Her black witch's hat sits low, shadowing her forehead while sunlight from above lights her face and her bare chest, the open black corset with lace trim framing her breasts, long dark gloves ending below her elbows. Behind her the archways frame distant mountains and a hard blue sky, and the cracked stone tiles under her boots throw sharp black shadows. Wind moves through the ruin with a low hollow moan. @ref1 says in Russian: \\\"Сегодня я сотру их молитвы, как пыль с этих камней.\\\"\",\"type\":\"image\",\"isAnchor\":false,\"isEndFrame\":false,\"imageFile\":\"LTX25Dir_5l1_tl1/a_bekn_.png\",\"imageB64\":\"/api/view?filename=a_bekn_.png&type=input&subfolder=LTX25Dir_5l1_tl1\"},{\"id\":\"1790447620274seg1\",\"start\":120,\"length\":132,\"prompt\":\"The view rises from the wicker basket rim toward the red hot air balloon envelope, taut silk swelling against a bright blue sky above a dense white sea of clouds. @ref2 and @ref3 sit side by side in the basket in dark clothing, heads bowed, shoulders almost touching, faces obscured, the woven fibers of the basket creaking under their weight while the ropes run up taut to the burner ring. Sunlight floods the cloud layer below and throws soft shadows across their bowed heads. The burner hisses and the balloon fabric snaps in the wind. @ref2 says in Russian: \\\"Сестра, почему у меня под ногами не каменный пол, а плетёное дно?\\\"\",\"type\":\"image\",\"isAnchor\":false,\"isEndFrame\":false,\"imageFile\":\"LTX25Dir_5l1_tl1/b_ebpq_.png\",\"imageB64\":\"/api/view?filename=b_ebpq_.png&type=input&subfolder=LTX25Dir_5l1_tl1\"},{\"id\":\"1790447620274seg2\",\"start\":252,\"length\":144,\"prompt\":\"Focus pulls from the black cylindrical burner assembly and its metal hook in the foreground to the faces of @ref4 and @ref5 in profile inside the open basket, their white collars bright against dark blue habits, hoods covering their heads to the nose. @ref4 leans in with her mouth open mid-word while @ref5 watches her with wide, tender eyes, their gazes locked inches apart above the endless blue and white cloudscape. Diffused daylight softens every line of their skin and the wicker grain behind them. The ropes hum and the wind rushes past the basket. @ref5 says in Russian: \\\"Ведьма нас заколдовала, сестра. Мы летим, и я не чувствую под собой земли.\\\"\",\"type\":\"image\",\"isAnchor\":false,\"isEndFrame\":false,\"imageFile\":\"LTX25Dir_5l1_tl1/c_rocb_.png\",\"imageB64\":\"/api/view?filename=c_rocb_.png&type=input&subfolder=LTX25Dir_5l1_tl1\"},{\"id\":\"1790447620274seg3\",\"start\":396,\"length\":156,\"prompt\":\"The view drives toward the nose cone of a small propeller aircraft as @ref6 sits inside it in a full-body blue hooded jumpsuit, arms flung out to the sides with palms forward, gripping the frame, her face calm and focused through the hood opening. The matte brown fuselage shudders, landing gear retracted beneath, one wing slicing the overcast gray-blue air above a flat ocean horizon at dusk. Cold dim light washes the metal and her blue cloth. The propeller chops the air in a hard rhythmic drone. @ref6 shouts in Russian: \\\"Прыгай на крыло! Держись за кромку и не смотри вниз!\\\"\",\"type\":\"image\",\"isAnchor\":false,\"isEndFrame\":false,\"imageFile\":\"LTX25Dir_5l1_tl1/d_xsxe_.png\",\"imageB64\":\"/api/view?filename=d_xsxe_.png&type=input&subfolder=LTX25Dir_5l1_tl1\"},{\"id\":\"1790447620274seg4\",\"start\":552,\"length\":169,\"prompt\":\"The view drops low and close over the scarred silver fuselage of the bomber, fisheye distortion bending the sky as @ref7 crouches on the metal gripping a heavy black machine gun, muzzle flashing orange with smoke plumes, while @ref8 lies prone beside her, robe billowing in the violent wind, one hand clamped to a torn panel. Shattered cockpit glass and a fractured propeller blade trail smoke behind them, two dark raptors soaring in formation above, smaller birds tumbling through the debris field, green and brown farmland patchworked far below under long afternoon shadows. The engine roars and gunfire cracks across the sky. @ref7 yells in Russian: \\\"Мы держимся! Крыло выдержит — стреляй по курсу!\\\"\",\"type\":\"image\",\"isAnchor\":false,\"isEndFrame\":false,\"imageFile\":\"LTX25Dir_5l1_tl1/e_juyw_.png\",\"imageB64\":\"/api/view?filename=e_juyw_.png&type=input&subfolder=LTX25Dir_5l1_tl1\"}],\"motionSegments\":[],\"audioSegments\":[]}",
+        "The ruined cathedral tilts hard across the frame as @ref1 stands between the cracked stone pillars, her wide startled eyes fixed on the lens, lips parted, one gloved hand raised with fingers curled mid-gesture while her left arm hangs loose at her side. Her black witch's hat sits low, shadowing her forehead while sunlight from above lights her face and her bare chest, the open black corset with lace trim framing her breasts, long dark gloves ending below her elbows. Behind her the archways frame distant mountains and a hard blue sky, and the cracked stone tiles under her boots throw sharp black shadows. Wind moves through the ruin with a low hollow moan. @ref1 says in Russian: \"Сегодня я сотру их молитвы, как пыль с этих камней.\" | The view rises from the wicker basket rim toward the red hot air balloon envelope, taut silk swelling against a bright blue sky above a dense white sea of clouds. @ref2 and @ref3 sit side by side in the basket in dark clothing, heads bowed, shoulders almost touching, faces obscured, the woven fibers of the basket creaking under their weight while the ropes run up taut to the burner ring. Sunlight floods the cloud layer below and throws soft shadows across their bowed heads. The burner hisses and the balloon fabric snaps in the wind. @ref2 says in Russian: \"Сестра, почему у меня под ногами не каменный пол, а плетёное дно?\" | Focus pulls from the black cylindrical burner assembly and its metal hook in the foreground to the faces of @ref4 and @ref5 in profile inside the open basket, their white collars bright against dark blue habits, hoods covering their heads to the nose. @ref4 leans in with her mouth open mid-word while @ref5 watches her with wide, tender eyes, their gazes locked inches apart above the endless blue and white cloudscape. Diffused daylight softens every line of their skin and the wicker grain behind them. The ropes hum and the wind rushes past the basket. @ref5 says in Russian: \"Ведьма нас заколдовала, сестра. Мы летим, и я не чувствую под собой земли.\" | The view drives toward the nose cone of a small propeller aircraft as @ref6 sits inside it in a full-body blue hooded jumpsuit, arms flung out to the sides with palms forward, gripping the frame, her face calm and focused through the hood opening. The matte brown fuselage shudders, landing gear retracted beneath, one wing slicing the overcast gray-blue air above a flat ocean horizon at dusk. Cold dim light washes the metal and her blue cloth. The propeller chops the air in a hard rhythmic drone. @ref6 shouts in Russian: \"Прыгай на крыло! Держись за кромку и не смотри вниз!\" | The view drops low and close over the scarred silver fuselage of the bomber, fisheye distortion bending the sky as @ref7 crouches on the metal gripping a heavy black machine gun, muzzle flashing orange with smoke plumes, while @ref8 lies prone beside her, robe billowing in the violent wind, one hand clamped to a torn panel. Shattered cockpit glass and a fractured propeller blade trail smoke behind them, two dark raptors soaring in formation above, smaller birds tumbling through the debris field, green and brown farmland patchworked far below under long afternoon shadows. The engine roars and gunfire cracks across the sky. @ref7 yells in Russian: \"Мы держимся! Крыло выдержит — стреляй по курсу!\"",
+        "120,132,144,156,169",
+        0.001,
+        "1.00,1.00,1.00,1.00,1.00",
+        true,
+        true,
+        true,
+        24,
+        "seconds",
+        768,
+        512,
+        "stretch to fit",
+        32,
+        18,
+        false,
+        1,
+        "",
+        ""
+      ],
+      "widgets_values_named": {
+        "start_second": 0,
+        "end_second": 30.042,
+        "duration_seconds": 30.042,
+        "start_frame": 0,
+        "end_frame": 721,
+        "duration_frames": 721,
+        "timeline_data": "{\"mainTrackEnabled\":true,\"audioTrackEnabled\":true,\"motionTrackEnabled\":true,\"propHeight\":90,\"globalPropHeight\":108,\"showFilenames\":false,\"showPromptZones\":true,\"overrideAudio\":false,\"inpaint_audio\":true,\"global_prompt\":\"An ancient ruined cathedral of cracked stone pillars and broken archways opens onto a bright blue mountain sky, where sparse green vegetation clings to distant slopes and sunlight cuts sharp blades of shadow across the paving stones. Above this world the air thins into an endless white sea of clouds under a hard blue zenith, and higher still the sky turns to overcast gray-blue over a flat ocean horizon, then to a streaked blue afternoon with long shadows raking across green and brown farmland far below. The mood is bright, playful and absurd — a solemn convent world knocked sideways into a cartoon of flight, where black habits, wicker baskets, red silk and broken propeller blades tumble through the same clean daylight. Warm earth tones of stone and wicker sit against cold navy cloth, white cloud and silver fuselage metal; light is always direct, always high, always casting long honest shadows.\",\"retake_global_prompt\":\"\",\"retakeMode\":false,\"retakeStart\":79,\"retakeLength\":66,\"retakePrompt\":\"replace driver with @char1 \",\"retakeStrength\":1,\"retakeVideo\":{\"fileName\":\"LTX-2_00650-audio.mp4\",\"imageFile\":\"whatdreamscost/LTX-2_00650-audio.mp4\",\"videoDurationFrames\":201,\"fileSize\":13238818},\"normalStartFrame\":0,\"normalDurationFrames\":721,\"reference_mode\":\"OFF\",\"disable_prompt_relay\":false,\"msr_prefix_frames\":41,\"analyzeProvider\":\"ollama\",\"analyzeBaseUrl\":\"\",\"analyzeModel\":\"\",\"characters\":[{\"images\":[],\"description\":\"\"},{\"images\":[],\"description\":\"\"},{\"images\":[],\"description\":\"\"}],\"segments\":[{\"id\":\"1790447620274seg0\",\"start\":0,\"length\":120,\"prompt\":\"The ruined cathedral tilts hard across the frame as @ref1 stands between the cracked stone pillars, her wide startled eyes fixed on the lens, lips parted, one gloved hand raised with fingers curled mid-gesture while her left arm hangs loose at her side. Her black witch's hat sits low, shadowing her forehead while sunlight from above lights her face and her bare chest, the open black corset with lace trim framing her breasts, long dark gloves ending below her elbows. Behind her the archways frame distant mountains and a hard blue sky, and the cracked stone tiles under her boots throw sharp black shadows. Wind moves through the ruin with a low hollow moan. @ref1 says in Russian: \\\"Сегодня я сотру их молитвы, как пыль с этих камней.\\\"\",\"type\":\"image\",\"isAnchor\":false,\"isEndFrame\":false,\"imageFile\":\"LTX25Dir_5l1_tl1/a_bekn_.png\",\"imageB64\":\"/api/view?filename=a_bekn_.png&type=input&subfolder=LTX25Dir_5l1_tl1\"},{\"id\":\"1790447620274seg1\",\"start\":120,\"length\":132,\"prompt\":\"The view rises from the wicker basket rim toward the red hot air balloon envelope, taut silk swelling against a bright blue sky above a dense white sea of clouds. @ref2 and @ref3 sit side by side in the basket in dark clothing, heads bowed, shoulders almost touching, faces obscured, the woven fibers of the basket creaking under their weight while the ropes run up taut to the burner ring. Sunlight floods the cloud layer below and throws soft shadows across their bowed heads. The burner hisses and the balloon fabric snaps in the wind. @ref2 says in Russian: \\\"Сестра, почему у меня под ногами не каменный пол, а плетёное дно?\\\"\",\"type\":\"image\",\"isAnchor\":false,\"isEndFrame\":false,\"imageFile\":\"LTX25Dir_5l1_tl1/b_ebpq_.png\",\"imageB64\":\"/api/view?filename=b_ebpq_.png&type=input&subfolder=LTX25Dir_5l1_tl1\"},{\"id\":\"1790447620274seg2\",\"start\":252,\"length\":144,\"prompt\":\"Focus pulls from the black cylindrical burner assembly and its metal hook in the foreground to the faces of @ref4 and @ref5 in profile inside the open basket, their white collars bright against dark blue habits, hoods covering their heads to the nose. @ref4 leans in with her mouth open mid-word while @ref5 watches her with wide, tender eyes, their gazes locked inches apart above the endless blue and white cloudscape. Diffused daylight softens every line of their skin and the wicker grain behind them. The ropes hum and the wind rushes past the basket. @ref5 says in Russian: \\\"Ведьма нас заколдовала, сестра. Мы летим, и я не чувствую под собой земли.\\\"\",\"type\":\"image\",\"isAnchor\":false,\"isEndFrame\":false,\"imageFile\":\"LTX25Dir_5l1_tl1/c_rocb_.png\",\"imageB64\":\"/api/view?filename=c_rocb_.png&type=input&subfolder=LTX25Dir_5l1_tl1\"},{\"id\":\"1790447620274seg3\",\"start\":396,\"length\":156,\"prompt\":\"The view drives toward the nose cone of a small propeller aircraft as @ref6 sits inside it in a full-body blue hooded jumpsuit, arms flung out to the sides with palms forward, gripping the frame, her face calm and focused through the hood opening. The matte brown fuselage shudders, landing gear retracted beneath, one wing slicing the overcast gray-blue air above a flat ocean horizon at dusk. Cold dim light washes the metal and her blue cloth. The propeller chops the air in a hard rhythmic drone. @ref6 shouts in Russian: \\\"Прыгай на крыло! Держись за кромку и не смотри вниз!\\\"\",\"type\":\"image\",\"isAnchor\":false,\"isEndFrame\":false,\"imageFile\":\"LTX25Dir_5l1_tl1/d_xsxe_.png\",\"imageB64\":\"/api/view?filename=d_xsxe_.png&type=input&subfolder=LTX25Dir_5l1_tl1\"},{\"id\":\"1790447620274seg4\",\"start\":552,\"length\":169,\"prompt\":\"The view drops low and close over the scarred silver fuselage of the bomber, fisheye distortion bending the sky as @ref7 crouches on the metal gripping a heavy black machine gun, muzzle flashing orange with smoke plumes, while @ref8 lies prone beside her, robe billowing in the violent wind, one hand clamped to a torn panel. Shattered cockpit glass and a fractured propeller blade trail smoke behind them, two dark raptors soaring in formation above, smaller birds tumbling through the debris field, green and brown farmland patchworked far below under long afternoon shadows. The engine roars and gunfire cracks across the sky. @ref7 yells in Russian: \\\"Мы держимся! Крыло выдержит — стреляй по курсу!\\\"\",\"type\":\"image\",\"isAnchor\":false,\"isEndFrame\":false,\"imageFile\":\"LTX25Dir_5l1_tl1/e_juyw_.png\",\"imageB64\":\"/api/view?filename=e_juyw_.png&type=input&subfolder=LTX25Dir_5l1_tl1\"}],\"motionSegments\":[],\"audioSegments\":[]}",
+        "local_prompts": "The ruined cathedral tilts hard across the frame as @ref1 stands between the cracked stone pillars, her wide startled eyes fixed on the lens, lips parted, one gloved hand raised with fingers curled mid-gesture while her left arm hangs loose at her side. Her black witch's hat sits low, shadowing her forehead while sunlight from above lights her face and her bare chest, the open black corset with lace trim framing her breasts, long dark gloves ending below her elbows. Behind her the archways frame distant mountains and a hard blue sky, and the cracked stone tiles under her boots throw sharp black shadows. Wind moves through the ruin with a low hollow moan. @ref1 says in Russian: \"Сегодня я сотру их молитвы, как пыль с этих камней.\" | The view rises from the wicker basket rim toward the red hot air balloon envelope, taut silk swelling against a bright blue sky above a dense white sea of clouds. @ref2 and @ref3 sit side by side in the basket in dark clothing, heads bowed, shoulders almost touching, faces obscured, the woven fibers of the basket creaking under their weight while the ropes run up taut to the burner ring. Sunlight floods the cloud layer below and throws soft shadows across their bowed heads. The burner hisses and the balloon fabric snaps in the wind. @ref2 says in Russian: \"Сестра, почему у меня под ногами не каменный пол, а плетёное дно?\" | Focus pulls from the black cylindrical burner assembly and its metal hook in the foreground to the faces of @ref4 and @ref5 in profile inside the open basket, their white collars bright against dark blue habits, hoods covering their heads to the nose. @ref4 leans in with her mouth open mid-word while @ref5 watches her with wide, tender eyes, their gazes locked inches apart above the endless blue and white cloudscape. Diffused daylight softens every line of their skin and the wicker grain behind them. The ropes hum and the wind rushes past the basket. @ref5 says in Russian: \"Ведьма нас заколдовала, сестра. Мы летим, и я не чувствую под собой земли.\" | The view drives toward the nose cone of a small propeller aircraft as @ref6 sits inside it in a full-body blue hooded jumpsuit, arms flung out to the sides with palms forward, gripping the frame, her face calm and focused through the hood opening. The matte brown fuselage shudders, landing gear retracted beneath, one wing slicing the overcast gray-blue air above a flat ocean horizon at dusk. Cold dim light washes the metal and her blue cloth. The propeller chops the air in a hard rhythmic drone. @ref6 shouts in Russian: \"Прыгай на крыло! Держись за кромку и не смотри вниз!\" | The view drops low and close over the scarred silver fuselage of the bomber, fisheye distortion bending the sky as @ref7 crouches on the metal gripping a heavy black machine gun, muzzle flashing orange with smoke plumes, while @ref8 lies prone beside her, robe billowing in the violent wind, one hand clamped to a torn panel. Shattered cockpit glass and a fractured propeller blade trail smoke behind them, two dark raptors soaring in formation above, smaller birds tumbling through the debris field, green and brown farmland patchworked far below under long afternoon shadows. The engine roars and gunfire cracks across the sky. @ref7 yells in Russian: \"Мы держимся! Крыло выдержит — стреляй по курсу!\"",
+        "segment_lengths": "120,132,144,156,169",
+        "epsilon": 0.001,
+        "guide_strength": "1.00,1.00,1.00,1.00,1.00",
+        "use_custom_audio": true,
+        "use_custom_motion": true,
+        "inpaint_audio": true,
+        "frame_rate": 24,
+        "display_mode": "seconds",
+        "custom_width": 768,
+        "custom_height": 512,
+        "resize_method": "stretch to fit",
+        "divisible_by": 32,
+        "img_compression": 18,
+        "override_audio": false,
+        "reference_strength": 1,
+        "ltx_settings_ui": "",
+        "timeline_ui": ""
+      }
+    },
+    {
+      "id": 80,
+      "type": "LoraLoaderModelOnly",
+      "pos": [
+        1188.543815306891,
+        4670.11550070385
+      ],
+      "size": [
+        260,
+        85.21429623404856
+      ],
+      "flags": {},
+      "order": 35,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 405
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            219
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.75",
+        "Node name for S&R": "LoraLoaderModelOnly",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65,
+        "models": [
+          {
+            "name": "ltx-2.3-22b-distilled-lora-384.safetensors",
+            "url": "https://huggingface.co/Lightricks/LTX-2.3/resolve/main/ltx-2.3-22b-distilled-lora-384.safetensors",
+            "directory": "loras"
+          }
+        ],
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "lora_name": true,
+            "strength_model": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "ltx2\\LTX_SulphurEXP_LoRA_fro99-avgrank105.safetensors",
+        1
+      ],
+      "widgets_values_named": {
+        "lora_name": "ltx2\\LTX_SulphurEXP_LoRA_fro99-avgrank105.safetensors",
+        "strength_model": 1
+      },
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 97,
+      "type": "PathchSageAttentionKJ",
+      "pos": [
+        1278.1677983988275,
+        4215.803673127763
+      ],
+      "size": [
+        270,
+        82
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 36,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 219
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            215
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-kjnodes",
+        "ver": "204f6d5aae73b10c0fe2fb26e61405fd6337bb77",
+        "Node name for S&R": "PathchSageAttentionKJ",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "sage_attention": true,
+            "allow_compile": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "auto",
+        false
+      ],
+      "widgets_values_named": {
+        "sage_attention": "auto",
+        "allow_compile": false
+      }
+    },
+    {
+      "id": 98,
+      "type": "LTX2MemoryEfficientSageAttentionPatch",
+      "pos": [
+        1479.8282190239377,
+        4256.179659506212
+      ],
+      "size": [
+        275.179296875,
+        58
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 37,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 215
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "links": [
+            217
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-kjnodes",
+        "ver": "2acdef1766026ff3be00daf3c45f6a064db9100f",
+        "Node name for S&R": "LTX2MemoryEfficientSageAttentionPatch",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "triton_kernels": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        true
+      ],
+      "widgets_values_named": {
+        "triton_kernels": true
+      }
+    },
+    {
+      "id": 99,
+      "type": "LTX2AttentionTunerPatch",
+      "pos": [
+        1275.2544201414994,
+        4265.356841668169
+      ],
+      "size": [
+        283.875,
+        178
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 39,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 216
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "links": [
+            214,
+            218
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-kjnodes",
+        "ver": "5b38397a6430fdb16c7bd14a6bd64c2b0e69a5f0",
+        "Node name for S&R": "LTX2AttentionTunerPatch",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "blocks": true,
+            "video_scale": true,
+            "audio_scale": true,
+            "audio_to_video_scale": true,
+            "video_to_audio_scale": true,
+            "triton_kernels": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "",
+        1,
+        1,
+        1,
+        1,
+        true
+      ],
+      "widgets_values_named": {
+        "blocks": "",
+        "video_scale": 1,
+        "audio_scale": 1,
+        "audio_to_video_scale": 1,
+        "video_to_audio_scale": 1,
+        "triton_kernels": true
+      }
+    },
+    {
+      "id": 11,
+      "type": "BasicScheduler",
+      "pos": [
+        3911.538365353464,
+        4655.777557535617
+      ],
+      "size": [
+        210,
+        110
+      ],
+      "flags": {},
+      "order": 64,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 544
+        }
+      ],
+      "outputs": [
+        {
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "links": [
+            52
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.16.4",
+        "Node name for S&R": "BasicScheduler",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "scheduler": true,
+            "steps": true,
+            "denoise": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "linear_quadratic",
+        10,
+        1
+      ],
+      "widgets_values_named": {
+        "scheduler": "linear_quadratic",
+        "steps": 10,
+        "denoise": 1
+      }
+    },
+    {
+      "id": 206,
+      "type": "LTXDirectorGuideCS25",
+      "pos": [
+        3318.1918051885973,
+        4387.811687505486
+      ],
+      "size": [
+        288.24609375,
+        453.36924006026265
+      ],
+      "flags": {},
+      "order": 58,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 513
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 514
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 519
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "link": 585
+        },
+        {
+          "name": "guide_data",
+          "type": "GUIDE_DATA",
+          "link": 588
+        },
+        {
+          "name": "motion_guide_data",
+          "shape": 7,
+          "type": "MOTION_GUIDE_DATA",
+          "link": 590
+        },
+        {
+          "name": "model",
+          "shape": 7,
+          "type": "MODEL",
+          "link": 600
+        }
+      ],
+      "outputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": [
+            520,
+            525
+          ]
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": [
+            521,
+            524
+          ]
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "links": [
+            522
+          ]
+        },
+        {
+          "name": "model",
+          "type": "MODEL",
+          "links": [
+            523,
+            544
+          ]
+        },
+        {
+          "name": "latent_downscale_factor",
+          "type": "FLOAT",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "CGlide/WhatDreamsCost-CSGlide",
+        "Node name for S&R": "LTXDirectorGuideCS25",
+        "ver": "6a035f05769536a87d9764e8b91d5744dc014fd2",
+        "cnr_id": "WhatDreamsCost-ComfyUI",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "ic_lora_name": true,
+            "ic_lora_strength": true,
+            "scale_by": true,
+            "upscale_method": true,
+            "image_attention_strength": true,
+            "crop": true,
+            "auto_snap_ic_grid": true,
+            "use_tiled_encode": true,
+            "tile_size": true,
+            "tile_overlap": true,
+            "retake_mode": true,
+            "msr_strength": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "ltx2\\ltx-2-19b-ic-lora-detailer.safetensors",
+        1,
+        0.5,
+        "bicubic",
+        1,
+        "center",
+        true,
+        false,
+        256,
+        64,
+        false,
+        0
+      ],
+      "widgets_values_named": {
+        "ic_lora_name": "ltx2\\ltx-2-19b-ic-lora-detailer.safetensors",
+        "ic_lora_strength": 1,
+        "scale_by": 0.5,
+        "upscale_method": "bicubic",
+        "image_attention_strength": 1,
+        "crop": "center",
+        "auto_snap_ic_grid": true,
+        "use_tiled_encode": false,
+        "tile_size": 256,
+        "tile_overlap": 64,
+        "retake_mode": false,
+        "msr_strength": 0
+      }
+    }
+  ],
+  "links": [
+    [
+      12,
+      9,
+      0,
+      10,
+      1,
+      "GUIDER"
+    ],
+    [
+      14,
+      7,
+      0,
+      10,
+      4,
+      "LATENT"
+    ],
+    [
+      51,
+      28,
+      0,
+      10,
+      0,
+      "NOISE"
+    ],
+    [
+      52,
+      11,
+      0,
+      10,
+      3,
+      "SIGMAS"
+    ],
+    [
+      53,
+      29,
+      0,
+      10,
+      2,
+      "SAMPLER"
+    ],
+    [
+      124,
+      49,
+      0,
+      47,
+      1,
+      "GUIDER"
+    ],
+    [
+      125,
+      53,
+      0,
+      47,
+      2,
+      "SAMPLER"
+    ],
+    [
+      127,
+      50,
+      0,
+      47,
+      4,
+      "LATENT"
+    ],
+    [
+      144,
+      57,
+      0,
+      52,
+      1,
+      "LATENT_UPSCALE_MODEL"
+    ],
+    [
+      157,
+      28,
+      0,
+      47,
+      0,
+      "NOISE"
+    ],
+    [
+      180,
+      47,
+      0,
+      48,
+      0,
+      "LATENT"
+    ],
+    [
+      196,
+      78,
+      0,
+      79,
+      2,
+      "VAE"
+    ],
+    [
+      213,
+      101,
+      0,
+      95,
+      0,
+      "MODEL"
+    ],
+    [
+      214,
+      99,
+      0,
+      96,
+      0,
+      "MODEL"
+    ],
+    [
+      215,
+      97,
+      0,
+      98,
+      0,
+      "MODEL"
+    ],
+    [
+      216,
+      100,
+      0,
+      99,
+      0,
+      "MODEL"
+    ],
+    [
+      217,
+      98,
+      0,
+      100,
+      0,
+      "MODEL"
+    ],
+    [
+      218,
+      99,
+      0,
+      101,
+      0,
+      "MODEL"
+    ],
+    [
+      219,
+      80,
+      0,
+      97,
+      0,
+      "MODEL"
+    ],
+    [
+      222,
+      15,
+      0,
+      102,
+      0,
+      "IMAGE"
+    ],
+    [
+      223,
+      16,
+      0,
+      102,
+      1,
+      "AUDIO"
+    ],
+    [
+      227,
+      4,
+      0,
+      107,
+      0,
+      "VAE"
+    ],
+    [
+      228,
+      108,
+      0,
+      16,
+      1,
+      "VAE"
+    ],
+    [
+      229,
+      3,
+      0,
+      109,
+      0,
+      "VAE"
+    ],
+    [
+      231,
+      111,
+      0,
+      52,
+      2,
+      "VAE"
+    ],
+    [
+      233,
+      113,
+      0,
+      15,
+      1,
+      "VAE"
+    ],
+    [
+      235,
+      13,
+      1,
+      16,
+      0,
+      "LATENT"
+    ],
+    [
+      267,
+      10,
+      0,
+      13,
+      0,
+      "LATENT"
+    ],
+    [
+      382,
+      13,
+      1,
+      174,
+      0,
+      "LATENT"
+    ],
+    [
+      383,
+      175,
+      0,
+      50,
+      1,
+      "LATENT"
+    ],
+    [
+      384,
+      176,
+      0,
+      52,
+      0,
+      "LATENT"
+    ],
+    [
+      392,
+      181,
+      0,
+      102,
+      4,
+      "FLOAT"
+    ],
+    [
+      405,
+      79,
+      0,
+      80,
+      0,
+      "MODEL"
+    ],
+    [
+      408,
+      94,
+      0,
+      79,
+      0,
+      "MODEL"
+    ],
+    [
+      500,
+      52,
+      0,
+      205,
+      3,
+      "LATENT"
+    ],
+    [
+      502,
+      205,
+      0,
+      49,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      503,
+      205,
+      1,
+      49,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      504,
+      205,
+      3,
+      49,
+      0,
+      "MODEL"
+    ],
+    [
+      505,
+      205,
+      2,
+      50,
+      0,
+      "LATENT"
+    ],
+    [
+      506,
+      112,
+      0,
+      205,
+      2,
+      "VAE"
+    ],
+    [
+      508,
+      103,
+      0,
+      205,
+      6,
+      "MODEL"
+    ],
+    [
+      509,
+      205,
+      0,
+      169,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      510,
+      205,
+      1,
+      170,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      511,
+      167,
+      0,
+      205,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      512,
+      168,
+      0,
+      205,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      513,
+      5,
+      0,
+      206,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      514,
+      5,
+      1,
+      206,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      519,
+      110,
+      0,
+      206,
+      2,
+      "VAE"
+    ],
+    [
+      520,
+      206,
+      0,
+      9,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      521,
+      206,
+      1,
+      9,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      522,
+      206,
+      2,
+      7,
+      0,
+      "LATENT"
+    ],
+    [
+      523,
+      206,
+      3,
+      9,
+      0,
+      "MODEL"
+    ],
+    [
+      524,
+      206,
+      1,
+      166,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      525,
+      206,
+      0,
+      165,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      527,
+      171,
+      0,
+      207,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      528,
+      172,
+      0,
+      207,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      529,
+      48,
+      0,
+      207,
+      2,
+      "LATENT"
+    ],
+    [
+      532,
+      163,
+      0,
+      208,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      533,
+      162,
+      0,
+      208,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      534,
+      208,
+      2,
+      173,
+      0,
+      "LATENT"
+    ],
+    [
+      538,
+      205,
+      3,
+      54,
+      0,
+      "MODEL"
+    ],
+    [
+      539,
+      13,
+      0,
+      208,
+      2,
+      "LATENT"
+    ],
+    [
+      544,
+      206,
+      3,
+      11,
+      0,
+      "MODEL"
+    ],
+    [
+      550,
+      104,
+      0,
+      47,
+      3,
+      "SIGMAS"
+    ],
+    [
+      577,
+      4,
+      0,
+      220,
+      2,
+      "VAE"
+    ],
+    [
+      578,
+      3,
+      0,
+      220,
+      5,
+      "VAE"
+    ],
+    [
+      581,
+      220,
+      1,
+      160,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      582,
+      220,
+      1,
+      5,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      583,
+      220,
+      2,
+      161,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      585,
+      220,
+      3,
+      206,
+      3,
+      "LATENT"
+    ],
+    [
+      586,
+      220,
+      4,
+      7,
+      1,
+      "LATENT"
+    ],
+    [
+      587,
+      220,
+      5,
+      205,
+      4,
+      "GUIDE_DATA"
+    ],
+    [
+      588,
+      220,
+      5,
+      206,
+      4,
+      "GUIDE_DATA"
+    ],
+    [
+      589,
+      220,
+      6,
+      205,
+      5,
+      "MOTION_GUIDE_DATA"
+    ],
+    [
+      590,
+      220,
+      6,
+      206,
+      5,
+      "MOTION_GUIDE_DATA"
+    ],
+    [
+      591,
+      220,
+      7,
+      180,
+      0,
+      "FLOAT"
+    ],
+    [
+      592,
+      220,
+      7,
+      5,
+      2,
+      "FLOAT"
+    ],
+    [
+      593,
+      220,
+      9,
+      182,
+      0,
+      "INT"
+    ],
+    [
+      597,
+      226,
+      0,
+      220,
+      1,
+      "CLIP"
+    ],
+    [
+      598,
+      220,
+      2,
+      228,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      599,
+      228,
+      0,
+      5,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      600,
+      220,
+      0,
+      206,
+      6,
+      "MODEL"
+    ],
+    [
+      602,
+      207,
+      2,
+      15,
+      0,
+      "LATENT"
+    ],
+    [
+      603,
+      101,
+      0,
+      230,
+      0,
+      "MODEL"
+    ],
+    [
+      605,
+      230,
+      0,
+      231,
+      0,
+      "*"
+    ],
+    [
+      608,
+      230,
+      0,
+      220,
+      0,
+      "MODEL"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 4,
+      "title": "Stage #1",
+      "bounding": [
+        3016.805994963843,
+        4308.288648200755,
+        1606.2379320089217,
+        760.3108486715846
+      ],
+      "flags": {}
+    },
+    {
+      "id": 5,
+      "title": "Stage #2 Upscale",
+      "bounding": [
+        3014.511362276872,
+        3740.2110485574576,
+        1610.58065732864,
+        543.7537097700324
+      ],
+      "flags": {}
+    },
+    {
+      "id": 6,
+      "title": "Process Video",
+      "bounding": [
+        4647.885369591847,
+        3745.09345122726,
+        1012.506433346367,
+        1323.8349380513605
+      ],
+      "flags": {}
+    },
+    {
+      "id": 7,
+      "title": "Timeline",
+      "bounding": [
+        1777.8233971795028,
+        3740.7638722614215,
+        1223.960654049973,
+        1327.678450477571
+      ],
+      "flags": {}
+    },
+    {
+      "id": 8,
+      "title": "Peformace tweaks (help low vram)",
+      "bounding": [
+        1270.0934983588413,
+        4153.903583195573,
+        485.2883108883925,
+        109.75103239530472
+      ],
+      "flags": {}
+    },
+    {
+      "id": 9,
+      "title": "LTX-2 Loras",
+      "bounding": [
+        1266.851443434426,
+        3821.7807258321477,
+        493.249044492934,
+        316.97960132943217
+      ],
+      "flags": {}
+    },
+    {
+      "id": 10,
+      "title": "Group",
+      "bounding": [
+        1153.1440092407659,
+        4279.708623295673,
+        597.8960119181045,
+        592.6764849338833
+      ],
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.7402431157047017,
+      "offset": [
+        -877.3153563014225,
+        -3834.8794468621145
+      ]
+    },
+    "frontendVersion": "1.52.7",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true,
+    "ue_links": [],
+    "links_added_by_ue": [],
+    "anomalous_hashes": {
+      "78_taeltx2_3.safetensors": {
+        "hash": "",
+        "size": 23531296
+      },
+      "94_redgraftLTX25Fast2K\\redgraftLTX25Fast2K_ltx25RedgraftNSFW.safetensors": {
+        "hash": "",
+        "size": 17026023216
+      },
+      "94_redgraftLTX25Fast2K/redgraftLTX25Fast2K_ltx25RedgraftNSFW.safetensors": {
+        "hash": "",
+        "size": 17026023216
+      },
+      "226_Gemma-4-12B-it-uncensored-hereti20DeepNeuralNerd20-LTX202.5-ComfyUI-int8convrot.safetensors": {
+        "hash": "",
+        "size": 13167724346
+      },
+      "3_ltx-2.5-video-vae-bf16.safetensors": {
+        "hash": "",
+        "size": 1472223346
+      },
+      "4_ltx-2.5-audio-vae-bf16.safetensors": {
+        "hash": "",
+        "size": 364866540
+      },
+      "205_ltx2\\ltx-2-19b-ic-lora-detailer.safetensors": {
+        "hash": "",
+        "size": 2617401920
+      },
+      "205_ltx2/ltx-2-19b-ic-lora-detailer.safetensors": {
+        "hash": "",
+        "size": 2617401920
+      },
+      "80_ltx2\\LTX_SulphurEXP_LoRA_fro99-avgrank105.safetensors": {
+        "hash": "",
+        "size": 2351753928
+      },
+      "80_ltx2/LTX_SulphurEXP_LoRA_fro99-avgrank105.safetensors": {
+        "hash": "",
+        "size": 2351753928
+      },
+      "206_ltx2\\ltx-2-19b-ic-lora-detailer.safetensors": {
+        "hash": "",
+        "size": 2617401920
+      },
+      "206_ltx2/ltx-2-19b-ic-lora-detailer.safetensors": {
+        "hash": "",
+        "size": 2617401920
+      }
+    }
+  },
+  "version": 0.4
+}

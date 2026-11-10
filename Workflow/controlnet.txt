@@ -1,0 +1,40 @@
+============================================================
+CONTROLNET CAPTIONS
+============================================================
+
+IMAGE [0% Start]  --  mq76wdweag41i7.jpeg
+--------------------------------------------------
+POSE: Standing upright with weight evenly distributed on both legs, torso straight with a subtle lean to the right, head held high with a slight tilt to the left and chin level, gaze directed straight ahead with a neutral expression, dark makeup accentuating her features, green lipstick adding a pop of color, right arm bent with hand resting on her hip and left arm bent with hand placed on her thigh, both hands relaxed with fingers gently curled, legs straight with knees slightly relaxed, gold headpiece atop her high bun, exuding a sense of dark mystery.
+
+ATMOSPHERE: Soft, diffused lighting with a warm, golden quality casts an air of mystique over the serene pond, where lily pads float like emeralds on the dark, glassy water, as a woman poses with enigmatic elegance, her black and gold Egyptian-inspired attire shimmering with subtle intensity, set against a backdrop of tall, whispering reeds that seem to lean in, as if sharing secrets, the cool, muted color palette with deep blues and greens dominating the scene, punctuated by the warm, sun-kissed tones of her gold necklace and headpiece, while her dark makeup and bold, green lipstick add a pop of vibrant contrast, evoking a sense of ancient, mystical ritual, with textures of smooth water, delicate lily pad leaves, and the soft, flowing fabric of her long skirt, all blending together to create a dark, mysterious atmosphere, reminiscent of a forgotten, ancient world, shrouded in mist and legend.
+
+IMAGE [25%]  --  mq76xowdlxm74y.jpeg
+--------------------------------------------------
+POSE: Kneeling on the ground with weight evenly distributed on both legs, which are crossed in front of her, torso upright with a slight lean forward, head held straight with chin level and gaze directed at the phone in her right hand, right arm bent at a 45-degree angle with wrist rotated and hand grasping the phone, left arm bent and resting on her left knee with hand relaxed, legs bent at a 90-degree angle with feet tucked under her, facial expression serious with mouth closed and eyebrows slightly furrowed, hair styled in two braids framing her face.
+
+ATMOSPHERE: Soft, diffused lighting with a neutral color temperature illuminates the scene, casting gentle shadows across the woman's intricate tattoos and the subtle textures of her black outfit, purple and black striped leggings, and black boots, which are accentuated by the soft sheen of her braided hair and the metallic glint of her multiple necklaces and bracelets, set against a plain beige background that provides a calm, serene atmosphere, with a muted color palette and low contrast, evoking a sense of quiet contemplation, as if the woman's serious expression is a moment of introspection, frozen in time by the selfie she's taking with her phone, the overall mood being one of subdued, introspective elegance.
+
+IMAGE [50%]  --  mq76ra0sji4ayk.jpeg
+--------------------------------------------------
+POSE: Standing upright with weight evenly distributed on both legs, torso straight and spine aligned, head held high with a slight tilt to the left and chin level, gaze directed forward with a confident and edgy intensity, arms relaxed by her sides with elbows slightly bent and hands enclosed in red gloves with fingers curled into loose fists, legs straight with knees locked and feet shoulder-width apart, facial expression fierce and dramatic with dark red lips pursed and black eye makeup accentuating her intense stare, eyebrows angled downward in a slight scowl.
+
+ATMOSPHERE: Moody, low-key lighting casts a dramatic glow on Quinn, with a cool, overcast sky above, casting a soft, diffused illumination that accentuates the dark, edgy tones of her red and black outfit, the leather jacket and black pants a stark contrast to the vibrant, fiery hues of her gloves and lipstick, while the warm, golden light of the setting sun peeks through the clouds, casting long, ominous shadows across the rippling water, where a pirate ship looms in the background, its rugged, weathered textures a testament to the harsh, unforgiving environment, as the desaturated color palette, with muted blues and greys, punctuated by bold, vibrant highlights of red and pink, adds to the dark, gritty atmosphere, reminiscent of a dystopian, punk-rock inspired aesthetic, with gritty, urban textures of worn leather and distressed metal, and a sense of foreboding, as if the very darkness itself is closing in around her.
+
+IMAGE [75%]  --  mq7759eu468y23.jpeg
+--------------------------------------------------
+POSE: Sitting with her weight evenly distributed on the window sill, torso upright with a subtle lean forward, spine straight, head held high with a slight tilt to the right, chin level, and gaze directed straight at the viewer with a serious expression, her dark hair framing her face, arms bent with hands resting on her lap, one hand on top of the other, fingers relaxed, legs crossed with the right leg over the left, knees bent at a 90-degree angle, feet hidden from view, and a neutral to slightly somber facial expression with lips closed and eyebrows slightly furrowed.
+
+ATMOSPHERE: Soft, diffused natural light pours in from the window to the right, casting a gentle glow on the subject's serene face, with a slightly cool color temperature and moderate intensity, creating subtle shadows that accentuate her elegant features, while the peeling white wall behind her adds a touch of worn, vintage texture, and the overall color palette is characterized by muted blues and whites, with a pop of red from the belt, evoking a sense of refined sophistication, reminiscent of a classic Japanese portrait, with a film-like quality and high contrast, emphasizing the intricate lace trim on her stockings and the delicate floral pattern on her kimono, all blending together to create a captivating, intimate atmosphere.
+
+IMAGE [100% Final]  --  mq76yy6te5vlwo.jpeg
+--------------------------------------------------
+POSE: Standing upright with weight evenly distributed on both legs, torso straight and spine neutral, head held high with a slight tilt to the right and chin level, gaze directed forward with a hint of intensity, arms relaxed by her sides with elbows slightly bent and hands open, fingers curled gently around the edges of her jacket, legs straight with knees unlocked and feet shoulder-width apart, facial expression neutral with a subtle hint of confidence, eyebrows straight and mouth closed in a firm line.
+
+ATMOSPHERE: A futuristic atmosphere unfolds with harsh, cool fluorescent lighting overhead, casting a sterile glow on the subject, while the metallic blue jumpsuit shimmers with a mesmerizing sheen, its reflective surface picking up the faint hum of the lights, as the purple leather jacket adds a touch of edginess, with deep, rich shadows accentuating the contours of the woman's face and the rugged texture of the concrete staircase, set against a backdrop of industrial grey, with the vibrant purple of her hair and sneakers injecting a bold, pop of color, evoking a high-contrast, cyberpunk aesthetic, with a desaturated color palette and gritty, urban textures of rough concrete and sleek, synthetic fabrics.
+
+============================================================
+GLOBAL NEGATIVE PROMPT
+--------------------------------------------------
+low quality, blurry, distorted, misproportioned, poorly lit, overexposed, underexposed, inconsistent colors, incorrect anatomy, awkward posing, unnatural expressions, messy hair, cheap jewelry, low resolution, pixelated, noisy, grainy, inconsistent lighting, wrong colors, bad shading, lack of details, cartoonish, stylized, unrealistic, outdated fashion.
+
+============================================================
