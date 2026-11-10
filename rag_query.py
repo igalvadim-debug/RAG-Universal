@@ -27,8 +27,10 @@ def main():
     if backend == "none":
         print("\n⚠️  Ни KoboldCpp (5001), ни llama-server (8080) не запущены.")
         print("Хочешь запустить llama-server? Введи путь к папке с GGUF")
-        print(f"(Enter = {Path(r'D:\ComfyUi\models\LLM')} из models.txt):")
-        folder = input("  Папка: ").strip() or str(Path(r"D:\ComfyUi\models\LLM"))
+        from rag_core import MODEL_ROOTS as _roots
+        default_folder = str(next((Path(r) for r in _roots if Path(r).is_dir()), Path(__file__).parent / "models"))
+        print(f"(Enter = {default_folder}):")
+        folder = input("  Папка: ").strip() or default_folder
         if folder:
             models = scan_gguf(folder)
             if models:

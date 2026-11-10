@@ -1,63 +1,40 @@
 @echo off
 chcp 850 >nul
-title RAG + Qwen2.5 Coder + llama.cpp
-setlocal
+title RAG-CLI
+setlocal EnableExtensions
 
 set "ROOT=%~dp0"
+set "ENV=%ROOT%env"
 
-:: = Modelle & Server =
-if not defined LLAMA_EXE (
-    if exist "G:\llama.cpp\llama-b9204-bin-win-cuda-13.1-x64\llama-server.exe" (
-        set "LLAMA_EXE=G:\llama.cpp\llama-b9204-bin-win-cuda-13.1-x64\llama-server.exe"
-    ) else (
-        set "LLAMA_EXE=llama-server.exe"
-    )
-)
-if not defined MODEL_PATH set "MODEL_PATH=C:\Users\bunny\.lmstudio\models\Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf"
-if not defined MODELS_ROOT set "MODELS_ROOT=C:\Users\bunny\.lmstudio\models"
-if not defined WEBUI_PORT set "WEBUI_PORT=7960"
-if not defined WEBUI_HOST set "WEBUI_HOST=0.0.0.0"
+if exist "%ROOT%env.bat" call "%ROOT%env.bat"
+if not defined LLAMA_EXE if exist "%ROOT%llama\llama-server.exe" set "LLAMA_EXE=%ROOT%llama\llama-server.exe"
+if not defined MODELS_ROOT set "MODELS_ROOT=%ROOT%models\LLM"
 if not defined CTX_SIZE set "CTX_SIZE=8192"
 if not defined THREADS set "THREADS=8"
 if not defined NGL set "NGL=99"
 
-echo ================================
-echo   RAG-CLI mit lokalem llama-server
-echo ================================
-echo Modell: "%MODEL_PATH%"
-echo llama.cpp: "%LLAMA_EXE%"
-echo WebUI-Port im Skript: %WEBUI_PORT% (CLI nutzt aber nur rag_query.py)
-echo.
+if not exist "%ENV%\python.exe" (
+    echo [FEHLER] Python-Umgebung fehlt. Bitte zuerst setup.bat ausfuehren.
+    pause
+    exit /b 1
+)
+set "PYTHONNOUSERSITE=1"
+set "PATH=%ENV%;%ENV%\Library\bin;%ENV%\Scripts;%PATH%"
 
-if not exist "%LLAMA_EXE%" echo [WARN] LLAMA_EXE nicht gefunden: %LLAMA_EXE%
-if not exist "%MODEL_PATH%" echo [WARN] MODEL_PATH nicht gefunden: %MODEL_PATH%
+echo ================================
+echo   RAG-CLI
+echo ================================
 
-echo.
-echo ================================
-echo   Starte llama-server (lokal, Port 8080)
-echo ================================
-start "" /MIN cmd /c ^
-    "%LLAMA_EXE%" ^
-    -m "%MODEL_PATH%" ^
-    -ngl %NGL% ^
-    -c %CTX_SIZE% ^
-    --flash-attn on ^
-    --port 8080 ^
-    --host 127.0.0.1 ^
-    --threads %THREADS%
+rem llama-server nur starten, wenn MODEL_PATH gesetzt ist und existiert
+rem (sonst fragt rag_query.py nach der Modell-Datei)
+if defined MODEL_PATH if exist "%MODEL_PATH%" if defined LLAMA_EXE if exist "%LLAMA_EXE%" (
+    echo Starte llama-server: %MODEL_PATH%
+    start "" /MIN "%LLAMA_EXE%" -m "%MODEL_PATH%" -ngl %NGL% -c %CTX_SIZE% --flash-attn on --port 8080 --host 127.0.0.1 --threads %THREADS%
+    echo Warte auf den Server ...
+    powershell -NoProfile -Command "$t=0; while($t -lt 120){ try { if((Invoke-WebRequest http://127.0.0.1:8080/health -UseBasicParsing -TimeoutSec 2).StatusCode -eq 200){ exit 0 } } catch {}; Start-Sleep 1; $t++ }; exit 1"
+)
+
+"%ENV%\python.exe" -s "%ROOT%rag_query.py"
 
 echo.
-echo Warte 3 Sekunden, bis der Server bereit ist...
-timeout /t 3 >nul
-
-echo.
-echo ================================
-echo   Starte RAG-Client
-echo ================================
-python "%ROOT%rag_query.py"
-
-echo.
-echo ================================
-echo   Fertig
-echo ================================
 pause

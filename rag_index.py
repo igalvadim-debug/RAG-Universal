@@ -6,11 +6,8 @@ from sentence_transformers import SentenceTransformer
 
 BASE_DIR = Path(__file__).parent
 
-# Путь к модели эмбеддингов (paraphrase-multilingual-MiniLM-L12-v2 из models.txt:
-# D:\ComfyUi\models\LLM\paraphrase-multilingual-MiniLM-L12-v2).
-# Локальная копия model/ имеет приоритет, иначе — папка из ComfyUI.
-COMFY_EMBED_MODEL = Path(r"D:\ComfyUi\models\LLM\paraphrase-multilingual-MiniLM-L12-v2")
-MODEL_PATH = str(BASE_DIR / "model") if (BASE_DIR / "model").exists() else str(COMFY_EMBED_MODEL)
+# Модель эмбеддингов лежит портативно в model/ (bge-m3). Другой путь: EMBED_MODEL_DIR.
+MODEL_PATH = os.environ.get("EMBED_MODEL_DIR") or str(BASE_DIR / "model")
 
 # Папка с твоими output_*.md (зеркало zaebalo.ru)
 MD_DIR = str(BASE_DIR)

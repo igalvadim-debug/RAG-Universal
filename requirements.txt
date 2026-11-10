@@ -10,6 +10,9 @@ transformers==4.57.6
 # Web UI
 gradio==5.50.0
 
+# Workflow-Pruefung vor dem Speichern (Workflow\wf_lint.py)
+comfy-lint==0.1.0
+
 # Utilities
 requests==2.34.2
 beautifulsoup4==4.13.4

@@ -248,22 +248,58 @@ class Florence2Captioner:
 # Интерфейс совместим с Florence2Captioner.
 # ──────────────────────────────────────────────
 
-# Пары "модель + mmproj". Берётся первая, файлы которой реально лежат на диске:
-# так работает Gemma-4-E2B из LM Studio и, если она есть, старая установка Qwen3-VL.
-VL_CANDIDATES = [
-    (r"C:\Users\bunny\.lmstudio\models\gemma-4-E2B-it-Q8_0\gemma-4-E2B-it-Q8_0.gguf",
-     r"C:\Users\bunny\.lmstudio\models\gemma-4-E2B-it-Q8_0\mmproj-gemma-4-E2B-it-Q8_0.gguf"),
-    (r"C:\ai_diffusion\models\LLM\Qwen3-VL-4B-Instruct-abliterated.Q8_0.gguf",
-     r"C:\ai_diffusion\models\LLM\mmproj-F16.gguf"),
+# Пары "модель + mmproj" (имена файлов). Ищутся по папкам моделей — без жёстких путей:
+#   VL_MODEL + VL_MMPROJ (полные пути из окружения, если заданы),
+#   иначе VL_MODELS_DIR / MODELS_ROOT / MODELS_ROOT2 / MODELS_ROOT3 / <проект>\models.
+# Берётся первая пара, файлы которой реально найдены.
+VL_PAIR_NAMES = [
+    ("gemma-4-E2B-it-Q8_0.gguf", "mmproj-gemma-4-E2B-it-Q8_0.gguf"),
+    ("Qwen3-VL-4B-Instruct-abliterated.Q8_0.gguf", "mmproj-F16.gguf"),
+    ("Gemma-4-E2B-Uncensored-HauhauCS-Aggressive-Q6_K_P.gguf",
+     "mmproj-Gemma-4-E2B-Uncensored-HauhauCS-Aggressive-f16.gguf"),
 ]
 
 
+def _vl_search_roots() -> list:
+    roots = []
+    for var in ("VL_MODELS_DIR", "MODELS_ROOT", "MODELS_ROOT2", "MODELS_ROOT3"):
+        v = os.environ.get(var, "").strip().strip('"')
+        if v:
+            roots.append(Path(v))
+    roots.append(Path(__file__).parent / "models")
+    return [r for r in roots if r.is_dir()]
+
+
+def _find_gguf(name: str, roots: list, max_depth: int = 4):
+    """Ищет файл по имени в roots (ограниченная глубина, без скана всего диска)."""
+    target = name.lower()
+    for root in roots:
+        base_depth = len(root.parts)
+        for dirpath, dirnames, filenames in os.walk(root):
+            if len(Path(dirpath).parts) - base_depth >= max_depth:
+                dirnames[:] = []
+            for fn in filenames:
+                if fn.lower() == target:
+                    return str(Path(dirpath) / fn)
+    return None
+
+
 def _resolve_vl_pair() -> tuple[str, str]:
-    """Первая существующая пара модель+mmproj (Gemma-4-E2B имеет приоритет)."""
-    for model, mmproj in VL_CANDIDATES:
-        if Path(model).is_file() and Path(mmproj).is_file():
+    """Первая найденная пара модель+mmproj (сначала VL_MODEL/VL_MMPROJ из окружения)."""
+    env_m = os.environ.get("VL_MODEL", "").strip().strip('"')
+    env_p = os.environ.get("VL_MMPROJ", "").strip().strip('"')
+    if env_m and env_p and Path(env_m).is_file() and Path(env_p).is_file():
+        return env_m, env_p
+    roots = _vl_search_roots()
+    for model_name, mmproj_name in VL_PAIR_NAMES:
+        model = _find_gguf(model_name, roots)
+        if not model:
+            continue
+        sibling = Path(model).parent / mmproj_name
+        mmproj = str(sibling) if sibling.is_file() else _find_gguf(mmproj_name, roots)
+        if mmproj:
             return model, mmproj
-    return VL_CANDIDATES[0]
+    return VL_PAIR_NAMES[0]
 
 
 QWEN_VL_MODEL, QWEN_VL_MMPROJ = _resolve_vl_pair()
@@ -346,14 +382,13 @@ class QwenVLCaptioner:
         if env_exe:
             candidates.append(Path(env_exe))
         candidates += [
-            Path(r"G:\llama.cpp") / "llama-b9204-bin-win-cuda-13.1-x64" / "llama-server.exe",
-            Path(r"D:\Unsloth\C-claude\llama.cpp\llama-server.exe"),
-            base / "llama.cpp-master" / "llama-b9553-bin-win-cuda-13.3-x64" / "llama-server.exe",
-            base / "llama.cpp-master" / "build" / "bin" / "llama-server.exe",
-            base / "llama.cpp-master" / "build" / "bin" / "Release" / "llama-server.exe",
-            base / "llama.cpp-master" / "llama-server.exe",
             base / "llama" / "llama-server.exe",
+            base / "llama.cpp" / "llama-server.exe",
         ]
+        import shutil as _sh
+        _w = _sh.which("llama-server")
+        if _w:
+            candidates.append(Path(_w))
         for p in candidates:
             if p.exists():
                 return str(p)

@@ -41,7 +41,7 @@ def default_models_dir() -> Path:
         path = Path(root)
         if path.is_dir():
             return path
-    return Path(r"C:\Users\bunny\.lmstudio\models")
+    return BASE_DIR / "models"
 
 # workflow/tripple.py — создание workflow-JSON (TripleUpscale / CS LTX Director)
 import sys as _sys
@@ -70,12 +70,11 @@ def get_music_style_choices() -> list[str]:
 
 def load_song_styles() -> list[tuple[str, str]]:
     """
-    Liest styles_musik.txt (C:\Sandbox oder Projektordner) und gibt
+    Liest styles_musik.txt (Projektordner) und gibt
     [(label, voller_Text)] für die 20 Musikstile zurück.
     Format der Datei: 'N. Titel\nBeschreibung\n\n...'
     """
     candidates = [
-        Path(r"C:\Sandbox\styles_musik.txt"),
         BASE_DIR / "styles_musik.txt",
     ]
     for p in candidates:
@@ -579,7 +578,7 @@ def do_export(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, prompt_text):
     • ComfyUi\\input\\ — Bilder (a_XXXX_.png, ...)
     • workflow\\video_<3 Zeichen>\\ — Bilder + video.txt/novideo.txt
     """
-    comfy_dir = Path(r"D:\ComfyUi\input")
+    comfy_dir = _comfy_input_dir()
     comfy_dir.mkdir(parents=True, exist_ok=True)
 
     content = (prompt_text or "").strip()
@@ -688,7 +687,7 @@ def export_answer_prompt(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, prompt_text, wi
     with_photos=True  → ComfyUi\\input + workflow\\video_<3 Zeichen>\\ (Bilder + video.txt)
     with_photos=False → ComfyUi\\input + workflow\\novid_<3 Zeichen>\\ (nur novideo.txt)
     """
-    comfy_dir = Path(r"D:\ComfyUi\input")
+    comfy_dir = _comfy_input_dir()
     comfy_dir.mkdir(parents=True, exist_ok=True)
 
     images  = [p0, p1, p2, p3, p4, p5, p6, p7, p8, p9]
@@ -739,7 +738,7 @@ def export_answer_prompt(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, prompt_text, wi
 
 
 def _comfy_input_dir() -> Path:
-    return Path(r"D:\ComfyUi\input")
+    return rag_core.PATHS.comfy_input_dir
 
 
 def _norm_files(v, max_files: int = 2):
@@ -1483,7 +1482,7 @@ def load_json_into_ui(json_path: str, n_sequences: int = 5):
         lines.append("")
 
     # Куда искать картинки: рядом с JSON (папка проекта) или ComfyUi\\input
-    search_dirs = [p.parent] + [Path(r"D:\ComfyUi\input")]
+    search_dirs = [p.parent] + [_comfy_input_dir()]
     img_updates = []
     for i in range(10):
         if i >= n_show:

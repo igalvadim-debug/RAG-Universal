@@ -43,7 +43,9 @@ class Paths:
     chroma_dir: Path = field(
         default_factory=lambda: Path(_env("RAG_DB", str(BASE_DIR / "chroma_zaebalo")))
     )
-    bookrag_dir: Path = BASE_DIR / "bookrag"
+    bookrag_dir: Path = field(
+        default_factory=lambda: Path(_env("BOOKRAG_DB", str(BASE_DIR / "bookrag")))
+    )
     docs_dir: Path = BASE_DIR / "docs"
     songs_dir: Path = BASE_DIR / "Songs"
     projects_dir: Path = BASE_DIR / "projects"
@@ -58,9 +60,9 @@ class Paths:
     # Реальная папка ComfyUI-воркфлоу в этом репозитории — "Workflow" (с большой буквы!)
     workflow_dir: Path = BASE_DIR / "Workflow"
     # Каталог input того ComfyUI, куда экспортируются картинки/промпты.
-    # На другой машине задай: set COMFY_INPUT_DIR=D:\ComfyUiVid\input
+    # На другой машине задай: set COMFY_INPUT_DIR=<Pfad zu ComfyUI\input>  (in env.bat)
     comfy_input_dir: Path = field(
-        default_factory=lambda: Path(_env("COMFY_INPUT_DIR", r"D:\ComfyUiVid\input"))
+        default_factory=lambda: Path(_env("COMFY_INPUT_DIR", str(BASE_DIR / "comfy_input")))
     )
 
 
@@ -163,7 +165,6 @@ RAG = RagConfig()
 CLOUD_PROVIDERS: dict[str, dict[str, str]] = {
     "OpenAI":     {"url": "https://api.openai.com/v1/chat/completions",              "model": "gpt-4o-mini",                "key_var": "OPENAI_API_KEY"},
     "Groq":       {"url": "https://api.groq.com/openai/v1/chat/completions",         "model": "llama-3.3-70b-versatile",    "key_var": "GROQ_API_KEY"},
-    "DeepSeek":   {"url": "https://api.deepseek.com/chat/completions",               "model": "deepseek-chat",              "key_var": "DEEPSEEK_API_KEY"},
     "NVIDIA_NIM": {"url": "https://integrate.api.nvidia.com/v1/chat/completions",    "model": "meta/llama-3.3-70b-instruct","key_var": "NVIDIA_NIM_API_KEY"},
     "OpenRouter": {"url": "https://openrouter.ai/api/v1/chat/completions",           "model": "openai/gpt-4o-mini",         "key_var": "OPENROUTER_API_KEY"},
     "Google":     {"url": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", "model": "gemini-2.0-flash", "key_var": "GOOGLE_API_KEY"},

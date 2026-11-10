@@ -23,7 +23,7 @@ def extract_post_text(html_content):
 
 
 def main():
-    html_dir = r'C:\Users\Startklar\Desktop\zaebalo_mirror\zaebalo.ru'
+    html_dir = os.environ.get('ZAEBALO_MIRROR') or os.path.join(os.path.dirname(os.path.abspath(__file__)), 'zaebalo_mirror', 'zaebalo.ru')
 
     # Ищем все html-файлы рекурсивно
     html_files = glob.glob(os.path.join(html_dir, '**', '*.html'), recursive=True)

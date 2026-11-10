@@ -64,7 +64,7 @@ echo.
 set "WEBUI_PORT=7960"
 
 :: Torch zuerst mit CUDA-Index
-"%ENV%\Scripts\pip.exe" install torch==2.12.0 torchvision==0.27.0 torchaudio==2.11.0 --index-url https://download.pytorch.org/whl/cu128
+"%ENV%\python.exe" -s -m pip install torch==2.12.0 torchvision==0.27.0 torchaudio==2.11.0 --index-url https://download.pytorch.org/whl/cu128
 if errorlevel 1 (
     echo [FEHLER] Torch-Installation fehlgeschlagen!
     pause
@@ -72,17 +72,21 @@ if errorlevel 1 (
 )
 
 :: Dann Rest aus requirements.txt
-"%ENV%\Scripts\pip.exe" install -r "%ROOT%requirements.txt"
+"%ENV%\python.exe" -s -m pip install -r "%ROOT%requirements.txt"
 if errorlevel 1 (
     echo [FEHLER] Paket-Installation fehlgeschlagen!
     pause
     exit /b 1
 )
 
+:: Lokale Dateien aus Vorlagen anlegen (falls noch nicht vorhanden)
+if not exist "%ROOT%env.bat" if exist "%ROOT%env.example.bat" copy "%ROOT%env.example.bat" "%ROOT%env.bat" >nul
+if not exist "%ROOT%.env" if exist "%ROOT%.env.example" copy "%ROOT%.env.example" "%ROOT%.env" >nul
+if not exist "%ROOT%models\LLM" mkdir "%ROOT%models\LLM"
+
 echo.
 echo ============================================
-echo  Setup abgeschlossen!
-echo  Starte das System mit: start.bat
+echo  Setup abgeschlossen!echo  Starte das System mit: start.bat
 echo ============================================
 echo.
 pause

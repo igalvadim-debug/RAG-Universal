@@ -249,23 +249,17 @@ def _env_int(name: str, default: int) -> int:
         return default
 
 
-# llama-server бинарник — ищем в известных местах (порядок важен).
-# Переопределение: set "LLAMA_EXE=D:\Llama.cpp\llama-server.exe"
-# — тогда этот путь проверяется ПЕРВЫМ.
-# ВНИМАНИЕ: внешний llama-server (D:\Llama.cpp\llama-server.exe) пользователь может запускать САМ —
-# он здесь в конце списка, чтобы автозапуск из репозитория имел приоритет.
+# llama-server бинарник — порядок поиска (портативно, без жёстких путей):
+#   1) LLAMA_EXE из окружения (локальный env.bat),
+#   2) <проект>\llama\llama-server.exe,
+#   3) <проект>\llama.cpp\llama-server.exe,
+#   4) llama-server из PATH (find_llama_server).
 # Обычная генерация подключается к уже запущенному серверу через llama_alive()/get_llama_url().
 LLAMA_CANDIDATES = [
     p for p in [_env_path("LLAMA_EXE")] if p
 ] + [
-    BASE_DIR / "llama.cpp-master" / "llama-b9204-bin-win-cuda-13.1-x64" / "llama-server.exe",
-    BASE_DIR / "llama.cpp-master" / "llama-b9553-bin-win-cuda-13.3-x64" / "llama-server.exe",
-    BASE_DIR / "llama.cpp-master" / "build" / "bin" / "llama-server.exe",
-    BASE_DIR / "llama.cpp-master" / "build" / "bin" / "Release" / "llama-server.exe",
-    BASE_DIR / "llama.cpp-master" / "llama-server.exe",
     BASE_DIR / "llama" / "llama-server.exe",
-    # внешний llama.cpp вне репозитория
-    Path(r"D:\Llama.cpp") / "llama-server.exe",
+    BASE_DIR / "llama.cpp" / "llama-server.exe",
 ]
 
 # Корни GGUF-моделей: MODELS_ROOT / MODELS_ROOT2 из окружения (LM Studio, ComfyUI LLM)
@@ -275,7 +269,7 @@ MODEL_ROOTS = [
         _env_path("MODELS_ROOT"),
         _env_path("MODELS_ROOT2"),
         _env_path("MODELS_ROOT3"),
-        Path(r"D:\ComfyUi\models\LLM"),
+        BASE_DIR / "models" / "LLM",
         BASE_DIR / "models",
     ] if p
 ]
@@ -646,7 +640,7 @@ def start_llama_server(gguf_path: str, log_callback=None) -> bool:
     exe = find_llama_server()
     if exe is None:
         msg = ("[RAG] llama-server.exe nicht gefunden. Setze die Umgebungsvariable "
-               'LLAMA_EXE, z.B.: set "LLAMA_EXE=D:\\Llama.cpp\\llama-server.exe" '
+               'LLAMA_EXE, z.B.: set "LLAMA_EXE=<Ordner>\\llama-server.exe" '
                "oder lege die Binary in llama.cpp-master/build/bin/. "
                "WICHTIG: Variablen MUESSEN in derselben Shell/BAT gesetzt sein, "
                "die webui.py startet (siehe start.bat).")
@@ -687,8 +681,11 @@ def start_llama_server(gguf_path: str, log_callback=None) -> bool:
         "--flash-attn", "on",   # Flash Attention — neue llama.cpp-Versionen verlangen on|off|auto
         "-b", "512",            # batch size
         "--ubatch-size", "512", # micro-batch
-        "--mlock",              # не свопить модель
         "-t", str(threads),     # потоки CPU: THREADS > 8
+        # --mlock: не свопить модель. Некоторые сборки llama-server (в т.ч.
+        # D:\Llama.cpp\llama-server.exe) не поддерживают --mlock и падают с
+        # "invalid argument: --mlock" — включать только если MLOCK=1 в start.bat.
+        *(["--mlock"] if os.environ.get("MLOCK", "0").strip() == "1" else []),
         "--port", str(port),
         "--host", NET.llama_host,
     ]
@@ -782,6 +779,11 @@ def search_chunks(question: str, top_k: int = TOP_K, collection_name: str = "") 
     """
     if not collection_name or collection_name.strip().lower().startswith("выкл") \
             or collection_name.strip().lower() in ("off", "none", "без раг"):
+        return []
+    _label = collection_name.split(":", 1)[0] if ":" in collection_name else ""
+    _db = BOOKRAG_DIR if _label == "bookrag" else CHROMA_DIR
+    if not Path(_db).exists():
+        log.warning("RAG-Datenbank nicht vorhanden (optional): %s", _db)
         return []
     model      = get_model()
     collection = get_collection_by_name(collection_name)

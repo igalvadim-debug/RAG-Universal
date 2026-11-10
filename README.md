@@ -1,5 +1,23 @@
 # 🎬 RAG — KI-Videoproduktion: Szenario → FLUX → LTX → ComfyUI
 
+## Portable Version
+
+Alles liegt relativ zum Projektordner, nichts ist an einen PC oder ein Laufwerk gebunden.
+
+| Was | Wo | Pflicht |
+|---|---|---|
+| Start der WebUI | `start.bat` (legt beim ersten Mal per `setup.bat` Miniforge + `env` selbst an) | ja |
+| Embedding-Modell (bge-m3) | `model\` | ja |
+| GGUF-Modelle | `models\LLM\` (oder `MODELS_ROOT` in `env.bat`) | ja |
+| llama-server | `llama\llama-server.exe` (oder `LLAMA_EXE` in `env.bat`) | ja |
+| RAG-Datenbanken | `chroma_zaebalo\` und/oder `bookrag\` | **optional**, fehlen sie, steht im Dropdown nur "выкл" |
+| Lokale Einstellungen | `env.bat` (Vorlage: `env.example.bat`), API-Schluessel in `.env` | optional |
+
+Beim Kopieren auf einen anderen PC reichen: Projektordner **ohne** `env\` und `miniforge\`, danach `start.bat`.
+
+Workflows werden vor dem Speichern mit `Workflow\wf_lint.py` geprueft (comfy-lint fuer API-Format,
+eigene Struktur-Pruefung fuer UI-Format). Von Hand: `env\python.exe Workflow\wf_lint.py datei.json`.
+Schema-Cache fuer die Pruefung auf unbekannte Nodes: `env\python.exe Workflow\wf_lint.py --refresh` (ComfyUI muss laufen).
 RAG-System mit Vektordatenbank (ChromaDB), lokalen LLMs (llama.cpp / KoboldCpp) und Cloud-APIs (OpenAI, Google, DeepSeek, NVIDIA, OpenRouter, Groq). Generiert LTX-Video-Director-Prompts, FLUX-T2I-Prompts und ControlNet-Captions aus Text + Fotos — inklusive Selbstkontrolle auf Fehler.
 
 ---
