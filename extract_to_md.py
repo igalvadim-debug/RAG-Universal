@@ -1,6 +1,8 @@
-import os
-from bs4 import BeautifulSoup
 import glob
+import os
+
+from bs4 import BeautifulSoup
+
 
 def extract_post_text(html_content):
     """Извлекает только текст постов из div.item"""
@@ -45,7 +47,7 @@ def main():
     for html_file in sorted(html_files):
         try:
             # Читаем в правильной кодировке Windows-1251
-            with open(html_file, 'r', encoding='windows-1251', errors='replace') as f:
+            with open(html_file, encoding='windows-1251', errors='replace') as f:
                 html_content = f.read()
             
             posts = extract_post_text(html_content)

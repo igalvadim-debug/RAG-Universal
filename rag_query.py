@@ -6,13 +6,17 @@ rag_query.py — CLI-режим RAG.
     python rag_query.py
 """
 
-from rag_core import (
-    search_chunks, build_context,
-    generate_rag_answer, generate_topics,
-    get_backend, backend_status,
-    scan_gguf, start_llama_server,
-)
 from pathlib import Path
+
+from rag_core import (
+    build_context,
+    generate_rag_answer,
+    generate_topics,
+    get_backend,
+    scan_gguf,
+    search_chunks,
+    start_llama_server,
+)
 
 BASE_DIR = Path(__file__).parent
 

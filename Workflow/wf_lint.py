@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 wf_lint.py - Pruefung von ComfyUI-Workflows VOR dem Speichern.
 

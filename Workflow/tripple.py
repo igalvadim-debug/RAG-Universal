@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 tripple.py — извлечение промтов/длительности И создание ComfyUI-JSON.
 
@@ -27,6 +26,7 @@ LTXDirectorCS слева направо (timelines[0] → самая левая 
 """
 
 import json
+
 try:
     import wf_lint as _wf_lint
 except ImportError:  # Aufruf aus einem anderen Ordner / als Modul
@@ -35,10 +35,9 @@ except ImportError:  # Aufruf aus einem anderen Ordner / als Modul
     _sys.path.insert(0, str(_P(__file__).resolve().parent))
     import wf_lint as _wf_lint
 import re
+import shutil
 import sys
 import time
-import random
-import shutil
 from pathlib import Path
 
 # Тип кастомной ноды «Tripple» — держит 4 промта + FPS + кол-во кадров
@@ -273,7 +272,7 @@ def format_duration(fps, frames, source):
 
 
 def extract_main(json_path):
-    with open(json_path, "r", encoding="utf-8") as f:
+    with open(json_path, encoding="utf-8") as f:
         workflow = json.load(f)
 
     lines = []
@@ -501,7 +500,7 @@ def create_tripple_workflow(template_path, out_path, prompts, image_path=None,
     """
     template_path = Path(template_path)
     out_path = Path(out_path)
-    with open(template_path, "r", encoding="utf-8") as f:
+    with open(template_path, encoding="utf-8") as f:
         workflow = json.load(f)
 
     tripple_nodes = find_tripple_nodes(workflow)
@@ -645,7 +644,7 @@ def create_sc_workflow(template_path, out_path, timelines, fps=24, comfy_input_d
     """
     template_path = Path(template_path)
     out_path = Path(out_path)
-    with open(template_path, "r", encoding="utf-8") as f:
+    with open(template_path, encoding="utf-8") as f:
         workflow = json.load(f)
 
     cs_nodes = find_nodes(workflow, node_type)
@@ -662,7 +661,7 @@ def create_sc_workflow(template_path, out_path, timelines, fps=24, comfy_input_d
 
     fps = int(fps) if fps else 24
 
-    for node, tl_data in zip(cs_nodes, timelines):
+    for node, tl_data in zip(cs_nodes, timelines, strict=False):
         global_prompt   = tl_data.get("global_prompt") or ""
         segment_prompts = tl_data.get("segment_prompts") or []
         ref_images      = tl_data.get("ref_images") or []
@@ -816,14 +815,14 @@ def create_ltx25_workflow(template_path, out_path, prompt_text,
     """
     template_path = Path(template_path)
     out_path = Path(out_path)
-    with open(template_path, "r", encoding="utf-8") as f:
+    with open(template_path, encoding="utf-8") as f:
         workflow = json.load(f)
 
     prompt_text = as_text(prompt_text)
 
     # ── LoadImage: первый по X = START-кадр, второй = END-кадр ──
     load_imgs = sorted(find_nodes(workflow, "LoadImage"), key=lambda n: (n.get("pos") or [0, 0])[0])
-    for node, img in zip(load_imgs[:2], [first_image, last_image]):
+    for node, img in zip(load_imgs[:2], [first_image, last_image], strict=False):
         if img and Path(img).exists():
             src = Path(img)
             comfy_input_dir = Path(comfy_input_dir)
@@ -878,7 +877,7 @@ def create_t2v_workflow(template_path, out_path, prompt_text,
     """
     template_path = Path(template_path)
     out_path = Path(out_path)
-    with open(template_path, "r", encoding="utf-8") as f:
+    with open(template_path, encoding="utf-8") as f:
         workflow = json.load(f)
 
     prompt_text = as_text(prompt_text)
@@ -1146,7 +1145,7 @@ def create_minimax_ref_workflow(template_path, out_path, prompt_text, images=Non
     """
     template_path = Path(template_path)
     out_path = Path(out_path)
-    with open(template_path, "r", encoding="utf-8") as f:
+    with open(template_path, encoding="utf-8") as f:
         workflow = json.load(f)
 
     # только верхний уровень: внутри subgraph есть свои PrimitiveStringMultiline/PrimitiveFloat

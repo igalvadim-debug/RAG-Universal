@@ -1,5 +1,5 @@
-from pathlib import Path
 import re
+from pathlib import Path
 
 index_path = Path(r"C:\Users\Startklar\Desktop\zaebalo_mirror\zaebalo.ru\index.html")
 

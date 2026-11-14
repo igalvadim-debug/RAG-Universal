@@ -7,19 +7,19 @@ webui.py — Gradio-интерфейс для RAG-проекта.
     start.bat
 """
 
-import gradio as gr
-from pathlib import Path
-import threading
-import shutil
+import json
 import random
+import shutil
 import string
 import subprocess
-import json
+from pathlib import Path
 
-import rag_core
-import update_db
-import stats
+import gradio as gr
+
 import project_manager
+import rag_core
+import stats
+import update_db
 
 BASE_DIR     = Path(__file__).parent
 UPLOAD_CACHE = BASE_DIR / "_upload_cache"
@@ -291,7 +291,7 @@ def do_export(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, prompt_text):
     proj_dir = _make_export_subfolder(content) if content else Path(r"D:\claudeAgent\RAG\workflow")
 
     exported = 0
-    for img_path, label in zip(images, slot_labels):
+    for img_path, label in zip(images, slot_labels, strict=False):
         if img_path:
             src = Path(img_path)
             if src.exists():
@@ -400,7 +400,7 @@ def export_answer_prompt(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, prompt_text, wi
 
     if with_photos:
         exported = 0
-        for img_path, label in zip(images, slot_labels):
+        for img_path, label in zip(images, slot_labels, strict=False):
             if img_path:
                 src = Path(img_path)
                 if src.exists():
@@ -456,7 +456,7 @@ def update_image_slots(n_sequences: int):
             col_labels.append(gr.update(visible=False))
 
     cb_updates = []
-    for r in range(10):
+    for _r in range(10):
         for c in range(10):
             cb_updates.append(gr.update(visible=(c < n)))
 

@@ -1,6 +1,7 @@
 import glob
 import os
 
+
 def estimate_tokens(text: str) -> int:
     """Примерная, но очень точная оценка для русского текста"""
     # Для русского: ~3 символа = 1 токен
@@ -28,7 +29,7 @@ def main():
         try:
             size_kb = os.path.getsize(md) / 1024
             
-            with open(md, 'r', encoding='utf-8', errors='replace') as f:
+            with open(md, encoding='utf-8', errors='replace') as f:
                 text = f.read()
             
             tokens = estimate_tokens(text)

@@ -1,4 +1,5 @@
 import json
+
 try:
     import wf_lint as _wf_lint
 except ImportError:  # Aufruf aus einem anderen Ordner / als Modul
@@ -8,10 +9,9 @@ except ImportError:  # Aufruf aus einem anderen Ordner / als Modul
     import wf_lint as _wf_lint
 import os
 import re
-import glob
 import time
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 # ==========================================
 # KONFIGURATION
@@ -241,7 +241,7 @@ def parse_prompt_file(filepath: Path) -> tuple[str, list[str], list]:
         text, re.DOTALL
     )
     if timeline_matches:
-        for pct_str, content in timeline_matches:
+        for _pct_str, content in timeline_matches:
             block = content.strip()
             block = re.sub(r'\n\s*\n', '\n', block)
             lines_list = [l.strip() for l in block.splitlines()]
@@ -257,7 +257,7 @@ def parse_prompt_file(filepath: Path) -> tuple[str, list[str], list]:
             text, re.DOTALL
         )
         if timeline_matches:
-            for pct_str, content in timeline_matches:
+            for _pct_str, content in timeline_matches:
                 block = content.strip()
                 block = re.sub(r'\n\s*\n', '\n', block)
                 lines_list = [l.strip() for l in block.splitlines()]
@@ -453,7 +453,7 @@ def main():
 
     # 4. Fuer jedes JSON: LTXDirector-Nodes aktualisieren
     for input_path, output_name in json_pairs:
-        with open(input_path, 'r', encoding='utf-8') as f:
+        with open(input_path, encoding='utf-8') as f:
             workflow = json.load(f)
         print(f"\n{'='*50}\n⚙️  {Path(input_path).name} → {output_name}\n{'='*50}")
 

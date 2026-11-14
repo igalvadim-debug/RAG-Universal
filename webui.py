@@ -7,19 +7,19 @@ webui.py — Gradio-интерфейс для RAG-проекта.
     start.bat
 """
 
-import gradio as gr
-from pathlib import Path
-import threading
-import shutil
+import json
 import random
+import shutil
 import string
 import subprocess
-import json
+from pathlib import Path
 
-import rag_core
-import update_db
-import stats
+import gradio as gr
+
 import project_manager
+import rag_core
+import stats
+import update_db
 
 BASE_DIR     = Path(__file__).parent
 UPLOAD_CACHE = BASE_DIR / "_upload_cache"
@@ -45,9 +45,11 @@ def default_models_dir() -> Path:
 
 # workflow/tripple.py — создание workflow-JSON (TripleUpscale / CS LTX Director)
 import sys as _sys
+
 if str(BASE_DIR / "Workflow") not in _sys.path:
     _sys.path.insert(0, str(BASE_DIR / "Workflow"))
 import tripple  # noqa: E402
+
 import grid_splitter  # noqa: E402  (Gitter/Storyboard in Einzelbilder schneiden)
 
 
@@ -591,7 +593,7 @@ def do_export(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, prompt_text):
     content = _split_and_save_notes(content, proj_dir)
 
     exported = 0
-    for img_path, label in zip(images, slot_labels):
+    for img_path, label in zip(images, slot_labels, strict=False):
         if img_path:
             src = Path(img_path)
             if src.exists():
@@ -708,7 +710,7 @@ def export_answer_prompt(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, prompt_text, wi
 
     if with_photos:
         exported = 0
-        for img_path, label in zip(images, slot_labels):
+        for img_path, label in zip(images, slot_labels, strict=False):
             if img_path:
                 src = Path(img_path)
                 if src.exists():
@@ -934,7 +936,7 @@ def export_t2v_json(answer_text, video_length, director_mode):
         return f"❌ Ошибка создания T2V JSON: {e}"
 
     (folder / "video.txt").write_text(prompt_clean + "\n", encoding="utf-8")
-    src = f"решение LLM" if sigma_steps else f"по длительности"
+    src = "решение LLM" if sigma_steps else "по длительности"
     return f"✅ T2V-JSON: {out.name} → {folder.name} | {duration}с, сигамы low {len(sl)} / high {len(sh)} шагов ({src})"
 
 
@@ -960,7 +962,7 @@ def _caption_ref_images(ref_paths: list, timeline: int = 1):
             missing.append(p)
     if missing:
         try:
-            from image_captioning import QwenVLCaptioner, Florence2Captioner
+            from image_captioning import Florence2Captioner, QwenVLCaptioner
             captioner = None
             try:
                 captioner = QwenVLCaptioner()
@@ -1562,7 +1564,7 @@ def update_image_slots(n_sequences: int, director_mode: str = "нет"):
             col_labels.append(gr.update(visible=False))
 
     cb_updates = []
-    for r in range(20):
+    for _r in range(20):
         for c in range(10):
             cb_updates.append(gr.update(visible=(c < n)))
 
