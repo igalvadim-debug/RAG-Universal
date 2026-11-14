@@ -3,15 +3,16 @@ rag_core.py — ядро RAG: эмбеддинги, поиск по Chroma, ге
 Все пути относительные от папки скрипта.
 """
 
+import json
 import os
 import re
 import subprocess
 import time
-import json
-import requests
 from pathlib import Path
-from sentence_transformers import SentenceTransformer
+
 import chromadb
+import requests
+from sentence_transformers import SentenceTransformer
 
 # ──────────────────────────────────────────────
 # ПУТИ (все относительные от папки этого файла)
@@ -360,7 +361,7 @@ def call_llm(messages: list[dict], max_tokens: int = 1024, temperature: float = 
                     return result
                 errors.append(err)
         if errors:
-            return f"[Ошибка] Перепробованы все облачные API — ни один не ответил:\n" + "\n".join(errors)
+            return "[Ошибка] Перепробованы все облачные API — ни один не ответил:\n" + "\n".join(errors)
         return "[Ошибка] Ни KoboldCpp, ни llama-server недоступны, и ни один облачный API-ключ не найден в .env."
 
     url = KOBOLD_URL if backend == "kobold" else LLAMA_URL
@@ -453,7 +454,7 @@ def generate_rag_answer(question, context, style="реализм", language="р�
         photo_mapping = ""
         if photo_count > 0:
             photo_mapping = (
-                f"\n\nFOTO-ZU-SZENE-ZUWEISUNG (UNBEDINGT EINHALTEN):\n"
+                "\n\nFOTO-ZU-SZENE-ZUWEISUNG (UNBEDINGT EINHALTEN):\n"
                 + "\n".join(
                     f"  SEQUENCE {idx} = FOTO {idx} ({fname}) — GENAU dieser Ort/diese Szene"
                     for idx, (fname, _) in enumerate(photo_scene_map, start=1)
@@ -580,7 +581,7 @@ def generate_rag_answer(question, context, style="реализм", language="р�
             photo_mapping_dm = ""
             if photo_count > 0:
                 photo_mapping_dm = (
-                    f"\n\nFOTO-ZU-SZENE-ZUWEISUNG (UNBEDINGT EINHALTEN):\n"
+                    "\n\nFOTO-ZU-SZENE-ZUWEISUNG (UNBEDINGT EINHALTEN):\n"
                     + "\n".join(
                         f"  SEQUENCE {idx} = FOTO {idx} ({fname}) — GENAU dieser Ort/diese Szene"
                         for idx, (fname, _) in enumerate(photo_scene_map, start=1)
@@ -658,7 +659,7 @@ def generate_rag_answer(question, context, style="реализм", language="р�
         if timeline_techniques and any(t for t in timeline_techniques):
             part_pcts = ["0%-20%", "20%-40%", "40%-60%", "60%-80%", "80%-100%"]
             lines = ["CINEMATOGRAPHY TIMELINE (strictly follow per segment):"]
-            for i, (pct, tech) in enumerate(zip(part_pcts, timeline_techniques)):
+            for i, (pct, tech) in enumerate(zip(part_pcts, timeline_techniques, strict=False)):
                 if tech:
                     tech_lower = tech.lower()
                     if any(tech_lower.endswith(w) for w in ("shot", "angle", "zoom", "view", "profile", "level", "pov")):
@@ -705,7 +706,7 @@ def generate_rag_answer(question, context, style="реализм", language="р�
                 from image_captioning import Florence2Captioner
                 captioner = Florence2Captioner()
                 try:
-                    for slot_idx, p in filled:
+                    for _slot_idx, p in filled:
                         raw = captioner.caption(p)
                         fname = Path(p).name
                         photo_scene_map.append((fname, raw))

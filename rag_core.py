@@ -15,7 +15,7 @@ import chromadb
 import requests
 from sentence_transformers import SentenceTransformer
 
-from rag_config import BASE_DIR, CLOUD_PROVIDERS, KEY_ALIASES, NET, PATHS, RAG
+from rag_config import CLOUD_PROVIDERS, KEY_ALIASES, NET, PATHS, RAG
 from rag_net import NetworkError, http_post, is_alive
 
 log = logging.getLogger("rag.core")
@@ -884,10 +884,10 @@ def _try_cloud_chain(messages: list[dict], max_tokens: int, temperature: float,
         errors.append(err)
         # Пауза 10 сек только если rate-limit (429/503), иначе сразу следующий
         if "лимит запросов" in err:
-            print(f"[RAG] ⏳ 10 сек перед следующим провайдером...")
+            print("[RAG] ⏳ 10 сек перед следующим провайдером...")
             time.sleep(10)
     if errors:
-        return f"[Ошибка] Перепробованы все облачные API — ни один не ответил:\n" + "\n".join(errors)
+        return "[Ошибка] Перепробованы все облачные API — ни один не ответил:\n" + "\n".join(errors)
     return "[Ошибка] Облачные API недоступны: ни одного ключа не найдено в .env."
 
 
@@ -1217,7 +1217,7 @@ def _load_minimax_sp(anim: bool = False) -> str:
     """Читает minimaxh3SP.txt (реализм) или minimaxh3SP_anim.txt (анимация) при каждом вызове."""
     path = _MM_SP_ANIM_FILE if anim else _MM_SP_FILE
     try:
-        with open(path, "r", encoding="utf-8-sig") as f:
+        with open(path, encoding="utf-8-sig") as f:
             return f.read().strip()
     except Exception as e:
         print(f"[RAG] ⚠️ Системный промт MiniMax не прочитан ({path}): {e}")
@@ -1329,7 +1329,7 @@ def generate_rag_answer(question, context, style="реализм", language="р�
         photo_mapping = ""
         if photo_count > 0:
             photo_mapping = (
-                f"\n\nFOTO-ZU-SZENE-ZUWEISUNG (UNBEDINGT EINHALTEN):\n"
+                "\n\nFOTO-ZU-SZENE-ZUWEISUNG (UNBEDINGT EINHALTEN):\n"
                 + "\n".join(
                     f"  SEQUENCE {idx} = FOTO {idx} ({fname}) — GENAU dieser Ort/diese Szene"
                     for idx, (fname, _) in enumerate(photo_scene_map, start=1)
@@ -1341,20 +1341,20 @@ def generate_rag_answer(question, context, style="реализм", language="р�
         if is_music:
             if song_mode:
                 music_extra_instr = (
-                    f"MUSIC PROMPT: the song is sung with melody in the chosen style. "
-                    f"Match the vocal delivery to the genre (powerful/aggressive for metal, "
-                    f"soulful for rock, catchy and clean for pop)."
+                    "MUSIC PROMPT: the song is sung with melody in the chosen style. "
+                    "Match the vocal delivery to the genre (powerful/aggressive for metal, "
+                    "soulful for rock, catchy and clean for pop)."
                 )
             else:
                 music_extra_instr = (
-                    f"MUSIC VIDEO: The performer sings the lyrics in lip-sync — plain phrasing like "
-                    f"'the woman sings in lip-sync to the lyrics: \"[LYRIC_TEXT]\"' is allowed, but NO phonetic tokens, "
-                    f"no 'audio engine' mechanics, no transcription. "
-                    f"The full lyrics are output in the Dialogue field of each segment, plain text, original language. "
-                    f"The video prompt may include at most ONE brief music sentence (broad genre or a single dominant "
-                    f"sound) — never a stack of instruments and effects. If the character sings, the camera MUST keep "
-                    f"the face and lips visible (medium or close-up, steady drift) — never a macro push-in on the eyes "
-                    f"during the vocal."
+                    "MUSIC VIDEO: The performer sings the lyrics in lip-sync — plain phrasing like "
+                    "'the woman sings in lip-sync to the lyrics: \"[LYRIC_TEXT]\"' is allowed, but NO phonetic tokens, "
+                    "no 'audio engine' mechanics, no transcription. "
+                    "The full lyrics are output in the Dialogue field of each segment, plain text, original language. "
+                    "The video prompt may include at most ONE brief music sentence (broad genre or a single dominant "
+                    "sound) — never a stack of instruments and effects. If the character sings, the camera MUST keep "
+                    "the face and lips visible (medium or close-up, steady drift) — never a macro push-in on the eyes "
+                    "during the vocal."
                 )
         else:
             music_extra_instr = ""
@@ -1575,11 +1575,11 @@ def generate_rag_answer(question, context, style="реализм", language="р�
                 )
             else:
                 lang_instr = (
-                    f"All technical directives and scene descriptions MUST be in English. "
-                    f"MUSIC VIDEO LYRICS LANGUAGE: The song lyrics in the Dialogue field MUST stay in their "
-                    f"ORIGINAL language — do NOT translate the song. If the song is in English, keep it in English; "
-                    f"do not read or subtitle it in another language. Match the lyrics to the chosen music genre. "
-                    f"No lip-sync or phonetic tokens — lyrics are plain text."
+                    "All technical directives and scene descriptions MUST be in English. "
+                    "MUSIC VIDEO LYRICS LANGUAGE: The song lyrics in the Dialogue field MUST stay in their "
+                    "ORIGINAL language — do NOT translate the song. If the song is in English, keep it in English; "
+                    "do not read or subtitle it in another language. Match the lyrics to the chosen music genre. "
+                    "No lip-sync or phonetic tokens — lyrics are plain text."
                 )
         else:
             lang_instr = (
@@ -1603,9 +1603,9 @@ def generate_rag_answer(question, context, style="реализм", language="р�
                 )
             else:
                 music_lang_rule_dm = (
-                    f"MUSIC VIDEO: the SINGING lyrics in the Dialogue field MUST stay in their ORIGINAL "
-                    f"language — do NOT translate the song. If the song is in English, keep it in English. "
-                    f"Everything else stays English. No lip-sync or phonetic tokens."
+                    "MUSIC VIDEO: the SINGING lyrics in the Dialogue field MUST stay in their ORIGINAL "
+                    "language — do NOT translate the song. If the song is in English, keep it in English. "
+                    "Everything else stays English. No lip-sync or phonetic tokens."
                 )
         else:
             music_lang_rule_dm = (
@@ -1627,7 +1627,7 @@ def generate_rag_answer(question, context, style="реализм", language="р�
             photo_mapping_dm = ""
             if photo_count > 0:
                 photo_mapping_dm = (
-                    f"\n\nFOTO-ZU-SZENE-ZUWEISUNG (UNBEDINGT EINHALTEN):\n"
+                    "\n\nFOTO-ZU-SZENE-ZUWEISUNG (UNBEDINGT EINHALTEN):\n"
                     + "\n".join(
                         f"  SEQUENCE {idx} = FOTO {idx} ({fname}) — GENAU dieser Ort/diese Szene"
                         for idx, (fname, _) in enumerate(photo_scene_map, start=1)
@@ -2037,7 +2037,7 @@ def generate_rag_answer(question, context, style="реализм", language="р�
             part_pcts = ["0%-10%", "10%-20%", "20%-30%", "30%-40%", "40%-50%",
                          "50%-60%", "60%-70%", "70%-80%", "80%-90%", "90%-100%"]
             lines = ["CINEMATOGRAPHY TIMELINE (strictly follow per segment):"]
-            for i, (pct, tech) in enumerate(zip(part_pcts, timeline_techniques)):
+            for i, (pct, tech) in enumerate(zip(part_pcts, timeline_techniques, strict=False)):
                 if tech:
                     tech_lower = tech.lower()
                     if any(tech_lower.endswith(w) for w in ("shot", "angle", "zoom", "view", "profile", "level", "pov")):
@@ -2083,7 +2083,7 @@ def generate_rag_answer(question, context, style="реализм", language="р�
         if filled:
             try:
                 # Qwen3-VL через llama-server (mmproj) если файлы на месте, иначе Florence-2
-                from image_captioning import QwenVLCaptioner, Florence2Captioner
+                from image_captioning import Florence2Captioner, QwenVLCaptioner
                 captioner = None
                 try:
                     captioner = QwenVLCaptioner()
@@ -2143,7 +2143,7 @@ def generate_rag_answer(question, context, style="реализм", language="р�
             _ref_groups.append((2, ref_image_paths_tl2))
     if _ref_groups:
         try:
-            from image_captioning import QwenVLCaptioner, Florence2Captioner
+            from image_captioning import Florence2Captioner, QwenVLCaptioner
             captioner = None
             try:
                 captioner = QwenVLCaptioner()
@@ -2611,7 +2611,7 @@ def generate_controlnet_captions(image_paths: list, cloud_provider: str = "auto"
     extrem detaillierte Pose + Atmosphere + Negative Prompt fuer ComfyUI ControlNet.
     """
     try:
-        from image_captioning import QwenVLCaptioner, Florence2Captioner
+        from image_captioning import Florence2Captioner, QwenVLCaptioner
     except ImportError as e:
         return f"[Fehler] image_captioning.py nicht importierbar: {e}"
 

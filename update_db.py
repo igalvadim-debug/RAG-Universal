@@ -4,11 +4,12 @@ update_db.py — индексирует MD-файлы из ./docs/ в ChromaDB.
 Уже проиндексированные файлы не трогает.
 """
 
-import os
 import glob
 import hashlib
-import chromadb
+import os
 from pathlib import Path
+
+import chromadb
 from sentence_transformers import SentenceTransformer
 
 # ──────────────────────────────────────────────
@@ -98,7 +99,7 @@ def main(log_callback=None):
 
         log(f"[DB] Индексирую: {os.path.basename(md_path)}")
 
-        with open(md_path, "r", encoding="utf-8") as f:
+        with open(md_path, encoding="utf-8") as f:
             text = f.read()
 
         chunks = chunk_by_separator(text)

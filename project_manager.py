@@ -3,10 +3,10 @@ project_manager.py — управление проектами и генерац
 Создаёт структуру папок projects/scenario_NAME_NN/ с промптами для каждой сцены.
 """
 
-import re
 import json
-from pathlib import Path
+import re
 from datetime import datetime
+from pathlib import Path
 
 import rag_core
 
@@ -246,7 +246,7 @@ def create_project(
         "",
         "═" * 60,
     ]
-    for i, (pct, prompt) in enumerate(zip(pcts, prompts), start=1):
+    for i, (pct, prompt) in enumerate(zip(pcts, prompts, strict=False), start=1):
         lines.append(f"\n🖼️  SCENE {i}  [{pct}]  →  scene_{i}.txt")
         lines.append("─" * 50)
         lines.append(prompt)

@@ -1,7 +1,8 @@
-import os
 import glob
-import chromadb
+import os
 from pathlib import Path
+
+import chromadb
 from sentence_transformers import SentenceTransformer
 
 BASE_DIR = Path(__file__).parent
@@ -38,7 +39,7 @@ def main():
 
     for md in md_files:
         print(f"Обрабатываю: {md}")
-        with open(md, "r", encoding="utf-8") as f:
+        with open(md, encoding="utf-8") as f:
             text = f.read()
 
         for chunk in chunk_text(text):

@@ -104,7 +104,7 @@ def main():
         free_vram()
         torch.cuda.empty_cache()
 
-    from diffusers import ZImagePipeline, ZImageTransformer2DModel, GGUFQuantizationConfig
+    from diffusers import GGUFQuantizationConfig, ZImagePipeline, ZImageTransformer2DModel
 
     print(f"[ZImage] Lade GGUF: {gguf}")
     transformer = ZImageTransformer2DModel.from_single_file(

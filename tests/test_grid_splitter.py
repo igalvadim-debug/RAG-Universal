@@ -16,7 +16,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 @pytest.fixture
 def splitter(monkeypatch):
     """Load the real splitter without starting a vision server."""
-    spec = importlib.util.spec_from_file_location("grid_splitter", REPO_ROOT / "Workflow" / "grid_splitter.py")
+    spec = importlib.util.spec_from_file_location("grid_splitter", REPO_ROOT / "grid_splitter.py")
     module = importlib.util.module_from_spec(spec)
     monkeypatch.setitem(sys.modules, "grid_splitter", module)
     spec.loader.exec_module(module)

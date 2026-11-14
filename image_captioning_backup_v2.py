@@ -3,10 +3,11 @@ image_captioning.py — Florence-2 мульти-кадровый генерат�
 """
 
 from __future__ import annotations
-from pathlib import Path
-from typing import Callable, Optional
+
 import gc
 import re
+from collections.abc import Callable
+from pathlib import Path
 
 FLORENCE_DIR = Path(__file__).parent / "florence-2-large"
 def _build_timeline_labels(n_frames: int) -> list[str]:
@@ -158,7 +159,7 @@ class Florence2Captioner:
         if self._model is not None:
             return
         import torch
-        from transformers import AutoProcessor, AutoModelForCausalLM
+        from transformers import AutoModelForCausalLM, AutoProcessor
 
         print("[Florence2] Загружаю модель из", FLORENCE_DIR)
         self._device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -438,7 +439,7 @@ def generate_timeline_prompts(image_paths: list, llm_fn: Callable, n_frames: int
         global_prompt,
         "",
     ]
-    for label, prompt in zip(timeline_labels, ltx_prompts):
+    for label, prompt in zip(timeline_labels, ltx_prompts, strict=False):
         lines.append(f"{label}:")
         lines.append(prompt or "[empty]")
         lines.append("")

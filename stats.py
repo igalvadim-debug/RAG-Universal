@@ -2,8 +2,8 @@
 stats.py — статистика ChromaDB и папки docs.
 """
 
-import os
 from pathlib import Path
+
 import chromadb
 
 BASE_DIR    = Path(__file__).parent

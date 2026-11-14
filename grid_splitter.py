@@ -592,14 +592,17 @@ def strip_caption(img: Image.Image, gray: np.ndarray, mask: np.ndarray, box, W: 
             seg = par[band_idx[0]:band_idx[-1] + 1, :].reshape(-1, 3)
             line_edge = span_edge(par, 0, w)          # pro Zeile: ueber alle Spalten einfarbig?
             perp_full = col_full_bg                   # senkrechte Volllinie = gleichmaessige Spalte
-            at = lambda a, b: par[a, b]               # Zugriff Zeile, Spalte
+            def at(a, b):
+                return par[a, b]               # Zugriff Zeile, Spalte
         else:                                         # Spaltenband, Pruefung oben/unten
             seg = par[:, band_idx[0]:band_idx[-1] + 1].reshape(-1, 3)
             line_edge = span_edge(par.T, 0, h)        # pro Spalte: ueber alle Zeilen einfarbig?
             perp_full = row_full_bg                   # senkrechte Volllinie = gleichmaessige Zeile
-            at = lambda a, b: par[b, a]               # Zugriff umgekehrt (Linie, Gegenposition)
+            def at(a, b):
+                return par[b, a]               # Zugriff umgekehrt (Linie, Gegenposition)
         band_med = np.median(seg, axis=0)
-        same = lambda p: float(np.abs(np.asarray(p, dtype=np.int16) - band_med).max()) < 24
+        def same(p):
+            return float(np.abs(np.asarray(p, dtype=np.int16) - band_med).max()) < 24
         edge_ok = bool(line_edge[inner]) and bool(perp_full[lo]) and bool(perp_full[hi - 1])
         left_ok = edge_ok and same(at(inner, lo))
         right_ok = edge_ok and same(at(inner, hi - 1))
@@ -905,7 +908,7 @@ def process(path: Path, port: int, out_root: Path, debug: bool,
     folder = pick_folder(out_root)
     folder.mkdir(parents=True, exist_ok=True)
     saved: list[Path] = []
-    for name, box in zip(make_names(len(boxes)), boxes):
+    for name, box in zip(make_names(len(boxes)), boxes, strict=False):
         fp = folder / f"{name}.png"
         img.convert("RGB").crop(box).save(fp, "PNG")
         saved.append(fp)
@@ -1007,7 +1010,7 @@ def main() -> None:
         try:
             proc = start_server(args.ngl, args.model)
         except RuntimeError as e:
-            raise SystemExit(f"[FEHLER] {e}")
+            raise SystemExit(f"[FEHLER] {e}") from e
         port = VL_PORT
 
     ok = True

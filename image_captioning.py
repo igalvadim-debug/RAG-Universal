@@ -3,12 +3,13 @@ image_captioning.py — Florence-2 мульти-кадровый генерат�
 """
 
 from __future__ import annotations
-from pathlib import Path
-from typing import Callable, Optional
+
 import gc
 import io
 import os
 import re
+from collections.abc import Callable
+from pathlib import Path
 
 FLORENCE_DIR = Path(__file__).parent / "florence-2-large"
 def _build_timeline_labels(n_frames: int) -> list[str]:
@@ -160,7 +161,7 @@ class Florence2Captioner:
         if self._model is not None:
             return
         import torch
-        from transformers import AutoProcessor, AutoModelForCausalLM
+        from transformers import AutoModelForCausalLM, AutoProcessor
 
         print("[Florence2] Загружаю модель из", FLORENCE_DIR)
         self._device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -374,7 +375,7 @@ class QwenVLCaptioner:
         self._log_f  = None
         self._loaded = False
 
-    def _find_server_exe(self) -> Optional[str]:
+    def _find_server_exe(self) -> str | None:
         # LLAMA_EXE aus der Umgebung hat Vorrang (start.bat), dann bekannte Pfade
         base = Path(__file__).parent
         env_exe = os.environ.get("LLAMA_EXE", "").strip().strip('"')
@@ -449,7 +450,8 @@ class QwenVLCaptioner:
         if self._loaded and self._proc is not None and self._proc.poll() is None:
             return
 
-        import subprocess, time
+        import subprocess
+        import time
         exe = self._find_server_exe()
         if exe is None:
             raise RuntimeError("llama-server.exe не найден (llama.cpp-master/build/bin/)")
@@ -502,6 +504,7 @@ class QwenVLCaptioner:
 
     def _chat(self, image_path: str, system: str, user_text: str) -> str:
         import base64
+
         import requests
         from PIL import Image
 
@@ -798,7 +801,7 @@ def generate_timeline_prompts(image_paths: list, llm_fn: Callable, n_frames: int
         "---GLOBAL_PROMPT_END---",
         "",
     ]
-    for i, (label, prompt) in enumerate(zip(timeline_labels, ltx_prompts), start=1):
+    for i, (_label, prompt) in enumerate(zip(timeline_labels, ltx_prompts, strict=False), start=1):
         lines.append(f"---SEQUENCE_{i}_START---")
         lines.append(prompt or "[empty]")
         lines.append(f"---SEQUENCE_{i}_END---")
